@@ -81,3 +81,34 @@ test('conservative does not match memes embedded in a substantive sentence', () 
     assert.equal(isCopypasta(normalizeText(text), 'conservative'), false, text);
   }
 });
+
+test('conservative chain patterns recognize related memes and exact repetitions', () => {
+  const { chainPattern } = globalThis.NotThisTextRules;
+  const key = text => chainPattern(normalizeText(text));
+  assert.ok(key('And my axe!'));
+  assert.equal(key('And my axe!'), key('and my sword'));
+  assert.equal(key('and my sword'), key('and my bow'));
+  assert.equal(key('Rock and stone!'), key('For Karl!'));
+  assert.equal(key('LOL!'), key('lol'));
+  assert.notEqual(key('lol'), key('nice'));
+  assert.notEqual(key('and my axe'), key('rock and stone'));
+});
+
+test('conservative chains reject ordinary answers and embedded meme references', () => {
+  const { chainPattern } = globalThis.NotThisTextRules;
+  for (const text of ['Yes', 'Thanks', 'Which cable?', 'Use the blue one.', 'Agreed', '42', 'And my axe needs sharpening.', 'Please add rock and stone', 'Well, it was a step up.']) {
+    assert.equal(chainPattern(normalizeText(text)), null, text);
+  }
+});
+
+test('conservative repetition includes requested number, F, and emoji chains', () => {
+  const { chainPattern } = globalThis.NotThisTextRules;
+  const key = text => chainPattern(normalizeText(text), text);
+  for (const text of ['F', '69', '420', '😂']) assert.ok(key(text), text);
+  assert.equal(key('F!'), key('f'));
+  assert.equal(key(' 😂 '), key('😂'));
+  assert.notEqual(key('😂'), key('👍'));
+  assert.equal(key('Thanks 😂'), null);
+  assert.equal(key('There are 69 items.'), null);
+  assert.equal(key('42'), null);
+});

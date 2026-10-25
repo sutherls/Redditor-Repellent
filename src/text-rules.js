@@ -94,5 +94,27 @@
     return openers.some((opener) => normalizedText.startsWith(opener));
   }
 
-  globalThis.NotThisTextRules = { isStockPhrase, isCopypasta };
+  // Whole-comment matches only. Shared keys identify related meme replies;
+  // other recognized reactions must repeat the same normalized phrase.
+  const CHAIN_FAMILIES = [
+    ['and my axe', 'and my sword', 'and my bow', 'you have my sword', 'and you have my sword', 'and my bow and my axe'],
+    ['rock and stone', 'rock and stone brother', 'rock and stone to the bone', 'did i hear a rock and stone', 'for karl', 'for carl', 'for rock and stone'],
+  ];
+  const REPEATED_REACTIONS = new Set(['this', 'this is the way', 'lol', 'lmao', 'nice', 'f', '69', '420']);
+
+  function chainPattern(normalizedText, rawText = normalizedText) {
+    // Match repeated emoji-only replies, never emoji embedded in real text.
+    if (/\p{Extended_Pictographic}/u.test(rawText) &&
+        /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\p{Emoji_Component}|‍|️|\s)+$/u.test(rawText)) {
+      return `emoji:${rawText.replace(/[\s\uFE0F]/gu, '')}`;
+    }
+    const family = CHAIN_FAMILIES.findIndex((phrases) => phrases.includes(normalizedText));
+    if (family !== -1) return `family:${family}`;
+    if (CONSERVATIVE_PHRASES.has(normalizedText) || REPEATED_REACTIONS.has(normalizedText)) {
+      return `repeat:${normalizedText}`;
+    }
+    return null;
+  }
+
+  globalThis.NotThisTextRules = { isStockPhrase, isCopypasta, chainPattern };
 })();

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Reply-chain sensitivity regression tests</title>
+<link rel="stylesheet" href="../src/content.css">
+<style>
+body { font: 14px system-ui; padding: 20px; }
+shreddit-comment { display: block; margin: 5px; }
+shreddit-comment[collapsed] > [slot="comment"],
+shreddit-comment[collapsed] > #comment-children,
+.thing.collapsed > .entry .usertext-body,
+.thing.collapsed > .child { display: none; }
+</style>
+<h1>Reply-chain sensitivity regression tests</h1>
+<button id="run">Run chain tests</button>
+<pre id="results">Ready</pre>
+<div id="comments" class="commentarea"></div>
+<script>
+  const listeners = [];
+  window.chrome = {
+    storage: {
+      sync: { get: async () => ({}) }, local: { get: async () => ({ lifetime: 0 }) },
+      onChanged: { addListener: fn => listeners.push(fn) },
+    },
+    runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) },
+  };
+</script>
+<script src="../src/patterns.js"></script>
+<script src="../src/text-rules.js"></script>
+<script src="../src/content.js"></script>
+<script>
+  const wait = () => new Promise(resolve => setTimeout(resolve, 400));
+  const comments = document.getElementById('comments');
+  let id = 0;
+  function add(text, parent, old, author = 'reader') {
+    const el = document.createElement(old ? 'div' : 'shreddit-comment');
+    el.id = `chain-test-${++id}`;
+    el.setAttribute('author', author);
+    el.dataset.author = author;
+    if (old) {
+      el.className = 'thing comment noncollapsed';
+      el.innerHTML = '<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>';
+    } else {
+      el.innerHTML = '<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+    }
+    el.querySelector(old ? '.md' : '[slot="comment"]').textContent = text;
+    parent.append(el);
+    return el;
+  }
+  const children = (el, old) => el.querySelector(old ? ':scope > .child' : ':scope > #comment-children');
+  function chain(texts, old, authors = []) {
+    let parent = comments;
+    return texts.map((text, i) => {
+      const el = add(text, parent, old, authors[i]);
+      parent = children(el, old);
+      return el;
+    });
+  }
+  const filtered = el => el.getAttribute('data-rgc-kind') === 'chain' && el.getAttribute('data-rgc') === 'collapsed';
+  function configure(patch = {}) {
+    __rgc.restoreAll();
+    comments.replaceChildren();
+    __rgc.settings = { rules: { chain: true, phrase: false, emote: false }, chainSensitivity: 'conservative', ...patch };
+  }
+  document.getElementById('run').addEventListener('click', async () => {
+    const button = document.getElementById('run');
+    button.disabled = true;
+    const results = [];
+    const check = (name, ok) => results.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
+    for (const old of [false, true]) {
+      const label = old ? 'old Reddit' : 'new Reddit';
+      configure();
+      const qa = chain(['Which cable?', 'Use the blue one.', 'Thanks, that worked.'], old);
+      const meme = chain(['And my axe!', 'And my sword!', 'And my bow!'], old);
+      const repeated = chain(['LOL!', 'lol', 'lol'], old);
+      const f = chain(['F', 'f', 'F!'], old);
+      const numbers = chain(['69', '69', '69'], old);
+      const fourTwenty = chain(['420', '420', '420'], old);
+      const emoji = chain(['😂', '😂', '😂'], old);
+      const meaningfulEmoji = chain(['Thanks 😂', 'Thanks 😂', 'Thanks 😂'], old);
+      const yes = chain(['Yes', 'Yes', 'Yes'], old);
+      const mixed = chain(['and my axe', 'rock and stone', 'lol'], old);
+      const broken = chain(['and my axe', 'Which tool do you need?', 'and my sword', 'and my bow'], old);
+      const sibling = add('Here is useful information about the actual discussion.', children(meme[0], old), old);
+      await wait();
+      check(`${label}: short Q&A stays open`, qa.every(el => !filtered(el)));
+      check(`${label}: meme family folds from second reply`, !filtered(meme[0]) && filtered(meme[1]));
+      check(`${label}: recognized repetition folds`, filtered(repeated[1]));
+      check(`${label}: F and number chains fold`, filtered(f[1]) && filtered(numbers[1]) && filtered(fourTwenty[1]));
+      check(`${label}: repeated emoji chain folds`, filtered(emoji[1]));
+      check(`${label}: emoji in meaningful text is preserved`, meaningfulEmoji.every(el => !filtered(el)));
+      check(`${label}: ordinary repeated answers stay open`, yes.every(el => !filtered(el)));
+      check(`${label}: unrelated meme families do not combine`, mixed.every(el => !filtered(el)));
+      check(`${label}: substantive interruption breaks the chain`, broken.every(el => !filtered(el)));
+      check(`${label}: useful sibling remains visible`, sibling.getClientRects().length > 0);
+      listeners.forEach(fn => fn({ chainSensitivity: { newValue: 'standard' } }, 'sync'));
+      await wait();
+      check(`${label}: Standard retains short-chain behavior`, filtered(qa[1]));
+      listeners.forEach(fn => fn({ chainSensitivity: { newValue: 'conservative' } }, 'sync'));
+      await wait();
+      check(`${label}: switching back restores Q&A`, qa.every(el => !filtered(el)));
+      configure({ chainLength: 4, keepReplies: true });
+      const late = chain(['and my axe', 'and my sword', 'and my bow'], old);
+      await wait();
+      check(`${label}: minimum length respected`, late.every(el => !filtered(el)));
+      const final = add('and my axe', children(late[2], old), old);
+      await wait();
+      check(`${label}: late reply completes chain despite keepReplies`, filtered(late[1]) && final.getClientRects().length === 0);
+      configure({ allowedUsers: ['trusted'] });
+      const allowed = chain(['and my axe', 'and my sword', 'and my bow'], old, ['reader', 'trusted', 'reader']);
+      await wait();
+      check(`${label}: always-show user breaks chain`, allowed.every(el => !filtered(el)));
+      configure({ rules: { chain: false, phrase: false } });
+      const off = chain(['and my axe', 'and my sword', 'and my bow'], old);
+      await wait();
+      check(`${label}: sensitivity does not enable disabled chain rule`, off.every(el => !filtered(el)));
+    }
+    document.getElementById('results').textContent = results.join('\n');
+    button.disabled = false;
+  });
+</script>
+</html>

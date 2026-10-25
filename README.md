@@ -20,6 +20,7 @@ Chrome and Microsoft Edge are our first development targets. The inherited code 
 - Optionally filter image-only comments, quote-only comments, short comments, downvoted comments, and chains of short replies.
 - Turn individual rules on or off and adjust word-count, score, and reply-chain thresholds.
 - Choose **Standard** (the default, original behavior) or **Conservative** cliché sensitivity. Conservative uses a smaller set of clear stock phrases and more specific copypasta openers, preserving ordinary acknowledgments and broad openings such as "In the year 2000." Other enabled filters can still collapse those comments.
+- Set reply-chain sensitivity independently: **Standard** keeps the original short-reply behavior; **Conservative** requires consecutive replies from the same recognized meme family (such as "and my axe/sword/bow") or repetitions of the same recognized reaction. It preserves short question-and-answer exchanges and unknown joke or lyric chains. Enable the reply-chain rule to use either mode; the configured minimum chain length still applies.
 - Add your own wildcard or regex patterns and try them in the popup's comment tester.
 - Maintain muted-user and always-show lists.
 - See why a comment was collapsed and reveal it when you want. Complete hiding is also optional.
@@ -39,6 +40,8 @@ The current rules are deterministic heuristics. They can make mistakes, and shor
 - **Feedback:** eventually support choices such as "Never show me comments like this."
 
 The goal is to filter disruptive behavior, not particular viewpoints. Changes will be incremental and tested against examples that should be filtered and conversations that should stay visible.
+
+See the [grouped roadmap](docs/ROADMAP.md) and [comprehensive filtering targets](docs/FILTERING_TARGETS.md) for the full direction. These are development goals, not claims that every category is already supported.
 
 ## Privacy and approach
 
@@ -95,6 +98,8 @@ To check the browser fixture, serve the repository locally, for example with `py
 The same server also provides `test/lifecycle.html` for comment replacement, edits, and settings updates, and `test/popup.html` for save-before-reload behavior. These fixtures simulate Reddit markup and browser extension APIs; they do not replace testing the installed extension on Reddit.
 
 `test/res-persistence.html` covers the RES automatic-collapse marker, labels and counts for prior collapses, and explicit reveal behavior. Its persistence simulation follows [RES's commentHidePersistor module](https://github.com/honestbleeps/Reddit-Enhancement-Suite/blob/master/lib/modules/commentHidePersistor.js).
+
+`test/chains.html` checks both reply-chain sensitivities on old and modern Reddit markup, including useful conversations, meme families, late replies, minimum length, and always-show users.
 
 For a distributable ZIP on Windows:
 

@@ -36,6 +36,17 @@
     </fieldset>
 
     <fieldset>
+      <legend>Reply-chain filtering</legend>
+      <label class="row" for="chainSensitivity">Sensitivity
+        <select id="chainSensitivity" aria-describedby="chainHint">
+          <option value="standard">Standard</option>
+          <option value="conservative">Conservative</option>
+        </select>
+      </label>
+      <p class="hint" id="chainHint">Requires the reply-chain rule above. Standard catches runs of short replies. Conservative requires matching meme patterns or the same recognized reaction repeated. The first reply in the chain stays open; other enabled filters still apply.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>Cliché filtering</legend>
       <label class="row" for="clicheSensitivity">Sensitivity
         <select id="clicheSensitivity" aria-describedby="clicheHint">

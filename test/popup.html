@@ -45,6 +45,10 @@
       const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
       const sensitivity = doc.getElementById('clicheSensitivity');
       check('Standard is selected by default', sensitivity.value === 'standard');
+      const chainSensitivity = doc.getElementById('chainSensitivity');
+      check('Reply-chain sensitivity defaults to Standard', chainSensitivity.value === 'standard');
+      chainSensitivity.value = 'conservative';
+      chainSensitivity.dispatchEvent(new win.Event('change'));
       sensitivity.value = 'conservative';
       sensitivity.dispatchEvent(new win.Event('change'));
       const patterns = doc.getElementById('customPatterns');
@@ -54,6 +58,7 @@
       await wait(200);
       check('Reload requested exactly once', state.reloads === 1);
       check('Pending sensitivity saved before reload', state.atReload?.clicheSensitivity === 'conservative');
+      check('Reply-chain sensitivity saves independently', state.atReload?.chainSensitivity === 'conservative');
       check('Pending typed patterns saved before reload', state.atReload?.customPatterns === 'test phrase');
       // Simulate a new click after the mocked reload and a storage failure.
       doc.getElementById('reloadExtension').disabled = false;

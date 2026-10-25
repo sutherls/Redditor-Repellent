@@ -32,7 +32,7 @@
 
   // From src/patterns.js, which the manifest loads first.
   const { normalizeText, compilePatterns, firstMatch } = globalThis.NotThisPatterns;
-  const { isStockPhrase, isCopypasta } = globalThis.NotThisTextRules;
+  const { isStockPhrase, isCopypasta, chainPattern } = globalThis.NotThisTextRules;
 
   const DEFAULTS = {
     enabled: true,
@@ -43,6 +43,7 @@
     shortWords: 3,
     scoreBelow: 0,
     chainLength: 3,
+    chainSensitivity: 'standard',
     clicheSensitivity: 'standard',
     mutedUsers: [],
     allowedUsers: [],      // never collapsed, whatever they post
@@ -75,6 +76,7 @@
     if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
     s.mode = s.mode === 'hide' ? 'hide' : 'collapse';
     s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
+    s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.shortWords = Math.min(20, Math.max(1, parseInt(s.shortWords, 10) || DEFAULTS.shortWords));
     s.scoreBelow = Number.isFinite(Number(s.scoreBelow)) ? Number(s.scoreBelow) : DEFAULTS.scoreBelow;
     s.chainLength = Math.min(10, Math.max(3, parseInt(s.chainLength, 10) || DEFAULTS.chainLength));
@@ -525,7 +527,17 @@
 
   function collapseChainEndingAt(el) {
     const links = [];
-    for (let node = el; node && isChainLink(node); node = parentComment(node)) links.push(node);
+    const conservative = settings.chainSensitivity === 'conservative';
+    const patternOf = (node) => {
+      const text = bodyOf(node)?.textContent || '';
+      return chainPattern(normalizeText(text), text);
+    };
+    const pattern = conservative ? patternOf(el) : null;
+    if (conservative && !pattern) return;
+    for (let node = el; node && isChainLink(node); node = parentComment(node)) {
+      if (conservative && patternOf(node) !== pattern) break;
+      links.push(node);
+    }
     if (links.length < settings.chainLength) return;
     const target = links[links.length - 2]; // the reply to the setup, on this path
     // Already collapsed, hidden, or collapsed by Reddit or the user before we got there.

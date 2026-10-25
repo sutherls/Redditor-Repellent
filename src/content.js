@@ -43,6 +43,7 @@
     shortWords: 3,
     scoreBelow: 0,
     chainLength: 3,
+    clicheSensitivity: 'standard',
     mutedUsers: [],
     allowedUsers: [],      // never collapsed, whatever they post
     customPatterns: '',    // one per line: plain text, or /regex/flags
@@ -73,6 +74,7 @@
     // v1.0 stored a single `includeImages` flag.
     if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
     s.mode = s.mode === 'hide' ? 'hide' : 'collapse';
+    s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.shortWords = Math.min(20, Math.max(1, parseInt(s.shortWords, 10) || DEFAULTS.shortWords));
     s.scoreBelow = Number.isFinite(Number(s.scoreBelow)) ? Number(s.scoreBelow) : DEFAULTS.scoreBelow;
     s.chainLength = Math.min(10, Math.max(3, parseInt(s.chainLength, 10) || DEFAULTS.chainLength));
@@ -182,7 +184,7 @@
         if (allGif) return { kind: 'gif', words: 0 };
         // "r/whoosh" and friends get autolinked; they're still stock phrases.
         const normLink = normalizeText(text);
-        if (isStockPhrase(normLink)) return { kind: 'phrase', words: 0 };
+        if (isStockPhrase(normLink, settings.clicheSensitivity)) return { kind: 'phrase', words: 0 };
         return { kind: 'link', words: 0 };
       }
     }
@@ -196,8 +198,8 @@
 
     const norm = normalizeText(text);
     if (norm === '') return { kind: 'phrase', words: 0 };  // punctuation only: "...", "?!"
-    if (isStockPhrase(norm)) return { kind: 'phrase', words: 0 };
-    if (isCopypasta(norm)) return { kind: 'pasta', words: 0 };
+    if (isStockPhrase(norm, settings.clicheSensitivity)) return { kind: 'phrase', words: 0 };
+    if (isCopypasta(norm, settings.clicheSensitivity)) return { kind: 'pasta', words: 0 };
 
     return { kind: null, words: norm.split(' ').length };
   }
@@ -763,6 +765,7 @@
     set settings(s) {
       rawSettings = s || {};
       settings = normalizeSettings(rawSettings);
+      classCache = new WeakMap();
       revealed = false;
     },
   };

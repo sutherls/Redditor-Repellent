@@ -47,6 +47,14 @@
 
 <h2>New Reddit (shreddit)</h2>
 <div id="new">
+  <shreddit-comment thingid="t1_ack" author="reader" depth="0" data-expect="phrase" data-conservative="keep">
+    <div slot="commentMeta">reader — acknowledgment</div>
+    <div slot="comment"><p>Agreed.</p></div>
+  </shreddit-comment>
+  <shreddit-comment thingid="t1_year" author="reader" depth="0" data-expect="pasta" data-conservative="keep">
+    <div slot="commentMeta">reader — genuine recollection</div>
+    <div slot="comment"><p>In the year 2000, I moved to Boston.</p></div>
+  </shreddit-comment>
   <shreddit-comment thingid="t1_a" author="alice" depth="0" data-expect="keep">
     <div slot="commentMeta">alice · 2h — normal comment</div>
     <div slot="comment"><div class="md"><p>A perfectly normal comment with actual words in it.</p></div></div>
@@ -98,7 +106,7 @@
     <div slot="comment"><div class="md"><p><img alt="gif" src="https://external-preview.redd.it/ghi.gif" width="300" height="200"></p></div></div>
   </shreddit-comment>
 
-  <shreddit-comment thingid="t1_p1" author="kim" depth="0" data-expect="phrase">
+  <shreddit-comment data-conservative="keep" thingid="t1_p1" author="kim" depth="0" data-expect="phrase">
     <div slot="commentMeta">kim · 2h — "This."</div>
     <div slot="comment"><div class="md"><p>This.</p></div></div>
   </shreddit-comment>
@@ -108,12 +116,12 @@
     <div slot="comment"><div class="md"><p>Take my upvote!!</p></div></div>
   </shreddit-comment>
 
-  <shreddit-comment thingid="t1_p3" author="mona" depth="0" data-expect="phrase">
+  <shreddit-comment data-conservative="keep" thingid="t1_p3" author="mona" depth="0" data-expect="phrase">
     <div slot="commentMeta">mona · 2h — "lmaooo"</div>
     <div slot="comment"><div class="md"><p>lmaooo</p></div></div>
   </shreddit-comment>
 
-  <shreddit-comment thingid="t1_p4" author="nate" depth="0" data-expect="phrase">
+  <shreddit-comment data-conservative="link" thingid="t1_p4" author="nate" depth="0" data-expect="phrase">
     <div slot="commentMeta">nate · 2h — "r/whoosh"</div>
     <div slot="comment"><div class="md"><p><a href="/r/whoosh">r/whoosh</a></p></div></div>
   </shreddit-comment>
@@ -153,7 +161,7 @@
     <div slot="comment"><div class="md"><p>According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little body off the ground.</p></div></div>
   </shreddit-comment>
 
-  <shreddit-comment thingid="t1_pasta2" author="tess" depth="0" data-expect="pasta">
+  <shreddit-comment data-conservative="keep" thingid="t1_pasta2" author="tess" depth="0" data-expect="pasta">
     <div slot="commentMeta">tess · 2h — copypasta (Krusty Krab)</div>
     <div slot="comment"><div class="md"><p>Is this the Krusty Krab? No, this is Patrick.</p></div></div>
   </shreddit-comment>
@@ -374,7 +382,7 @@
       </div>
     </div>
 
-    <div class="thing comment noncollapsed" id="thing_t1_o7" data-fullname="t1_o7" data-author="kim" data-expect="phrase">
+    <div class="thing comment noncollapsed" data-conservative="keep" id="thing_t1_o7" data-fullname="t1_o7" data-author="kim" data-expect="phrase">
       <div class="entry">
         <p class="tagline"><a href="javascript:void(0)" class="expand" onclick="return togglecomment(this)">[–]</a> <a class="author">kim</a> 2h — "^this"</p>
         <form class="usertext"><div class="usertext-body"><div class="md"><p><sup>this</sup></p></div></div></form>
@@ -416,6 +424,8 @@
 <script>
   const SCENARIOS = {
     'defaults': {},
+    'conservative': { clicheSensitivity: 'conservative' },
+    'standard after conservative': { clicheSensitivity: 'standard' },
     'everything on': { rules: { image: true, quote: true, short: true, score: true, chain: true }, shortWords: 3, scoreBelow: 0 },
     'hide mode': { mode: 'hide' },
     'keep replies': { keepReplies: true },
@@ -458,7 +468,7 @@
     const lines = [];
     let pass = 0, fail = 0;
     document.querySelectorAll('[data-expect]').forEach((el) => {
-      const expect = el.getAttribute('data-expect');
+      const expect = (s.clicheSensitivity === 'conservative' && el.getAttribute('data-conservative')) || el.getAttribute('data-expect');
       let shouldAct;
       if (expect === 'keep') shouldAct = false;
       else if (expect === 'native') shouldAct = s.mode === 'hide';

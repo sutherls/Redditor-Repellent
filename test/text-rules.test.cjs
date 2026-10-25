@@ -53,3 +53,31 @@ test('punctuation-only handling remains the content script responsibility', () =
   assert.equal(isStockPhrase(normalizeText('...?!')), false);
   assert.equal(isCopypasta(normalizeText('...?!')), false);
 });
+
+test('conservative keeps acknowledgments and broad copypasta openings', () => {
+  for (const text of ['Thanks.', 'Agreed.', 'Correct.', 'This.', 'lol', 'r/AskReddit', '100%', 'In the year 2000, I moved to Boston.', 'We live in a society with limited resources.', 'Somebody once told me how to fix this.']) {
+    assert.equal(isStockPhrase(normalizeText(text), 'conservative'), false, text);
+    assert.equal(isCopypasta(normalizeText(text), 'conservative'), false, text);
+  }
+  // Thanks was already preserved in Standard; the other acknowledgments were not.
+  assert.equal(isStockPhrase(normalizeText('Thanks.'), 'standard'), false);
+  assert.equal(isStockPhrase(normalizeText('Agreed.'), 'standard'), true);
+  assert.equal(isStockPhrase(normalizeText('Correct.'), 'standard'), true);
+  assert.equal(isCopypasta(normalizeText('In the year 2000, I moved to Boston.'), 'standard'), true);
+});
+
+test('conservative still catches explicit memes and specific copypasta', () => {
+  for (const text of ['TAKE MY UPVOTE!', 'Username checks out.', 'Sir, this is a Wendy’s.', 'And my axe!']) {
+    assert.equal(isStockPhrase(normalizeText(text), 'conservative'), true, text);
+  }
+  for (const text of ['Did you ever hear the tragedy of Darth Plagueis the Wise?', 'According to all known laws of aviation, there is no way a bee should be able to fly.', 'Somebody once told me the world is gonna roll me.']) {
+    assert.equal(isCopypasta(normalizeText(text), 'conservative'), true, text);
+  }
+});
+
+test('conservative does not match memes embedded in a substantive sentence', () => {
+  for (const text of ['Username checks out, but here is how to repair the part.', 'The joke is and my axe.', 'Someone quoted did you ever hear the tragedy of Darth Plagueis the Wise.']) {
+    assert.equal(isStockPhrase(normalizeText(text), 'conservative'), false, text);
+    assert.equal(isCopypasta(normalizeText(text), 'conservative'), false, text);
+  }
+});

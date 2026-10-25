@@ -19,6 +19,7 @@ Chrome and Microsoft Edge are our first development targets. The inherited code 
 - Collapse stock phrases, tired memes, known copypasta, GIF-only and emoji-only comments, bare links, and bot replies.
 - Optionally filter image-only comments, quote-only comments, short comments, downvoted comments, and chains of short replies.
 - Turn individual rules on or off and adjust word-count, score, and reply-chain thresholds.
+- Choose **Standard** (the default, original behavior) or **Conservative** cliché sensitivity. Conservative uses a smaller set of clear stock phrases and more specific copypasta openers, preserving ordinary acknowledgments and broad openings such as "In the year 2000." Other enabled filters can still collapse those comments.
 - Add your own wildcard or regex patterns and try them in the popup's comment tester.
 - Maintain muted-user and always-show lists.
 - See why a comment was collapsed and reveal it when you want. Complete hiding is also optional.

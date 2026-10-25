@@ -64,12 +64,34 @@
     'in the year 2000', 'i cant believe youve done this', 'you know i had to do it to em',
   ];
 
-  function isStockPhrase(normalizedText) {
+  // Deliberately narrow: ordinary acknowledgments and subreddit references stay out.
+  const CONSERVATIVE_PHRASES = new Set([
+    'take my upvote', 'take my angry upvote', 'take my updoot',
+    'username checks out', 'sir this is a wendys', 'this is a wendys',
+    'and my axe', 'and my sword', 'and my bow', 'and my bow and my axe',
+    'rock and stone', 'rock and stone brother', 'rock and stone to the bone',
+    'did i hear a rock and stone', 'thanks for the gold kind stranger',
+    'edit thanks for the gold', 'rip my inbox', 'general kenobi',
+    'the real lpt is always in the comments', 'you win the internet',
+    'shut up and take my money', 'im in this picture and i dont like it',
+  ]);
+  const CONSERVATIVE_PASTA_OPENERS = [
+    'what the fuck did you just fucking say about me you little',
+    'did you ever hear the tragedy of darth plagueis the wise',
+    'according to all known laws of aviation there is no way',
+    'to be fair you have to have a very high iq to understand rick and morty',
+    'the fitnessgram pacer test is a multistage',
+    'somebody once told me the world is gonna roll me',
+  ];
+
+  function isStockPhrase(normalizedText, sensitivity = 'standard') {
+    if (sensitivity === 'conservative') return CONSERVATIVE_PHRASES.has(normalizedText);
     return PHRASES.has(normalizedText) || PHRASE_RES.some((re) => re.test(normalizedText));
   }
 
-  function isCopypasta(normalizedText) {
-    return PASTA_OPENERS.some((opener) => normalizedText.startsWith(opener));
+  function isCopypasta(normalizedText, sensitivity = 'standard') {
+    const openers = sensitivity === 'conservative' ? CONSERVATIVE_PASTA_OPENERS : PASTA_OPENERS;
+    return openers.some((opener) => normalizedText.startsWith(opener));
   }
 
   globalThis.NotThisTextRules = { isStockPhrase, isCopypasta };

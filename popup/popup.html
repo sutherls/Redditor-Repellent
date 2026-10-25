@@ -36,6 +36,17 @@
     </fieldset>
 
     <fieldset>
+      <legend>Cliché filtering</legend>
+      <label class="row" for="clicheSensitivity">Sensitivity
+        <select id="clicheSensitivity" aria-describedby="clicheHint">
+          <option value="standard">Standard</option>
+          <option value="conservative">Conservative</option>
+        </select>
+      </label>
+      <p class="hint" id="clicheHint">Standard uses the original phrase and copypasta rules. Conservative catches a smaller set of clear clichés and keeps ordinary acknowledgments. Applies only to enabled stock-phrase and copypasta rules; other filters can still collapse these comments.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>Your own patterns <small>(one per line)</small></legend>
       <textarea id="customPatterns" rows="3" spellcheck="false" placeholder="for the emperor&#10;rock and stone*&#10;*and my axe*"></textarea>
       <ul class="hint examples">

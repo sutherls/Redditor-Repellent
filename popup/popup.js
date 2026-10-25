@@ -9,6 +9,7 @@ const RULE_DEFAULTS = {
 const DEFAULTS = {
   enabled: true, mode: 'collapse', showCounter: true, keepReplies: false,
   rules: RULE_DEFAULTS, shortWords: 3, scoreBelow: 0, chainLength: 3,
+  clicheSensitivity: 'standard',
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
@@ -31,6 +32,7 @@ const $showCounter = $('showCounter');
 const $mutedUsers = $('mutedUsers');
 const $allowedUsers = $('allowedUsers');
 const $chainLength = $('chainLength');
+const $clicheSensitivity = $('clicheSensitivity');
 const $customPatterns = $('customPatterns');
 const $patternErrors = $('patternErrors');
 const $patternTest = $('patternTest');
@@ -41,6 +43,7 @@ function normalize(raw) {
   const r = raw || {};
   const s = { ...DEFAULTS, ...r };
   s.rules = { ...RULE_DEFAULTS, ...(r.rules || {}) };
+  s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
   if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
   s.mutedUsers = Array.isArray(s.mutedUsers) ? s.mutedUsers : [];
   s.allowedUsers = Array.isArray(s.allowedUsers) ? s.allowedUsers : [];
@@ -100,6 +103,7 @@ function render(s) {
   $mutedUsers.value = s.mutedUsers.join('\n');
   $allowedUsers.value = s.allowedUsers.join('\n');
   $chainLength.value = s.chainLength;
+  $clicheSensitivity.value = s.clicheSensitivity;
   $customPatterns.value = s.customPatterns;
   renderPatternErrors();
   renderPatternTest();
@@ -167,6 +171,11 @@ $chainLength.addEventListener('change', async () => {
   const n = Math.min(10, Math.max(3, parseInt($chainLength.value, 10) || DEFAULTS.chainLength));
   $chainLength.value = n;
   await save({ chainLength: n });
+  statsSoon();
+});
+
+$clicheSensitivity.addEventListener('change', async () => {
+  await save({ clicheSensitivity: $clicheSensitivity.value });
   statsSoon();
 });
 

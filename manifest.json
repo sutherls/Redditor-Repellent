@@ -24,6 +24,7 @@
       ],
       "js": [
         "src/patterns.js",
+        "src/text-rules.js",
         "src/content.js"
       ],
       "css": [

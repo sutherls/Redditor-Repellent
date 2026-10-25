@@ -120,6 +120,7 @@ attribute) use the extension's own collapse instead, with the badge as a show/hi
 ```
 manifest.json         MV3 manifest (Chrome, Brave, Edge, Firefox)
 src/patterns.js       text matching shared with the popup (custom patterns, normalizing)
+src/text-rules.js     stock-phrase and copypasta matching
 src/content.js        detection, collapsing, on-page counter
 src/content.css       badge, banner, and hidden-mode styles
 src/background.js     toolbar badge count and the all-time tally
@@ -129,10 +130,17 @@ scripts/make-icons.js regenerates the icons with no dependencies
 scripts/package.ps1   builds dist/not-this-<version>.zip (Windows)
 scripts/package.sh    same, for macOS/Linux
 test/fixture.html     local test page covering both Reddit UIs and every rule
+test/text-rules.test.cjs  Node regression tests for stock phrases and copypasta
 STORE.md              paste-ready store listing copy
 ```
 
 ## Developing
+
+Run the text-rule regression tests with Node.js (no dependencies to install):
+
+```bash
+node --test test/text-rules.test.cjs
+```
 
 Load it unpacked as described under *Install*, then reload the extension card after each
 change. The test page runs the content script against hand-written comment markup for both
@@ -145,8 +153,8 @@ python -m http.server 8765
 Open <http://localhost:8765/test/fixture.html> and click *Run all scenarios*.
 
 Adding a stock phrase or a copypasta is a one-line change to `PHRASES`, `PHRASE_RES`, or
-`PASTA_OPENERS` at the top of `src/content.js`. If Reddit changes its markup, the selectors
-live in `bodyOf`, `metaContainer`, `ownParts`, and `MEDIA_SELECTOR` in the same file.
+`PASTA_OPENERS` in `src/text-rules.js`. If Reddit changes its markup, the selectors
+live in `bodyOf`, `metaContainer`, `ownParts`, and `MEDIA_SELECTOR` in `src/content.js`.
 
 ### Building for the stores
 

@@ -17,7 +17,7 @@ if (Test-Path $zip) { Remove-Item $zip -Force }
 
 $archive = [System.IO.Compression.ZipFile]::Open($zip, 'Create')
 try {
-  foreach ($item in @('manifest.json', 'src', 'popup', 'icons')) {
+  foreach ($item in @('manifest.json', 'LICENSE', 'src', 'popup', 'icons')) {
     $path = Join-Path $root $item
     $files = if (Test-Path $path -PathType Container) { Get-ChildItem $path -Recurse -File } else { Get-Item $path }
     foreach ($f in $files) {

@@ -6,5 +6,5 @@ version=$(node -p "require('./manifest.json').version")
 mkdir -p dist
 zip="dist/not-this-$version.zip"
 rm -f "$zip"
-zip -r "$zip" manifest.json src popup icons -x '*.DS_Store'
+zip -r "$zip" manifest.json LICENSE src popup icons -x '*.DS_Store'
 echo "Wrote $zip"

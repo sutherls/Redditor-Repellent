@@ -1,202 +1,102 @@
-# Not This.
+# Redditor Repellent
 
-**A browser extension that collapses low-effort Reddit comments so you can read the actual discussion.**
+**Reddit without the Redditors.**
 
-Reaction GIFs, "This.", "lol", "Take my upvote", bare links, bot replies, copypasta. They're
-still there if you want them, folded up with a small badge saying why, one click from expanding.
-Works on new Reddit and old.reddit.com, in Chrome, Brave, Edge, and Firefox.
+Less circlejerking. Fewer tired memes. More of the discussion you actually came for.
 
-No accounts. No tracking. No network requests. Nothing leaves your browser.
+Redditor Repellent is a highly customizable browser extension built to cut through repetitive comments, political grandstanding, rage bait, and terminally online commentary. Finally, you can enjoy Reddit without having to experience Reddit.
 
-## What it collapses
+A fork of [Not This.](https://github.com/recruiterguy/not-this) by Chris Hoyt, building upon an already great extension.
 
-Every rule has its own switch in the popup.
+## Where things stand
 
-**On by default**
+This project is in early development. The existing low-effort comment filters work today; contextual filtering for political derailment, rage bait, and performative moralizing is planned. Those advanced filters are not implemented yet.
 
-| Rule | What it catches |
+Chrome and Microsoft Edge are our first development targets. The inherited code supports both modern Reddit and old.reddit.com and includes Firefox support.
+
+## What works today
+
+- Collapse stock phrases, tired memes, known copypasta, GIF-only and emoji-only comments, bare links, and bot replies.
+- Optionally filter image-only comments, quote-only comments, short comments, downvoted comments, and chains of short replies.
+- Turn individual rules on or off and adjust word-count, score, and reply-chain thresholds.
+- Add your own wildcard or regex patterns and try them in the popup's comment tester.
+- Maintain muted-user and always-show lists.
+- See why a comment was collapsed and reveal it when you want. Complete hiding is also optional.
+- Choose whether to keep replies visible when collapsing a comment, with reply chains folded as a group.
+- See per-page and all-time filtering counts.
+
+The current rules are deterministic heuristics. They can make mistakes, and short reply chains are detected by structure and length, not by understanding the conversation.
+
+## Where we're headed
+
+- **Political derailment:** catch unrelated political or ideological commentary regardless of affiliation, without simply blocking political keywords.
+- **Repetition and joke chains:** improve detection of recycled jokes, song lyric chains, and low-effort pile-ons.
+- **Rage bait:** identify posts and comments whose main purpose is to provoke reactions.
+- **Performative moralizing:** catch grandstanding that hijacks an unrelated discussion.
+- **Context awareness:** preserve relevant political discussion, legitimate criticism, useful information, and genuine conversation.
+- **More control:** add individual category sensitivity settings and clearer explanations.
+- **Feedback:** eventually support choices such as "Never show me comments like this."
+
+The goal is to filter disruptive behavior, not particular viewpoints. Changes will be incremental and tested against examples that should be filtered and conversations that should stay visible.
+
+## Privacy and approach
+
+Filtering currently runs in your browser using deterministic rules. There is no AI integration, tracking, analytics, or extension-initiated network traffic.
+
+Preferences use the browser's extension sync storage and may sync through your browser account. The all-time counter stays in local extension storage. Permissions are limited to storage and Reddit pages. See [PRIVACY.md](PRIVACY.md) for the inherited privacy policy.
+
+Future OpenAI API integration may be offered as an optional feature for more advanced classification. There is no requirement for local AI models. Any future data-sharing behavior will be documented before that feature is introduced.
+
+## Install locally
+
+This fork has not published a browser-store release yet.
+
+1. Clone this repository or download and extract its source:
+
+   ```bash
+   git clone https://github.com/sutherls/Redditor-Repellent.git
+   ```
+
+2. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
+3. Enable **Developer mode**, choose **Load unpacked**, and select the folder containing `manifest.json`.
+4. Open a Reddit comment thread and use the extension popup to choose your filters.
+
+The installed extension still appears as **Not This.** while the fork's branding is being updated. After pulling changes, reload the extension on the Extensions page and refresh your Reddit tabs.
+
+## Development
+
+Plain JavaScript, HTML, and CSS. No dependency installation or build step is needed to load the extension.
+
+| File | Purpose |
 |---|---|
-| GIF | The comment is nothing but a GIF (GIPHY or uploaded) |
-| Emoji | Only emoji or Reddit emotes |
-| Stock phrase | "This.", "lol", "Take my upvote", "Username checks out", r/whoosh, and a few hundred relatives |
-| Link-only | A bare URL with no words |
-| Bot | AutoModerator, accounts ending in "bot", "I am a bot" footers, RemindMe! invocations |
-| Copypasta | Well-known pastas, matched on how they start |
+| `manifest.json` | Extension configuration and permissions |
+| `src/content.js` | Reddit page handling, classification, collapsing, and counters |
+| `src/text-rules.js` | Stock-phrase and copypasta matching |
+| `src/patterns.js` | Normalization and custom pattern matching |
+| `src/background.js` | Toolbar badge and lifetime tally |
+| `popup/` | Filter controls and settings |
+| `test/` | Text-rule regression tests and browser fixtures |
 
-**Off by default, because they need judgment**
-
-| Rule | What it catches |
-|---|---|
-| Image | Only a static image |
-| Quote-only | Quotes the parent and adds nothing |
-| Short | Fewer than N words (you pick N) |
-| Downvoted | Score below N (you pick N) |
-| Reply chain | N or more short replies (8 words or fewer) in a row, each answering the last: pun threads, "and my axe", song lyrics a line at a time. The first one stays open, since it's the setup and may have real replies; the chain folds from the second. |
-
-Plus:
-
-- **Your own patterns.** One per line, with `*` meaning "anything here". Capitals and
-  punctuation don't matter, and matching is by whole words (`*axe*` doesn't catch "taxes").
-
-  | You type | It collapses comments that… |
-  |---|---|
-  | `for the emperor` | are just that |
-  | `rock and stone*` | start with it |
-  | `*and my axe*` | mention it anywhere |
-
-  A *Test a comment* box under the list shows which line, if any, would collapse whatever you
-  type into it. For power users, a line wrapped in slashes is a regex, tested against the comment as shown
-  and always case-insensitive (`/^ack+chy?ually/`). Lines starting with `#` are ignored.
-- **Always show.** Usernames that are never collapsed, whatever they post. Handy for a bot you
-  actually like reading.
-- **Muted users.** A list of usernames whose comments are always collapsed.
-- **Keep replies visible.** Collapse the comment but leave the conversation under it open.
-- **Collapse or hide.** Fold them up with a badge, or remove them from the page entirely.
-- **A counter.** "22 low-effort comments collapsed (7 GIF, 4 "this", 4 bot…)" above the thread, with
-  a *Show them* button, the same number on the toolbar icon, and an all-time tally in the popup.
-
-Things it will never do:
-
-- Collapse a comment that has real words in it (unless you turn on the short, downvoted, or
-  reply-chain rules, or add a pattern of your own).
-- Re-collapse a comment you've expanded.
-- Touch a comment Reddit already collapsed.
-- Vote, post, report, or click anything on your behalf.
-
-## Install
-
-**From the stores:**
-
-- Chrome, Brave, Edge: [Chrome Web Store](https://chromewebstore.google.com/detail/not-this/dafiegfbpcopimapifpcnfoklcajldjc)
-- Firefox Add-ons (desktop and Firefox for Android): coming soon
-- Microsoft Edge Add-ons: coming soon (Edge can install from the Chrome Web Store in the meantime)
-
-**From source**, for developers or the impatient:
-
-1. Download the [latest release](https://github.com/recruiterguy/not-this/releases) or clone this repository.
-2. Chrome / Brave / Edge: open `chrome://extensions` (or `brave://extensions`, `edge://extensions`),
-   turn on *Developer mode*, click *Load unpacked*, and pick the folder.
-3. Firefox: open `about:debugging#/runtime/this-firefox`, click *Load Temporary Add-on*, and pick
-   `manifest.json`. Temporary add-ons are removed when Firefox closes; use the store build for
-   something permanent.
-
-Then open any busy Reddit thread and click the toolbar icon.
-
-## Privacy
-
-The extension requests two things: storage, to save your settings, and access to reddit.com,
-to read and collapse comments. It has no other permissions, makes no network requests of its
-own, and includes no analytics. The all-time counter is a single number in your browser's
-local extension storage. See [PRIVACY.md](PRIVACY.md).
-
-The code is not minified. You can read every line in [`src/`](src/) and [`popup/`](popup/).
-
-## How it works
-
-`src/content.js` runs on Reddit pages and watches the DOM with a `MutationObserver`, since
-Reddit loads comments lazily and navigates as a single-page app. Each comment is checked
-against the rules in order (muted user, always-show user, your patterns, bot, score, then the
-body-based rules) and gets at most one kind. With the reply-chain rule on, each comment also
-walks up through its short ancestors; if the run is long enough, the chain collapses from its
-second link. Walking up from the newest reply means chains still get caught when their replies
-load late.
-
-For the body rules it strips media, then looks at what text remains: nothing
-(GIF, image, emoji), only links, only a blockquote, a stock phrase, a copypasta opener, or too
-few words.
-
-| Reddit UI | Comment element | How a GIF shows up |
-|---|---|---|
-| New Reddit | `<shreddit-comment>` with a `[slot="comment"]` body | `<shreddit-player>` video, `<img alt="gif">`, `.gif` URL, GIPHY link |
-| Old Reddit | `.thing.comment` with `.usertext-body .md` | literal `![gif](giphy\|id)` text, or a bare link to a `.gif` |
-
-Collapsing uses Reddit's own mechanism where possible: the `collapsed` attribute on new Reddit,
-the `[–]` toggle on old Reddit. That keeps Reddit's own JavaScript, and Reddit Enhancement
-Suite, in sync. "Keep replies visible" and the fallback path (for when Reddit ignores its own
-attribute) use the extension's own collapse instead, with the badge as a show/hide toggle.
-
-## Project layout
-
-```
-manifest.json         MV3 manifest (Chrome, Brave, Edge, Firefox)
-src/patterns.js       text matching shared with the popup (custom patterns, normalizing)
-src/text-rules.js     stock-phrase and copypasta matching
-src/content.js        detection, collapsing, on-page counter
-src/content.css       badge, banner, and hidden-mode styles
-src/background.js     toolbar badge count and the all-time tally
-popup/                toolbar popup: rules, behavior, muted users, stats
-icons/                generated by scripts/make-icons.js
-scripts/make-icons.js regenerates the icons with no dependencies
-scripts/package.ps1   builds dist/not-this-<version>.zip (Windows)
-scripts/package.sh    same, for macOS/Linux
-test/fixture.html     local test page covering both Reddit UIs and every rule
-test/text-rules.test.cjs  Node regression tests for stock phrases and copypasta
-STORE.md              paste-ready store listing copy
-```
-
-## Developing
-
-Run the text-rule regression tests with Node.js (no dependencies to install):
+Run the text-rule tests with Node.js:
 
 ```bash
 node --test test/text-rules.test.cjs
 ```
 
-Load it unpacked as described under *Install*, then reload the extension card after each
-change. The test page runs the content script against hand-written comment markup for both
-Reddit layouts under several settings scenarios. Serve the folder over HTTP:
+To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.
 
-```bash
-python -m http.server 8765
-```
+For a distributable ZIP on Windows:
 
-Open <http://localhost:8765/test/fixture.html> and click *Run all scenarios*.
-
-Adding a stock phrase or a copypasta is a one-line change to `PHRASES`, `PHRASE_RES`, or
-`PASTA_OPENERS` in `src/text-rules.js`. If Reddit changes its markup, the selectors
-live in `bodyOf`, `metaContainer`, `ownParts`, and `MEDIA_SELECTOR` in `src/content.js`.
-
-### Building for the stores
-
-```bash
+```powershell
 powershell -ExecutionPolicy Bypass -File scripts/package.ps1
 ```
 
-or on macOS/Linux:
+On macOS/Linux, run `sh scripts/package.sh`. Packaging still uses the inherited filename `dist/not-this-<version>.zip` and includes the MIT license.
 
-```bash
-sh scripts/package.sh
-```
+## Credits and license
 
-Either writes `dist/not-this-<version>.zip`, containing only the files the extension needs.
-Bump `version` in `manifest.json` first; the stores read the version from there.
+Redditor Repellent builds on **Not This.**, created by **Chris Hoyt / recruiterguy**. The original project provides the foundation for comment filtering, customization, and collapse/reveal behavior.
 
-### Publishing
+Released under the [MIT License](LICENSE). The original copyright and permission notice are preserved.
 
-- **Chrome Web Store:** <https://chrome.google.com/webstore/devconsole>, one-time $5 fee.
-  Upload the zip, add a 1280×800 screenshot, and on the Privacy tab declare no data collection
-  and justify the two permissions (settings storage; reading and modifying Reddit pages).
-- **Firefox Add-ons:** <https://addons.mozilla.org/developers/>, free. Upload the same zip.
-  The add-on id in `manifest.json` (`browser_specific_settings.gecko.id`) must never change
-  after the first upload. Contact address for the stores: notthis.racoon623@passmail.com.
-- **Microsoft Edge Add-ons:** <https://partner.microsoft.com/dashboard/microsoftedge/>, free.
-  Upload the same zip; Edge accepts Chrome MV3 packages unchanged.
-
-Suggested listing copy is in [STORE.md](STORE.md).
-
-## Contributing
-
-Bug reports and phrase-list suggestions are welcome in
-[Issues](https://github.com/recruiterguy/not-this/issues). If a comment was collapsed that
-shouldn't have been, or one slipped through that should have been caught, include the comment
-text (or a screenshot) and whether you were on new or old Reddit.
-
-## Why there is no auto-downvote
-
-Reddit's user agreement treats automated or scripted voting as vote manipulation, which gets
-accounts suspended, and the extension stores reject extensions that automate actions a site
-forbids. Every vote has to be a person's decision, so this extension only collapses.
-
-## License
-
-MIT. See [LICENSE](LICENSE). Not affiliated with or endorsed by Reddit, Inc.
+Not affiliated with or endorsed by Reddit, Inc.

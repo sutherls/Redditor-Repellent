@@ -8,6 +8,43 @@ require('../src/text-rules.js');
 const { normalizeText } = globalThis.NotThisPatterns;
 const { isStockPhrase, isCopypasta } = globalThis.NotThisTextRules;
 
+test('bounded cliche variations match in both sensitivity modes', () => {
+  for (const sensitivity of ['standard', 'conservative']) {
+    for (const text of [
+      'Angry upvote!', 'Have my angry updoot.', 'Take an upvote!',
+      'You win the internet today.', 'You won the internet for today!',
+      'That’s enough Reddit for today.', 'That is enough Reddit for today.',
+      'The real treasure was the friends we made along the way.',
+      'Maybe the real bug fixes were the friends we made along the way.',
+    ]) assert.equal(isStockPhrase(normalizeText(text), sensitivity), true, `${sensitivity}: ${text}`);
+  }
+});
+
+test('cliche templates preserve explanations, references, and unrelated discussion', () => {
+  for (const sensitivity of ['standard', 'conservative']) {
+    for (const text of [
+      'Take my upvote because this explains the voltage difference.',
+      'You win the internet today, but the calculation is incorrect.',
+      'That is enough Reddit for today; I need to finish the repair.',
+      'The real treasure was the friends we made along the way, but the route was unsafe.',
+      'The phrase angry upvote is a meme.', 'Can you explain "you win the internet today"?',
+      'The real problem was the battery.', 'The friends we made along the way helped us move.',
+      'Imagine thinking about another solution.', 'Found the electrician who fixed it.',
+    ]) assert.equal(isStockPhrase(normalizeText(text), sensitivity), false, `${sensitivity}: ${text}`);
+  }
+});
+
+test('cliche variants share chain keys only within their own template', () => {
+  const key = text => globalThis.NotThisTextRules.chainPattern(normalizeText(text));
+  assert.equal(key('Take my upvote'), key('Have my angry updoot'));
+  assert.equal(key('You win the internet'), key('You won the internet today'));
+  assert.equal(key('That’s enough Reddit for today'), key('That is enough Reddit for today'));
+  assert.equal(key('The real treasure was the friends we made along the way'),
+    key('Maybe the real bug fixes were the friends we made along the way'));
+  assert.notEqual(key('Angry upvote'), key('You win the internet'));
+  assert.equal(key('Take my upvote because this explains the voltage difference'), null);
+});
+
 test('stock phrases retain case, punctuation, and whitespace normalization', () => {
   for (const text of ['This.', ' TAKE MY UPVOTE! ', 'Sir, this is a Wendy’s.', 'and my axe', '100%']) {
     assert.equal(isStockPhrase(normalizeText(text)), true, text);

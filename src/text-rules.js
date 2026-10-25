@@ -84,7 +84,21 @@
     'somebody once told me the world is gonna roll me',
   ];
 
+  // Anchored, bounded templates only: added explanations must stay visible.
+  // Shared keys let cosmetic variations form a chain without mixing meme families.
+  const CLICHE_TEMPLATES = [
+    ['upvote', /^(?:(?:take|have) (?:my|an?) (?:angry )?(?:upvote|updoot)|angry upvote)$/],
+    ['internet-win', /^you (?:win|won) the internet(?: (?:today|for today))?$/],
+    ['enough-reddit', /^(?:thats|that is) enough reddit for today$/],
+    ['friends-along-the-way', /^(?:maybe )?the real [a-z]+(?: [a-z]+){0,2} (?:was|were) the friends we made along the way$/],
+  ];
+
+  function clicheTemplate(normalizedText) {
+    return CLICHE_TEMPLATES.find(([, pattern]) => pattern.test(normalizedText))?.[0] || null;
+  }
+
   function isStockPhrase(normalizedText, sensitivity = 'standard') {
+    if (clicheTemplate(normalizedText)) return true;
     if (sensitivity === 'conservative') return CONSERVATIVE_PHRASES.has(normalizedText);
     return PHRASES.has(normalizedText) || PHRASE_RES.some((re) => re.test(normalizedText));
   }
@@ -110,6 +124,8 @@
     }
     const family = CHAIN_FAMILIES.findIndex((phrases) => phrases.includes(normalizedText));
     if (family !== -1) return `family:${family}`;
+    const template = clicheTemplate(normalizedText);
+    if (template) return `template:${template}`;
     if (CONSERVATIVE_PHRASES.has(normalizedText) || REPEATED_REACTIONS.has(normalizedText)) {
       return `repeat:${normalizedText}`;
     }

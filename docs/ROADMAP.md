@@ -12,11 +12,12 @@ Available now:
 
 - Existing media, bot, stock-phrase, copypasta, and custom-pattern filters.
 - Independent Standard/Conservative sensitivity for clichés and reply chains.
+- Bounded whole-comment variations for upvote reactions, internet-win reactions, enough-Reddit-for-today replies, and friends-along-the-way templates; shared template keys also support Conservative chains.
 - Conservative chains recognize related axe/sword/bow and rock-and-stone memes, identical recognized reactions (including Nice, F, 69, 420, and This is the way), and identical emoji-only replies.
 - Repeated image-only chains use image URL identity, including known Reddit preview variants. This detects repetition, not the image's meaning; different reaction images and embedded captions are not classified.
 - Minimum chain length, protection for always-show users, and preservation of the first chain comment and useful sibling replies, subject to other enabled rules.
 
-Remaining: carefully bounded cliché-template variations, lyric and quote sequences, near-duplicate replies, recursive jokes, and better pun-chain evidence. Ordinary acknowledgments and useful text must not be treated as memes merely because they are short. Unknown joke/lyric chains are intentionally preserved by Conservative mode.
+Remaining: further carefully bounded cliché-template variations, lyric and quote sequences, near-duplicate replies, recursive jokes, and better pun-chain evidence. Ordinary acknowledgments and useful text must not be treated as memes merely because they are short. Unknown joke/lyric chains are intentionally preserved by Conservative mode.
 
 Reaction-image targets include meme-taking and "in front of my bath bombs" responses. Recognizing those across different uploads or captions remains planned; URL repetition alone cannot identify them reliably.
 

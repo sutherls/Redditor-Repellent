@@ -22,5 +22,5 @@
     }
   }
 
-  globalThis.NotThisMediaRules = { imageIdentity };
+  globalThis.RedditorRepellentMediaRules = { imageIdentity };
 })();

@@ -34,7 +34,7 @@ header {
 }
 header img { border-radius: 6px; }
 h1 { font-size: 14px; margin: 0; font-weight: 600; }
-h1 small { font-weight: 400; color: var(--muted); font-size: 11px; margin-left: 4px; }
+h1 small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
 
 .row {
   display: flex;

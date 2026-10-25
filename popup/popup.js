@@ -19,7 +19,7 @@ const LABELS = {
   muted: 'muted', custom: 'custom pattern', chain: 'reply chain',
 };
 // From src/patterns.js, the same matching the content script uses.
-const { MAX_PATTERN_CHARS, compilePatterns, firstMatch } = globalThis.NotThisPatterns;
+const { MAX_PATTERN_CHARS, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;
 
 const $ = (id) => document.getElementById(id);
 const $enabled = $('enabled');

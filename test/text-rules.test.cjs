@@ -5,8 +5,8 @@ const { test } = require('node:test');
 
 require('../src/patterns.js');
 require('../src/text-rules.js');
-const { normalizeText } = globalThis.NotThisPatterns;
-const { isStockPhrase, isCopypasta } = globalThis.NotThisTextRules;
+const { normalizeText } = globalThis.RedditorRepellentPatterns;
+const { isStockPhrase, isCopypasta } = globalThis.RedditorRepellentTextRules;
 
 test('bounded cliche variations match in both sensitivity modes', () => {
   for (const sensitivity of ['standard', 'conservative']) {
@@ -35,7 +35,7 @@ test('cliche templates preserve explanations, references, and unrelated discussi
 });
 
 test('cliche variants share chain keys only within their own template', () => {
-  const key = text => globalThis.NotThisTextRules.chainPattern(normalizeText(text));
+  const key = text => globalThis.RedditorRepellentTextRules.chainPattern(normalizeText(text));
   assert.equal(key('Take my upvote'), key('Have my angry updoot'));
   assert.equal(key('You win the internet'), key('You won the internet today'));
   assert.equal(key('That’s enough Reddit for today'), key('That is enough Reddit for today'));
@@ -120,7 +120,7 @@ test('conservative does not match memes embedded in a substantive sentence', () 
 });
 
 test('conservative chain patterns recognize related memes and exact repetitions', () => {
-  const { chainPattern } = globalThis.NotThisTextRules;
+  const { chainPattern } = globalThis.RedditorRepellentTextRules;
   const key = text => chainPattern(normalizeText(text));
   assert.ok(key('And my axe!'));
   assert.equal(key('And my axe!'), key('and my sword'));
@@ -132,14 +132,14 @@ test('conservative chain patterns recognize related memes and exact repetitions'
 });
 
 test('conservative chains reject ordinary answers and embedded meme references', () => {
-  const { chainPattern } = globalThis.NotThisTextRules;
+  const { chainPattern } = globalThis.RedditorRepellentTextRules;
   for (const text of ['Yes', 'Thanks', 'Which cable?', 'Use the blue one.', 'Agreed', '42', 'And my axe needs sharpening.', 'Please add rock and stone', 'Well, it was a step up.']) {
     assert.equal(chainPattern(normalizeText(text)), null, text);
   }
 });
 
 test('conservative repetition includes requested number, F, and emoji chains', () => {
-  const { chainPattern } = globalThis.NotThisTextRules;
+  const { chainPattern } = globalThis.RedditorRepellentTextRules;
   const key = text => chainPattern(normalizeText(text), text);
   for (const text of ['F', '69', '420', '😂']) assert.ok(key(text), text);
   assert.equal(key('F!'), key('f'));

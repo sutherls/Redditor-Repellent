@@ -1,8 +1,8 @@
-# Privacy Policy — Not This.
+# Privacy Policy — Redditor Repellent
 
-Last updated: 2026-09-12
+Last updated: 2026-10-25
 
-Not This. does not collect, store, transmit, or sell any personal data.
+Redditor Repellent does not collect, store, transmit, or sell any personal data.
 
 - It runs only on reddit.com pages and only reads the page to decide which comments to collapse.
 - It makes no network requests of its own.
@@ -12,4 +12,4 @@ Not This. does not collect, store, transmit, or sell any personal data.
 - The all-time counter is a single number kept in your browser's local extension storage.
 - No analytics, no tracking, no accounts.
 
-Questions: notthis.racoon623@passmail.com
+Questions: https://github.com/sutherls/Redditor-Repellent/issues

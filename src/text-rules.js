@@ -1,6 +1,6 @@
 /*
- * Not This. — deterministic stock-phrase and copypasta matching.
- * Inputs are normalized by NotThisPatterns.normalizeText before matching.
+ * Redditor Repellent — deterministic stock-phrase and copypasta matching.
+ * Inputs are normalized by RedditorRepellentPatterns.normalizeText before matching.
  */
 (() => {
   'use strict';
@@ -132,5 +132,5 @@
     return null;
   }
 
-  globalThis.NotThisTextRules = { isStockPhrase, isCopypasta, chainPattern };
+  globalThis.RedditorRepellentTextRules = { isStockPhrase, isCopypasta, chainPattern };
 })();

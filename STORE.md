@@ -4,17 +4,17 @@ Paste-ready text for the Chrome Web Store, Firefox Add-ons, and Edge Add-ons lis
 
 ## Name
 
-Not This.
+Redditor Repellent
 
 ## Short description (132 characters max on Chrome)
 
-Collapses low-effort Reddit comments (GIFs, "This.", lol, bare links, bots, copypasta) so you can read the actual discussion.
+Reddit without the Redditors. Customizable filters for repetitive comments, memes, bots, and low-effort reply chains.
 
 ## Full description
 
 You open a Reddit thread to see what people think. What you get is a reaction GIF, then "This.", then "lol", then a bot telling you it's a bot, then someone quoting the comment above them and adding nothing. Somewhere under all that is the actual discussion.
 
-Not This. folds the low-effort replies out of the way. They're still there, marked with a small badge that says why, and any one of them expands with a click. What's left is the thread you came for.
+Redditor Repellent folds the low-effort replies out of the way. They're still there, marked with a small badge that says why, and any one of them expands with a click. What's left is the thread you came for.
 
 WHAT IT COLLAPSES
 
@@ -52,7 +52,7 @@ THE DETAILS
 • Works on new Reddit and old.reddit.com
 • Collapse them with a badge, or hide them from the page entirely
 • Keep replies visible under a collapsed comment, if you'd rather not lose the conversation beneath a GIF
-• Open source and unminified. Every line is on GitHub: https://github.com/recruiterguy/not-this
+• Open source and unminified. Every line is on GitHub: https://github.com/sutherls/Redditor-Repellent
 • Found a phrase it should catch, or one it shouldn't have? Open an issue on GitHub.
 
 Not affiliated with or endorsed by Reddit, Inc.
@@ -74,7 +74,7 @@ Collapses low-effort comments on Reddit comment pages.
 
 ## Website / support URL
 
-https://github.com/recruiterguy/not-this
+https://github.com/sutherls/Redditor-Repellent
 
 ## Screenshot ideas (1280×800)
 

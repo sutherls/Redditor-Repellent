@@ -1,5 +1,5 @@
 /*
- * Not This. — text matching shared by the content script and the popup, so
+ * Redditor Repellent — text matching shared by the content script and the popup, so
  * the popup's "Test a comment" box always agrees with what gets collapsed.
  */
 (() => {
@@ -72,5 +72,5 @@
     return tests.find((p) => p.test(raw, norm)) || null;
   }
 
-  globalThis.NotThisPatterns = { MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch };
+  globalThis.RedditorRepellentPatterns = { MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch };
 })();

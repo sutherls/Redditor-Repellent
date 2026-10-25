@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 require('../src/media-rules.js');
-const { imageIdentity } = globalThis.NotThisMediaRules;
+const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
 
 test('Reddit preview rendering variants share an identity with the original', () => {
   assert.equal(imageIdentity('https://preview.redd.it/example.png?width=640&format=webp&auto=webp&s=signature'),

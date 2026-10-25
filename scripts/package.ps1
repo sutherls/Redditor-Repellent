@@ -1,4 +1,4 @@
-# Builds dist/not-this-<version>.zip for store submission.
+# Builds dist/redditor-repellent-<version>.zip for store submission.
 # Usage (from the repo root):  powershell -ExecutionPolicy Bypass -File scripts/package.ps1
 #
 # Writes entries with forward slashes. Compress-Archive in Windows PowerShell 5.1
@@ -12,7 +12,7 @@ $manifest = Get-Content (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Jso
 $version = $manifest.version
 $dist = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $dist | Out-Null
-$zip = Join-Path $dist "not-this-$version.zip"
+$zip = Join-Path $dist "redditor-repellent-$version.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 
 $archive = [System.IO.Compression.ZipFile]::Open($zip, 'Create')

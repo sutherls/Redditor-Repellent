@@ -67,7 +67,7 @@ This fork has not published a browser-store release yet.
 3. Enable **Developer mode**, choose **Load unpacked**, and select the folder containing `manifest.json`.
 4. Open a Reddit comment thread and use the extension popup to choose your filters.
 
-The installed extension still appears as **Not This.** while the fork's branding is being updated. After pulling changes, reload the extension on the Extensions page and refresh your Reddit tabs.
+The installed extension appears as **Redditor Repellent**. After pulling changes, reload the extension and refresh your Reddit tabs to update its scripts, name, and icon.
 
 The popup also has a **Reload extension** button that saves pending settings before restarting the extension. Refresh your open Reddit tabs afterward to load the updated code. Ordinary settings changes apply automatically and do not require a reload.
 
@@ -111,11 +111,11 @@ For a distributable ZIP on Windows:
 powershell -ExecutionPolicy Bypass -File scripts/package.ps1
 ```
 
-On macOS/Linux, run `sh scripts/package.sh`. Packaging still uses the inherited filename `dist/not-this-<version>.zip` and includes the MIT license.
+On macOS/Linux, run `sh scripts/package.sh`. Packaging creates `dist/redditor-repellent-<version>.zip` and includes the MIT license.
 
 ## Credits and license
 
-Redditor Repellent builds on **Not This.**, created by **Chris Hoyt / recruiterguy**. The original project provides the foundation for comment filtering, customization, and collapse/reveal behavior.
+The original project by **Chris Hoyt / recruiterguy**, linked above, provides the foundation for comment filtering, customization, and collapse/reveal behavior.
 
 Released under the [MIT License](LICENSE). The original copyright and permission notice are preserved.
 

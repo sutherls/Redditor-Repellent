@@ -1,5 +1,5 @@
 /*
- * Not This. — content script
+ * Redditor Repellent — content script
  *
  * Classifies every comment into one "low-effort" kind (or none) and collapses
  * or hides the ones whose rule is switched on. Works on new Reddit
@@ -31,9 +31,9 @@
   const CHAIN_WORDS = 8;
 
   // From src/patterns.js, which the manifest loads first.
-  const { normalizeText, compilePatterns, firstMatch } = globalThis.NotThisPatterns;
-  const { isStockPhrase, isCopypasta, chainPattern } = globalThis.NotThisTextRules;
-  const { imageIdentity } = globalThis.NotThisMediaRules;
+  const { normalizeText, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;
+  const { isStockPhrase, isCopypasta, chainPattern } = globalThis.RedditorRepellentTextRules;
+  const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
 
   const DEFAULTS = {
     enabled: true,
@@ -690,7 +690,7 @@
     text.className = `${BANNER_CLASS}__text`;
     const total = document.createElement('span');
     total.className = `${BANNER_CLASS}__total`;
-    total.title = 'Collapsed by Not This. since you installed it';
+    total.title = 'Collapsed by Redditor Repellent since you installed it';
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = `${BANNER_CLASS}__btn`;

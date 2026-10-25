@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Popup reload regression tests</title>
+<style>body { font: 14px system-ui; padding: 20px; } iframe { width: 350px; height: 900px; }</style>
+<h1>Popup reload regression tests</h1>
+<button id="run">Run popup tests</button>
+<pre id="results">Ready</pre>
+<iframe id="popup" title="Extension popup"></iframe>
+<script>
+  const wait = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
+  document.getElementById('run').addEventListener('click', async () => {
+    const run = document.getElementById('run');
+    run.disabled = true;
+    const output = [];
+    try {
+      const frame = document.getElementById('popup');
+      const html = await (await fetch('../popup/popup.html')).text();
+      const bootstrap = `
+        window.testState = { stored: {}, reloads: 0, failSave: false };
+        window.chrome = {
+          storage: {
+            sync: {
+              get: async () => testState.stored,
+              set: async (patch) => {
+                await new Promise(resolve => setTimeout(resolve, 30));
+                if (testState.failSave) throw new Error('Storage unavailable');
+                Object.assign(testState.stored, patch);
+              },
+            },
+            local: { get: async () => ({ lifetime: 0 }) },
+            onChanged: { addListener() {} },
+          },
+          tabs: { query: async () => [] },
+          runtime: { reload: () => { testState.reloads++; testState.atReload = {...testState.stored}; } },
+        };
+      `;
+      const ready = new Promise(resolve => frame.onload = resolve);
+      frame.srcdoc = html.replace('<head>', `<head><base href="${new URL('../popup/', location.href)}"><script>${bootstrap}<\/script>`);
+      await ready;
+      await wait();
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+      const state = win.testState;
+      const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
+      const sensitivity = doc.getElementById('clicheSensitivity');
+      check('Standard is selected by default', sensitivity.value === 'standard');
+      sensitivity.value = 'conservative';
+      sensitivity.dispatchEvent(new win.Event('change'));
+      const patterns = doc.getElementById('customPatterns');
+      patterns.value = 'test phrase';
+      patterns.dispatchEvent(new win.Event('input'));
+      doc.getElementById('reloadExtension').click();
+      await wait(200);
+      check('Reload requested exactly once', state.reloads === 1);
+      check('Pending sensitivity saved before reload', state.atReload?.clicheSensitivity === 'conservative');
+      check('Pending typed patterns saved before reload', state.atReload?.customPatterns === 'test phrase');
+      // Simulate a new click after the mocked reload and a storage failure.
+      doc.getElementById('reloadExtension').disabled = false;
+      state.failSave = true;
+      patterns.value = 'unsaved phrase';
+      patterns.dispatchEvent(new win.Event('input'));
+      doc.getElementById('reloadExtension').click();
+      await wait();
+      check('Storage failure prevents reload', state.reloads === 1);
+      check('Failure is visible and retry is available',
+        doc.getElementById('reloadStatus').textContent.includes('Could not save') &&
+        !doc.getElementById('reloadExtension').disabled);
+      state.failSave = false;
+      doc.getElementById('reloadExtension').click();
+      await wait(200);
+      check('Retry saves pending text and reloads', state.reloads === 2 && state.atReload.customPatterns === 'unsaved phrase');
+    } catch (error) {
+      output.push(`FAIL ${error.message}`);
+    }
+    document.getElementById('results').textContent = output.join('\n');
+    run.disabled = false;
+  });
+</script>
+</html>

@@ -452,6 +452,7 @@
 
   function consider(el) {
     const body = bodyOf(el);
+    processedBodies.set(el, body);
     if (!body) {
       // New Reddit renders bodies lazily; leave unmarked so we retry later.
       if (siteOf(el) === 'old') el.setAttribute(ATTR, 'skip');
@@ -478,6 +479,7 @@
   // ---------------------------------------------------------------------------
 
   let classCache = new WeakMap();
+  const processedBodies = new WeakMap();
 
   function classified(el, body) {
     let c = classCache.get(el);
@@ -721,6 +723,32 @@
     }, 150);
   }
 
+  function onMutations(records) {
+    const changed = new Set();
+    for (const record of records) {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      const el = target?.closest('shreddit-comment, .thing.comment');
+      if (!el || !el.hasAttribute(ATTR)) continue;
+      const body = bodyOf(el);
+      const previousBody = processedBodies.get(el);
+      // Ignore metadata, badges, counters, and nested replies. Recheck only
+      // when Reddit changes this comment's body or replaces its containing DOM.
+      const insideBody = body?.contains(record.target);
+      const replacedBody = [...record.addedNodes, ...record.removedNodes]
+        .some((node) => (body && node.contains(body)) || (previousBody && node.contains(previousBody)));
+      if (insideBody || replacedBody) changed.add(el);
+    }
+    for (const el of changed) {
+      classCache.delete(el);
+      processedBodies.set(el, bodyOf(el));
+      // A user-expanded comment remains expanded, even if Reddit edits it.
+      if (el.getAttribute(ATTR) === 'collapsed' &&
+          !el.classList.contains(OWN_CLASS) && !isNativelyCollapsed(el)) continue;
+      restore(el);
+    }
+    schedule();
+  }
+
   function loadSettings() {
     if (!storage) return Promise.resolve({});
     return Promise.resolve(storage.get(null)).then((s) => s || {}).catch(() => ({}));
@@ -774,8 +802,9 @@
     rawSettings = raw;
     settings = normalizeSettings(raw);
     scan();
-    new MutationObserver(schedule).observe(document.documentElement, {
+    new MutationObserver(onMutations).observe(document.documentElement, {
       childList: true,
+      characterData: true,
       subtree: true,
     });
   });

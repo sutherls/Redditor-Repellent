@@ -64,6 +64,10 @@ This fork has not published a browser-store release yet.
 
 The installed extension still appears as **Not This.** while the fork's branding is being updated. After pulling changes, reload the extension on the Extensions page and refresh your Reddit tabs.
 
+The popup also has a **Reload extension** button that saves pending settings before restarting the extension. Refresh your open Reddit tabs afterward to load the updated code. Ordinary settings changes apply automatically and do not require a reload.
+
+The extension rechecks comments when Reddit replaces their bodies or updates their text after loading. This addresses a reproduced stale-comment problem; if filtering still disappears after a thread refresh, report the thread URL and what the popup shows so we can investigate that case.
+
 ## Development
 
 Plain JavaScript, HTML, and CSS. No dependency installation or build step is needed to load the extension.
@@ -85,6 +89,8 @@ node --test test/text-rules.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.
+
+The same server also provides `test/lifecycle.html` for comment replacement, edits, and settings updates, and `test/popup.html` for save-before-reload behavior. These fixtures simulate Reddit markup and browser extension APIs; they do not replace testing the installed extension on Reddit.
 
 For a distributable ZIP on Windows:
 

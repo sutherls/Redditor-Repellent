@@ -115,9 +115,11 @@ async function load() {
   render(current);
 }
 
+let saveQueue = Promise.resolve();
 function save(patch) {
   Object.assign(current, patch);
-  return api.storage.sync.set(patch);
+  saveQueue = saveQueue.catch(() => {}).then(() => api.storage.sync.set(patch));
+  return saveQueue;
 }
 
 function statsSoon() {
@@ -180,12 +182,20 @@ $clicheSensitivity.addEventListener('change', async () => {
 });
 
 // Save text boxes a moment after the last keystroke.
+const pendingTextSaves = new Map();
 function onTyping(el, makePatch) {
   let timer = null;
   el.addEventListener('input', () => {
     clearTimeout(timer);
+    const flush = () => {
+      clearTimeout(timer);
+      return save(makePatch()).then(() => {
+        if (pendingTextSaves.get(el) === flush) pendingTextSaves.delete(el);
+      });
+    };
+    pendingTextSaves.set(el, flush);
     timer = setTimeout(async () => {
-      await save(makePatch());
+      await flush();
       statsSoon();
     }, 400);
   });
@@ -199,6 +209,21 @@ $customPatterns.addEventListener('input', () => {
   renderPatternTest();
 });
 $patternTest.addEventListener('input', renderPatternTest);
+
+$('reloadExtension').addEventListener('click', async () => {
+  const button = $('reloadExtension');
+  button.disabled = true;
+  $('reloadStatus').textContent = 'Saving settings and reloading…';
+  try {
+    await Promise.all([...pendingTextSaves.values()].map((flush) => flush()));
+    // Retry any earlier failed control save before closing the popup.
+    await save({ ...current });
+    api.runtime.reload();
+  } catch {
+    $('reloadStatus').textContent = 'Could not save settings or reload. Please try again.';
+    button.disabled = false;
+  }
+});
 
 // ---- Per-page stats ---------------------------------------------------------
 

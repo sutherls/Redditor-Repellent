@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Comment lifecycle regression tests</title>
+<link rel="stylesheet" href="../src/content.css">
+<style>
+body { font: 14px system-ui; padding: 20px; }
+shreddit-comment { display: block; padding: 8px; }
+shreddit-comment[collapsed] [slot="comment"] { display: none; }
+</style>
+<h1>Comment lifecycle regression tests</h1>
+<button id="run">Run lifecycle tests</button>
+<pre id="results">Ready</pre>
+<div id="comments" class="commentarea"></div>
+<script>
+  const settingsListeners = [];
+  window.chrome = {
+    storage: {
+      sync: { get: async () => ({}) },
+      local: { get: async () => ({ lifetime: 0 }) },
+      onChanged: { addListener: (fn) => settingsListeners.push(fn) },
+    },
+    runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) },
+  };
+</script>
+<script src="../src/patterns.js"></script>
+<script src="../src/text-rules.js"></script>
+<script src="../src/content.js"></script>
+<script>
+  const wait = () => new Promise((resolve) => setTimeout(resolve, 500));
+  const comments = document.getElementById('comments');
+  let sequence = 0;
+  function addComment(text, old = false) {
+    const el = document.createElement(old ? 'div' : 'shreddit-comment');
+    el.id = `lifecycle-${++sequence}`;
+    if (old) {
+      el.className = 'thing comment noncollapsed';
+      el.innerHTML = '<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div>';
+    } else {
+      el.innerHTML = '<div slot="commentMeta">reader</div><div slot="comment"></div>';
+    }
+    const body = el.querySelector(old ? '.md' : '[slot="comment"]');
+    body.textContent = text;
+    comments.append(el);
+    return { el, body };
+  }
+  const collapsed = (el) => el.getAttribute('data-rgc') === 'collapsed';
+  document.getElementById('run').addEventListener('click', async () => {
+    const button = document.getElementById('run');
+    button.disabled = true;
+    comments.replaceChildren();
+    const output = [];
+    const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
+    for (const old of [false, true]) {
+      const label = old ? 'old Reddit' : 'new Reddit';
+      const item = addComment('Loading discussion content', old);
+      await wait();
+      check(`${label}: placeholder initially preserved`, !collapsed(item.el));
+      item.body.textContent = 'Take my upvote!';
+      await wait();
+      check(`${label}: replaced text is filtered`, collapsed(item.el));
+      item.body.firstChild.data = 'Here is a detailed explanation of how this works.';
+      await wait();
+      check(`${label}: edited useful comment is restored`, !collapsed(item.el) && item.body.getClientRects().length > 0);
+      const replacement = item.body.cloneNode(false);
+      replacement.textContent = 'Username checks out.';
+      item.body.replaceWith(replacement);
+      await wait();
+      check(`${label}: replaced body is filtered`, collapsed(item.el));
+      // User expansion should survive unrelated DOM activity.
+      if (old) item.el.classList.remove('collapsed');
+      else item.el.removeAttribute('collapsed');
+      item.el.querySelector(old ? '.tagline' : '[slot="commentMeta"]').append(' updated timestamp');
+      addComment('A separate useful comment', old);
+      await wait();
+      check(`${label}: manual reveal survives unrelated changes`, replacement.getClientRects().length > 0);
+      replacement.textContent = 'And my axe!';
+      await wait();
+      check(`${label}: manual reveal survives body edits`, replacement.getClientRects().length > 0);
+    }
+    const ack = addComment('Agreed.');
+    await wait();
+    check('Standard initially filters acknowledgment', collapsed(ack.el));
+    settingsListeners.forEach(fn => fn({ clicheSensitivity: { newValue: 'conservative' } }, 'sync'));
+    await wait();
+    check('Settings changes apply without extension reload', !collapsed(ack.el));
+    settingsListeners.forEach(fn => fn({ clicheSensitivity: { newValue: 'standard' } }, 'sync'));
+    await wait();
+    check('Switching back reapplies Standard', collapsed(ack.el));
+    document.querySelector('.rgc-banner')?.remove();
+    await wait();
+    check('Removed summary is recreated', !!document.querySelector('.rgc-banner'));
+    document.getElementById('results').textContent = output.join('\n');
+    button.disabled = false;
+  });
+</script>
+</html>

@@ -254,6 +254,7 @@ async function refreshStats() {
     const strong = document.createElement('strong');
     strong.textContent = String(s.total);
     $status.append(strong, ` low-effort comment${s.total === 1 ? '' : 's'} ${verb} on this page`, parts ? ` (${parts}).` : '.');
+    if (s.alreadyCollapsed) $status.append(` ${s.alreadyCollapsed} were already collapsed by Reddit, RES, or you.`);
   } catch {
     $status.textContent = 'Open a Reddit comment thread to see stats.';
   }

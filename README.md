@@ -68,6 +68,8 @@ The popup also has a **Reload extension** button that saves pending settings bef
 
 The extension rechecks comments when Reddit replaces their bodies or updates their text after loading. This addresses a reproduced stale-comment problem; if filtering still disappears after a thread refresh, report the thread URL and what the popup shows so we can investigate that case.
 
+On old Reddit, automatic collapses are marked so Reddit Enhancement Suite does not save them as your manual choices. Matching comments that Reddit, RES, or you already collapsed still receive labels and appear in the summary as **already collapsed**, without increasing the lifetime tally. They stay closed when settings change; clicking **Show them** explicitly opens matched comments, including those prior collapses.
+
 ## Development
 
 Plain JavaScript, HTML, and CSS. No dependency installation or build step is needed to load the extension.
@@ -91,6 +93,8 @@ node --test test/text-rules.test.cjs
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.
 
 The same server also provides `test/lifecycle.html` for comment replacement, edits, and settings updates, and `test/popup.html` for save-before-reload behavior. These fixtures simulate Reddit markup and browser extension APIs; they do not replace testing the installed extension on Reddit.
+
+`test/res-persistence.html` covers the RES automatic-collapse marker, labels and counts for prior collapses, and explicit reveal behavior. Its persistence simulation follows [RES's commentHidePersistor module](https://github.com/honestbleeps/Reddit-Enhancement-Suite/blob/master/lib/modules/commentHidePersistor.js).
 
 For a distributable ZIP on Windows:
 

@@ -290,7 +290,21 @@
     }
     const toggle = el.querySelector(':scope > .entry .tagline a.expand');
     if (toggle) {
-      toggle.click();
+      if (collapsed) {
+        // RES commentHidePersistor ignores automatic collapses carrying a
+        // distinct reason. Otherwise this synthetic click becomes a saved
+        // user collapse and survives page reloads.
+        const previousReason = toggle.getAttribute('collapse-reason');
+        toggle.setAttribute('collapse-reason', 'redditor-repellent');
+        try {
+          toggle.click();
+        } finally {
+          if (previousReason === null) toggle.removeAttribute('collapse-reason');
+          else toggle.setAttribute('collapse-reason', previousReason);
+        }
+      } else {
+        toggle.click();
+      }
     } else {
       el.classList.toggle('collapsed', collapsed);
       el.classList.toggle('noncollapsed', !collapsed);
@@ -367,9 +381,10 @@
     }
 
     if (isNativelyCollapsed(el)) {
-      // Already collapsed by Reddit or the user; leave it alone.
+      // Preserve Reddit/user/RES collapse state, but still explain the match.
       el.setAttribute(ATTR, 'skip');
       el.setAttribute(NATIVE_ATTR, '');
+      addBadge(el, kind);
       return;
     }
 
@@ -412,8 +427,14 @@
     el.removeAttribute(NATIVE_ATTR);
   }
 
-  function restoreAll() {
-    document.querySelectorAll(`[${ATTR}]`).forEach(restore);
+  function restoreAll(revealNative = false) {
+    document.querySelectorAll(`[${ATTR}]`).forEach((el) => {
+      // Only the user's explicit "Show them" action may open prior collapses.
+      if (revealNative && el.hasAttribute(NATIVE_ATTR) && isNativelyCollapsed(el)) {
+        setNativeCollapsed(el, false);
+      }
+      restore(el);
+    });
     updateCounter();
   }
 
@@ -529,7 +550,7 @@
   }
 
   function stats() {
-    const acted = document.querySelectorAll(`[${ATTR}="collapsed"], [${ATTR}="hidden"]`);
+    const acted = document.querySelectorAll(`[${ATTR}="collapsed"], [${ATTR}="hidden"], [${NATIVE_ATTR}]`);
     const byKind = {};
     acted.forEach((el) => {
       const k = el.getAttribute(KIND_ATTR) || 'other';
@@ -537,6 +558,7 @@
     });
     return {
       total: acted.length,
+      alreadyCollapsed: document.querySelectorAll(`[${NATIVE_ATTR}]`).length,
       byKind,
       enabled: settings.enabled,
       mode: settings.mode,
@@ -645,7 +667,7 @@
         revealedCount = s.total;
         revealedByKind = s.byKind;
         revealed = true;
-        restoreAll();
+        restoreAll(true);
       }
     });
     banner.append(text, total, btn);
@@ -704,7 +726,8 @@
       btn.textContent = 'Hide again';
     } else {
       const verb = settings.mode === 'hide' ? 'hidden' : 'collapsed';
-      text.textContent = `${describe(count, s.byKind)} ${verb}`;
+      const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
+      text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';
     }
   }

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>RES collapse persistence regression tests</title>
+<link rel="stylesheet" href="../src/content.css">
+<style>
+body { font: 14px system-ui; padding: 20px; }
+.thing.collapsed > .entry .usertext-body { display: none; }
+</style>
+<h1>RES collapse persistence regression tests</h1>
+<button id="run">Run persistence tests</button>
+<pre id="results">Ready</pre>
+<div class="commentarea"><div class="sitetable nestedlisting" id="comments"></div></div>
+<script>
+  const remembered = new Set();
+  // Model RES commentHidePersistor's delegated click handler: automatic
+  // collapse reasons are ignored; ordinary user collapses are remembered.
+  document.body.addEventListener('click', (event) => {
+    const toggle = event.target.closest('a.expand');
+    if (!toggle) return;
+    const el = toggle.closest('.thing.comment');
+    if (el.classList.contains('collapsed')) {
+      const reason = toggle.getAttribute('collapse-reason');
+      if (reason && reason !== 'commentHidePersistor') return;
+      remembered.add(el.id);
+    } else {
+      toggle.removeAttribute('collapse-reason');
+      remembered.delete(el.id);
+    }
+  });
+  function addComment(id, text, collapsed = false) {
+    const el = document.createElement('div');
+    el.className = `thing comment ${collapsed ? 'collapsed' : 'noncollapsed'}`;
+    el.id = id;
+    el.innerHTML = '<div class="entry"><p class="tagline"><a class="expand" href="#">[–]</a> reader</p><div class="usertext-body"><div class="md"></div></div></div>';
+    el.querySelector('.md').textContent = text;
+    const toggle = el.querySelector('.expand');
+    toggle.textContent = collapsed ? '[+]' : '[–]';
+    toggle.addEventListener('click', event => {
+      event.preventDefault();
+      const isCollapsed = el.classList.toggle('collapsed');
+      el.classList.toggle('noncollapsed', !isCollapsed);
+      toggle.textContent = isCollapsed ? '[+]' : '[–]';
+    });
+    document.getElementById('comments').append(el);
+    return el;
+  }
+</script>
+<script src="../src/patterns.js"></script>
+<script src="../src/text-rules.js"></script>
+<script src="../src/content.js"></script>
+<script>
+  const wait = () => new Promise(resolve => setTimeout(resolve, 400));
+  document.getElementById('run').addEventListener('click', async () => {
+    const button = document.getElementById('run');
+    button.disabled = true;
+    const results = [];
+    const check = (name, ok) => results.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
+    document.getElementById('comments').replaceChildren();
+    remembered.clear();
+    window.__rgc.settings = {};
+    const automatic = addComment('auto', 'Take my upvote!');
+    await wait();
+    check('Automatic collapse is not saved by RES', !remembered.has('auto'));
+    automatic.remove();
+    const restored = addComment('restored', 'Take my upvote!', true);
+    const unrelated = addComment('unrelated', 'Here is a detailed explanation with useful information.', true);
+    await wait();
+    check('Previously collapsed match stays collapsed', restored.classList.contains('collapsed'));
+    check('Previously collapsed match receives a label', !!restored.querySelector('.rgc-badge'));
+    check('Summary includes previously collapsed match', !!document.querySelector('.rgc-banner'));
+    window.__rgc.restoreAll();
+    window.__rgc.scan();
+    await wait();
+    check('Reapplying settings does not open a prior collapse', restored.classList.contains('collapsed'));
+    document.querySelector('.rgc-banner__btn')?.click();
+    await wait();
+    check('Explicit Show them reveals matched prior collapse', !restored.classList.contains('collapsed'));
+    check('Show them leaves unrelated prior collapse alone', unrelated.classList.contains('collapsed'));
+    restored.querySelector('.expand').click();
+    check('Ordinary user collapse is still saved by RES', remembered.has('restored'));
+    document.getElementById('results').textContent = results.join('\n');
+    button.disabled = false;
+  });
+</script>
+</html>

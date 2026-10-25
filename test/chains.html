@@ -27,6 +27,7 @@ shreddit-comment[collapsed] > #comment-children,
 </script>
 <script src="../src/patterns.js"></script>
 <script src="../src/text-rules.js"></script>
+<script src="../src/media-rules.js"></script>
 <script src="../src/content.js"></script>
 <script>
   const wait = () => new Promise(resolve => setTimeout(resolve, 400));
@@ -114,6 +115,44 @@ shreddit-comment[collapsed] > #comment-children,
       const off = chain(['and my axe', 'and my sword', 'and my bow'], old);
       await wait();
       check(`${label}: sensitivity does not enable disabled chain rule`, off.every(el => !filtered(el)));
+      configure({ rules: { chain: true, phrase: false, emote: false, gif: false, link: false, image: false } });
+      function imageReplies(sources, caption = '') {
+        const replies = chain(sources.map(() => ''), old);
+        replies.forEach((el, i) => {
+          const body = el.querySelector(old ? '.md' : '[slot="comment"]');
+          if (old) {
+            const link = document.createElement('a');
+            link.href = sources[i];
+            link.textContent = '<image>';
+            body.append(link, caption);
+          } else {
+            const image = document.createElement('img');
+            image.setAttribute('data-src', sources[i]);
+            image.width = 100;
+            image.height = 100;
+            body.append(image, caption);
+          }
+        });
+        return replies;
+      }
+      const repeatedImage = imageReplies(['https://i.redd.it/meme.png', 'https://preview.redd.it/meme.png?width=300&format=webp&s=a', 'https://preview.redd.it/meme.png?width=600&s=b']);
+      const distinctImages = imageReplies(['https://i.redd.it/one.png', 'https://i.redd.it/two.png', 'https://i.redd.it/three.png']);
+      const usefulImage = imageReplies(Array(3).fill('https://i.redd.it/diagram.png'), ' Here is the wiring diagram.');
+      const variants = imageReplies(['https://example.com/image.png?id=1', 'https://example.com/image.png?id=2', 'https://example.com/image.png?id=3']);
+      const markdown = chain(Array(3).fill('![img](https://i.redd.it/meme.png)'), old);
+      await wait();
+      check(`${label}: same image variants form a chain`, !filtered(repeatedImage[0]) && filtered(repeatedImage[1]));
+      check(`${label}: different images remain open`, distinctImages.every(el => !filtered(el)));
+      check(`${label}: useful image captions remain open`, usefulImage.every(el => !filtered(el)));
+      check(`${label}: unknown URL query variants remain distinct`, variants.every(el => !filtered(el)));
+      check(`${label}: literal image markdown forms a chain`, filtered(markdown[1]));
+      const lazy = imageReplies(Array(3).fill(''));
+      await wait();
+      check(`${label}: missing image URLs do not form a chain`, lazy.every(el => !filtered(el)));
+      lazy.forEach(el => el.querySelector(old ? '.md a' : '[slot="comment"] img')
+        .setAttribute(old ? 'href' : 'data-src', 'https://i.redd.it/lazy.png'));
+      await wait();
+      check(`${label}: late image URL updates are rechecked`, filtered(lazy[1]));
     }
     document.getElementById('results').textContent = results.join('\n');
     button.disabled = false;

@@ -33,6 +33,7 @@
   // From src/patterns.js, which the manifest loads first.
   const { normalizeText, compilePatterns, firstMatch } = globalThis.NotThisPatterns;
   const { isStockPhrase, isCopypasta, chainPattern } = globalThis.NotThisTextRules;
+  const { imageIdentity } = globalThis.NotThisMediaRules;
 
   const DEFAULTS = {
     enabled: true,
@@ -529,8 +530,9 @@
     const links = [];
     const conservative = settings.chainSensitivity === 'conservative';
     const patternOf = (node) => {
-      const text = bodyOf(node)?.textContent || '';
-      return chainPattern(normalizeText(text), text);
+      const body = bodyOf(node);
+      const text = body?.textContent || '';
+      return imageChainPattern(body) || chainPattern(normalizeText(text), text);
     };
     const pattern = conservative ? patternOf(el) : null;
     if (conservative && !pattern) return;
@@ -548,6 +550,30 @@
       if ((st === 'collapsed' || st === 'hidden') && !keepsReplies(up)) return;
     }
     apply(target, 'chain');
+  }
+
+  function imageChainPattern(body) {
+    if (!body) return null;
+    const text = body.textContent.replace(/\s+/g, ' ').trim();
+    const images = body.querySelectorAll('img, faceplate-img');
+    let source = null;
+    if (images.length === 1 && !text && !body.querySelector('video, source, shreddit-player')) {
+      const image = images[0];
+      source = image.getAttribute('src') || image.getAttribute('data-src');
+    } else if (images.length === 0) {
+      const markdown = text.match(MD_IMAGE);
+      if (markdown) source = markdown[2];
+      else {
+        const links = body.querySelectorAll('a[href]');
+        if (links.length === 1) {
+          const href = links[0].getAttribute('href');
+          // Old Reddit often displays an uploaded image as an <image> link.
+          if (text === href || /^<?image>?$/i.test(text)) source = href;
+        }
+      }
+    }
+    const identity = source && imageIdentity(source);
+    return identity ? `image:${identity}` : null;
   }
 
   // Set when the user clicks "Show them" on the banner.
@@ -840,6 +866,8 @@
     new MutationObserver(onMutations).observe(document.documentElement, {
       childList: true,
       characterData: true,
+      attributes: true,
+      attributeFilter: ['src', 'data-src', 'href'],
       subtree: true,
     });
   });

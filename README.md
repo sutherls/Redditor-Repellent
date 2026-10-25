@@ -21,6 +21,7 @@ Chrome and Microsoft Edge are our first development targets. The inherited code 
 - Turn individual rules on or off and adjust word-count, score, and reply-chain thresholds.
 - Choose **Standard** (the default, original behavior) or **Conservative** cliché sensitivity. Conservative uses a smaller set of clear stock phrases and more specific copypasta openers, preserving ordinary acknowledgments and broad openings such as "In the year 2000." Other enabled filters can still collapse those comments.
 - Set reply-chain sensitivity independently: **Standard** keeps the original short-reply behavior; **Conservative** requires consecutive replies from the same recognized meme family (such as "and my axe/sword/bow") or repetitions of the same recognized reaction. It preserves short question-and-answer exchanges and unknown joke or lyric chains. Enable the reply-chain rule to use either mode; the configured minimum chain length still applies.
+- Conservative chains also recognize repeated image-only replies using the same image URL, including known Reddit preview-size variants. Different images and images with explanatory text stay outside this rule. No images are downloaded or analyzed: captions inside images, cropped/reuploaded copies, and sequences of different reaction memes are not recognized. Repeated useful images can also match, so collapse remains reversible.
 - Add your own wildcard or regex patterns and try them in the popup's comment tester.
 - Maintain muted-user and always-show lists.
 - See why a comment was collapsed and reveal it when you want. Complete hiding is also optional.
@@ -82,6 +83,7 @@ Plain JavaScript, HTML, and CSS. No dependency installation or build step is nee
 | `manifest.json` | Extension configuration and permissions |
 | `src/content.js` | Reddit page handling, classification, collapsing, and counters |
 | `src/text-rules.js` | Stock-phrase and copypasta matching |
+| `src/media-rules.js` | Repeated-image URL identity without image downloads |
 | `src/patterns.js` | Normalization and custom pattern matching |
 | `src/background.js` | Toolbar badge and lifetime tally |
 | `popup/` | Filter controls and settings |
@@ -91,6 +93,7 @@ Run the text-rule tests with Node.js:
 
 ```bash
 node --test test/text-rules.test.cjs
+node --test test/media-rules.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.

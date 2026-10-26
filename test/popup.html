@@ -47,6 +47,11 @@
       check('Standard is selected by default', sensitivity.value === 'standard');
       const chainSensitivity = doc.getElementById('chainSensitivity');
       check('Reply-chain sensitivity defaults to Standard', chainSensitivity.value === 'standard');
+      const politics = doc.querySelector('[data-rule="politics"]');
+      check('Political filter is opt-in', !politics.checked);
+      politics.click();
+      await wait();
+      check('Political filter saves independently', state.stored.rules?.politics === true && state.stored.rules?.gif === true);
       chainSensitivity.value = 'conservative';
       chainSensitivity.dispatchEvent(new win.Event('change'));
       sensitivity.value = 'conservative';

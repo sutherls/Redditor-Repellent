@@ -21,11 +21,13 @@ Remaining: further carefully bounded cliché-template variations, lyric and quot
 
 Reaction-image targets include meme-taking and "in front of my bath bombs" responses. Recognizing those across different uploads or captions remains planned; URL repetition alone cannot identify them reliably.
 
-## 2. Context and off-topic derailment — planned
+## 2. Context and off-topic derailment — in progress
 
 Combines sections 1, 2, and 11, plus context-sensitive aspects of 7 and 8.
 
 Collect submission topic, subreddit, and parent-reply context before adding conservative rules for unrelated political pivots, moral lectures, and imported controversies. Preserve relevant politics, ethics, allegations, criticism, and disagreement regardless of viewpoint. Missing context should favor leaving a comment visible.
+
+First experimental milestone: opt-in explicit off-topic political pivots, with visible post/subreddit/ancestor context, late-context rechecks, and reversible explanations. English-only recognized terms and explicit pivot wording keep this narrow. Subtle derailments, additional sensitivity levels, richer topic matching, and moralizing remain planned. A political keyword alone is never sufficient.
 
 ## 3. Hostility and engagement bait — planned
 

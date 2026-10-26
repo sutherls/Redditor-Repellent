@@ -5,6 +5,7 @@ const api = globalThis.browser ?? globalThis.chrome;
 const RULE_DEFAULTS = {
   gif: true, image: false, emote: true, phrase: true, link: true,
   bot: true, pasta: true, quote: false, short: false, score: false, chain: false,
+  politics: false,
 };
 const DEFAULTS = {
   enabled: true, mode: 'collapse', showCounter: true, keepReplies: false,
@@ -16,7 +17,7 @@ const DEFAULTS = {
 const LABELS = {
   gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
   bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
-  muted: 'muted', custom: 'custom pattern', chain: 'reply chain',
+  muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot',
 };
 // From src/patterns.js, the same matching the content script uses.
 const { MAX_PATTERN_CHARS, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;

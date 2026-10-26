@@ -23,6 +23,7 @@ Chrome and Microsoft Edge are our first development targets. The inherited code 
 - Set reply-chain sensitivity independently: **Standard** keeps the original short-reply behavior; **Conservative** requires consecutive replies from the same recognized meme family (such as "and my axe/sword/bow") or repetitions of the same recognized reaction. It preserves short question-and-answer exchanges and unknown joke or lyric chains. Enable the reply-chain rule to use either mode; the configured minimum chain length still applies.
 - Conservative chains also recognize repeated image-only replies using the same image URL, including known Reddit preview-size variants. Different images and images with explanatory text stay outside this rule. No images are downloaded or analyzed: captions inside images, cropped/reuploaded copies, and sequences of different reaction memes are not recognized. Repeated useful images can also match, so collapse remains reversible.
 - Both cliché sensitivities recognize bounded variations of upvote reactions, "you win the internet today," "that's enough Reddit for today," and "the real … was the friends we made along the way." These match whole comments only; added explanations stay outside these new patterns. Conservative chains group variations of the same template. Other enabled rules still apply.
+- **Experimental political pivots (off by default):** a conservative English-only rule for explicit admissions such as "Off topic, but…" followed by recognized political terms. It checks the visible post, subreddit, and ancestor comments, preserving known political/policy contexts and skipping missing or ambiguous context. Names, criticism, and viewpoints alone never trigger it. Matches retain replies and always offer collapse/reveal with an explanation, even in Hide mode. Other filters still apply. This first version will miss most subtle derailments and can still make mistakes; it does not understand intent, linked articles, or image text. It has one conservative setting; broader sensitivity levels remain planned.
 - Add your own wildcard or regex patterns and try them in the popup's comment tester.
 - Maintain muted-user and always-show lists.
 - See why a comment was collapsed and reveal it when you want. Complete hiding is also optional.
@@ -95,6 +96,7 @@ Run the text-rule tests with Node.js:
 ```bash
 node --test test/text-rules.test.cjs
 node --test test/media-rules.test.cjs
+node --test test/politics-rules.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.
@@ -104,6 +106,8 @@ The same server also provides `test/lifecycle.html` for comment replacement, edi
 `test/res-persistence.html` covers the RES automatic-collapse marker, labels and counts for prior collapses, and explicit reveal behavior. Its persistence simulation follows [RES's commentHidePersistor module](https://github.com/honestbleeps/Reddit-Enhancement-Suite/blob/master/lib/modules/commentHidePersistor.js).
 
 `test/chains.html` checks both reply-chain sensitivities on old and modern Reddit markup, including useful conversations, meme families, late replies, minimum length, and always-show users.
+
+`test/politics.html` checks political pivots on old and modern Reddit markup, including viewpoint symmetry, missing/late context, ancestor protection, always-show users, reveal, and live disabling. These are local fixtures; real Reddit testing is still needed.
 
 For a distributable ZIP on Windows:
 

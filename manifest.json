@@ -26,6 +26,7 @@
         "src/patterns.js",
         "src/text-rules.js",
         "src/media-rules.js",
+        "src/politics-rules.js",
         "src/content.js"
       ],
       "css": [

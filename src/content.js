@@ -24,6 +24,7 @@
     short: false,  // fewer than `shortWords` words
     score: false,  // score below `scoreBelow`
     chain: false,  // a run of `chainLength`+ short replies, each replying to the last
+    politics: false, // experimental explicit off-topic political pivots
   };
 
   // A reply counts as part of a chain when it's low-effort or at most this many words.
@@ -34,6 +35,9 @@
   const { normalizeText, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;
   const { isStockPhrase, isCopypasta, chainPattern } = globalThis.RedditorRepellentTextRules;
   const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
+  const politicalRules = globalThis.RedditorRepellentPolitics;
+  const politicalCandidates = new Set();
+  const POLITICAL_REASON = 'Explicit off-topic political pivot; no political or policy context found in the visible post and ancestor comments. This heuristic can be wrong.';
 
   const DEFAULTS = {
     enabled: true,
@@ -55,12 +59,12 @@
   const LABELS = {
     gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
     bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
-    muted: 'muted', custom: 'custom pattern', chain: 'reply chain',
+    muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot',
   };
   const BADGES = {
     gif: 'GIF', image: 'IMG', emote: 'EMOJI', phrase: 'LOW EFFORT', link: 'LINK', bot: 'BOT',
     pasta: 'PASTA', quote: 'QUOTE', short: 'SHORT', score: 'DOWNVOTED', muted: 'MUTED',
-    custom: 'CUSTOM', chain: 'CHAIN',
+    custom: 'CUSTOM', chain: 'CHAIN', politics: 'POLITICAL PIVOT',
   };
 
   function userList(list) {
@@ -316,7 +320,7 @@
 
   // A chain is mostly its replies, so "keep replies visible" doesn't apply to it.
   function keepsReplies(el) {
-    return settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain';
+    return el.getAttribute(KIND_ATTR) === 'politics' || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
   }
 
   function setOwnCollapsed(el, collapsed) {
@@ -339,7 +343,7 @@
     badge.className = BADGE_CLASS;
     badge.dataset.label = BADGES[kind] || 'LOW EFFORT';
     badge.textContent = badge.dataset.label;
-    badge.title = `Collapsed: ${LABELS[kind] || kind} comment`;
+    badge.title = kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
     meta.appendChild(badge);
     return badge;
   }
@@ -370,13 +374,13 @@
     }
     const hidden = el.classList.contains(OWN_CLASS);
     badge.textContent = hidden ? `${label} · show` : `${label} · hide`;
-    badge.title = hidden ? 'Show this comment' : 'Hide this comment again';
+    badge.title = (el.getAttribute(KIND_ATTR) === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
   }
 
   function apply(el, kind) {
     el.setAttribute(KIND_ATTR, kind);
 
-    if (settings.mode === 'hide') {
+    if (settings.mode === 'hide' && kind !== 'politics') {
       el.classList.add(HIDDEN_CLASS);
       el.setAttribute(ATTR, 'hidden');
       tally(el);
@@ -463,6 +467,7 @@
     if (isAllowed(el)) return null;
     if (matchesCustom(body)) return 'custom';
     if (rules.bot && isBot(author, body)) return 'bot';
+    if (rules.politics && politicalMatch(el, body)) return 'politics';
     if (rules.score) {
       const score = scoreOf(el);
       if (score !== null && score < settings.scoreBelow) return 'score';
@@ -483,6 +488,8 @@
       return;
     }
     if (body.childNodes.length === 0) return; // still loading; retry on next mutation
+    if (settings.rules.politics && politicalRules.isCandidate(body.textContent)) politicalCandidates.add(el);
+    else politicalCandidates.delete(el);
 
     const kind = decide(el, body);
     if (kind) {
@@ -519,7 +526,35 @@
     return el.parentElement?.closest(sel) ?? null;
   }
 
+  function politicalMatch(el, body) {
+    if (!politicalRules.isCandidate(body.textContent) || body.querySelector('blockquote, a, pre, code')) return false;
+    if (!metaContainer(el)) return false; // no safe place for an explanation/reveal control
+    if (/(^|\.)reddit\.com$/.test(location.hostname) && !/\/comments\//.test(location.pathname)) return false;
+    const posts = document.querySelectorAll('shreddit-post, .thing.link');
+    if (posts.length !== 1) return false;
+    const post = posts[0];
+    const title = post.getAttribute('post-title') || post.querySelector('h1, a.title')?.textContent || '';
+    const subreddit = post.getAttribute('subreddit-prefixed-name') || post.getAttribute('subreddit-name') || post.dataset.subreddit || '';
+    const ancestors = [];
+    let parent = parentComment(el);
+    // A loaded reply without its ancestor cannot be classified safely.
+    if (!parent && Number(el.getAttribute('depth')) > 0) return false;
+    if (!parent && el.querySelector(':scope > .entry .parent')) return false;
+    while (parent) {
+      const parentBody = bodyOf(parent);
+      if (!parentBody?.textContent.trim() || /^\s*\[(?:deleted|removed)\]\s*$/i.test(parentBody.textContent) || ancestors.length >= 20) return false;
+      ancestors.push(parentBody.textContent);
+      const next = parentComment(parent);
+      if (!next && (Number(parent.getAttribute('depth')) > 0 || parent.querySelector(':scope > .entry .parent'))) return false;
+      parent = next;
+    }
+    return politicalRules.shouldCollapse(body.textContent, {
+      title, subreddit, ancestors, complete: true, postText: post.textContent,
+    });
+  }
+
   function isChainLink(el) {
+    if (el.getAttribute(KIND_ATTR) === 'politics') return false; // retain this rule's explanation and visible replies
     const body = bodyOf(el);
     if (!body || body.childNodes.length === 0 || isAllowed(el)) return false;
     const { kind, words } = classified(el, body);
@@ -582,6 +617,15 @@
 
   function scan() {
     if (!settings.enabled || revealed) return;
+    // Context can arrive after comments. Only explicit candidates need rechecking.
+    for (const el of politicalCandidates) {
+      if (!el.isConnected || !settings.rules.politics) { politicalCandidates.delete(el); continue; }
+      const body = bodyOf(el);
+      if (!body) continue;
+      const wasPolitical = el.getAttribute(KIND_ATTR) === 'politics';
+      if (wasPolitical && !el.classList.contains(OWN_CLASS) && !isNativelyCollapsed(el)) continue;
+      if (wasPolitical !== (decide(el, body) === 'politics')) restore(el);
+    }
     document.querySelectorAll(`shreddit-comment:not([${ATTR}])`).forEach(consider);
     document.querySelectorAll(`.commentarea .thing.comment:not([${ATTR}])`).forEach(consider);
     updateCounter();
@@ -763,7 +807,7 @@
       text.textContent = `Showing ${describe(count, revealedByKind)}`;
       btn.textContent = 'Hide again';
     } else {
-      const verb = settings.mode === 'hide' ? 'hidden' : 'collapsed';
+      const verb = settings.mode === 'hide' ? (s.byKind.politics ? 'hidden or collapsed' : 'hidden') : 'collapsed';
       const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
       text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';
@@ -867,7 +911,7 @@
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['src', 'data-src', 'href'],
+      attributeFilter: ['src', 'data-src', 'href', 'post-title', 'subreddit-name', 'subreddit-prefixed-name', 'data-subreddit', 'depth'],
       subtree: true,
     });
   });

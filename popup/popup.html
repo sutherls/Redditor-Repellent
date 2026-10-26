@@ -22,8 +22,14 @@
   <div id="body">
     <fieldset>
       <legend>Political derailment — experimental</legend>
-      <label class="row"><input type="checkbox" data-rule="politics"> Explicit off-topic political pivots</label>
-      <p class="hint">Conservative, English-only first version. Requires an explicit pivot such as “Off topic, but…” and political commentary. Preserves political/policy contexts and skips missing context. Names or opinions alone never trigger it. Matches collapse with a reason and reveal option, even in Hide mode; replies stay visible. Other enabled filters still apply.</p>
+      <label class="row"><input type="checkbox" data-rule="politics"> Off-topic political pivots</label>
+      <label class="row" for="politicsSensitivity">Sensitivity
+        <select id="politicsSensitivity" aria-describedby="politicsHint">
+          <option value="conservative">Conservative</option>
+          <option value="standard">Standard</option>
+        </select>
+      </label>
+      <p class="hint" id="politicsHint">English-only. Conservative requires an explicit pivot such as “Off topic, but…”. Standard also catches whole-comment political blame/taunt templates, such as “This is what happens when you vote for…”. Both preserve recognized political/policy contexts and skip missing context. Names alone never trigger it. Matches collapse with a reason and reveal option, even in Hide mode; replies stay visible. Other enabled filters still apply.</p>
     </fieldset>
     <fieldset>
       <legend>Collapse comments that are…</legend>

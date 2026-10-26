@@ -12,6 +12,7 @@ const DEFAULTS = {
   rules: RULE_DEFAULTS, shortWords: 3, scoreBelow: 0, chainLength: 3,
   clicheSensitivity: 'standard',
   chainSensitivity: 'standard',
+  politicsSensitivity: 'conservative',
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
@@ -35,6 +36,7 @@ const $mutedUsers = $('mutedUsers');
 const $allowedUsers = $('allowedUsers');
 const $chainLength = $('chainLength');
 const $chainSensitivity = $('chainSensitivity');
+const $politicsSensitivity = $('politicsSensitivity');
 const $clicheSensitivity = $('clicheSensitivity');
 const $customPatterns = $('customPatterns');
 const $patternErrors = $('patternErrors');
@@ -48,6 +50,7 @@ function normalize(raw) {
   s.rules = { ...RULE_DEFAULTS, ...(r.rules || {}) };
   s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
   s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
+  s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';
   if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
   s.mutedUsers = Array.isArray(s.mutedUsers) ? s.mutedUsers : [];
   s.allowedUsers = Array.isArray(s.allowedUsers) ? s.allowedUsers : [];
@@ -108,6 +111,7 @@ function render(s) {
   $allowedUsers.value = s.allowedUsers.join('\n');
   $chainLength.value = s.chainLength;
   $chainSensitivity.value = s.chainSensitivity;
+  $politicsSensitivity.value = s.politicsSensitivity;
   $clicheSensitivity.value = s.clicheSensitivity;
   $customPatterns.value = s.customPatterns;
   renderPatternErrors();
@@ -189,6 +193,10 @@ $clicheSensitivity.addEventListener('change', async () => {
 $chainSensitivity.addEventListener('change', async () => {
   await save({ chainSensitivity: $chainSensitivity.value });
   statsSoon();
+});
+
+$politicsSensitivity.addEventListener('change', async () => {
+  await save({ politicsSensitivity: $politicsSensitivity.value });
 });
 
 // Save text boxes a moment after the last keystroke.

@@ -48,7 +48,7 @@ document.getElementById('run').onclick = async () => {
       check(`${label}: reversible even in Hide mode`, a.getAttribute('data-rgc') === 'collapsed' && !a.classList.contains('rgc-hidden'));
       check(`${label}: useful reply preserved`, !hit(reply) && !reply.classList.contains('rgc-part-hidden'));
       const badge = a.querySelector('[data-label="POLITICAL PIVOT"]');
-      check(`${label}: explanation`, badge?.title.includes('Explicit off-topic'));
+      check(`${label}: explanation`, badge?.title.includes('Political pivot template'));
       badge.click(); await wait();
       check(`${label}: reveal stays open`, !a.classList.contains('rgc-collapsed'));
       post.querySelector('p').textContent = 'The new government policy affects this build.';
@@ -64,8 +64,23 @@ document.getElementById('run').onclick = async () => {
       await wait(); check(`${label}: deleted ancestor preserves reply`, !hit(child));
       const quoted = add('', old); quoted.querySelector(old ? '.md' : '[slot="comment"]').innerHTML = '<blockquote>Off topic, but Republicans are ruining everything.</blockquote>';
       await wait(); check(`${label}: quoted pivot preserved`, !hit(quoted));
+      const blame = add('Democrats ruined everything.', old);
+      const taunt = add('This is what happens when you vote for Republicans!', old);
+      const detailed = add('Democrats ruined everything because the import regulation closed the factory.', old);
+      await wait(); check(`${label}: Conservative preserves implicit templates`, !hit(blame) && !hit(taunt));
+      listeners.forEach(fn => fn({ politicsSensitivity: { newValue: 'standard' } }, 'sync'));
+      await wait(); check(`${label}: Standard applies live`, hit(blame) && hit(taunt) && !hit(detailed));
+      check(`${label}: Standard explanation avoids claiming explicit admission`, blame.querySelector('[data-label="POLITICAL PIVOT"]')?.title.includes('Political pivot template'));
+      post.querySelector('p').textContent = 'The policy changed import tariffs.';
+      await wait(); check(`${label}: context restores Standard matches`, !hit(blame) && !hit(taunt));
+      post.querySelector('p').textContent = 'A weekend project.';
+      await wait();
+      listeners.forEach(fn => fn({ politicsSensitivity: { newValue: 'conservative' } }, 'sync'));
+      await wait(); check(`${label}: returning to Conservative restores implicit templates`, !hit(blame) && !hit(taunt));
       listeners.forEach(fn => fn({ rules: { newValue: { politics: false } } }, 'sync'));
       await wait(); check(`${label}: live disable restores`, !hit(b));
+      listeners.forEach(fn => fn({ politicsSensitivity: { newValue: 'standard' } }, 'sync'));
+      await wait(); check(`${label}: sensitivity does not enable disabled rule`, !hit(blame) && !hit(taunt));
     }
   } catch (e) { results.push(`FAIL ${e.stack}`); }
   document.getElementById('results').textContent = results.join('\n'); button.disabled = false;

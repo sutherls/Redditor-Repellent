@@ -27,7 +27,7 @@ Combines sections 1, 2, and 11, plus context-sensitive aspects of 7 and 8.
 
 Collect submission topic, subreddit, and parent-reply context before adding conservative rules for unrelated political pivots, moral lectures, and imported controversies. Preserve relevant politics, ethics, allegations, criticism, and disagreement regardless of viewpoint. Missing context should favor leaving a comment visible.
 
-First experimental milestone: opt-in explicit off-topic political pivots, with visible post/subreddit/ancestor context, late-context rechecks, and reversible explanations. English-only recognized terms and explicit pivot wording keep this narrow. Subtle derailments, additional sensitivity levels, richer topic matching, and moralizing remain planned. A political keyword alone is never sufficient.
+Available experimentally: opt-in political pivots, with visible post/subreddit/ancestor context, late-context rechecks, and reversible explanations. Conservative (default) requires explicit pivot wording. Standard additionally recognizes a small set of whole-comment political blame/taunt templates without an introduction, using the same patterns across supported targets. English-only recognition remains narrow. Subtle derailments, richer topic matching, and moralizing remain planned. A political keyword alone is never sufficient.
 
 ## 3. Hostility and engagement bait — planned
 

@@ -37,7 +37,7 @@
   const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
   const politicalRules = globalThis.RedditorRepellentPolitics;
   const politicalCandidates = new Set();
-  const POLITICAL_REASON = 'Explicit off-topic political pivot; no political or policy context found in the visible post and ancestor comments. This heuristic can be wrong.';
+  const POLITICAL_REASON = 'Political pivot template; no political or policy context found in the visible post and ancestor comments. This heuristic can be wrong.';
 
   const DEFAULTS = {
     enabled: true,
@@ -49,6 +49,7 @@
     scoreBelow: 0,
     chainLength: 3,
     chainSensitivity: 'standard',
+    politicsSensitivity: 'conservative',
     clicheSensitivity: 'standard',
     mutedUsers: [],
     allowedUsers: [],      // never collapsed, whatever they post
@@ -82,6 +83,7 @@
     s.mode = s.mode === 'hide' ? 'hide' : 'collapse';
     s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
+    s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';
     s.shortWords = Math.min(20, Math.max(1, parseInt(s.shortWords, 10) || DEFAULTS.shortWords));
     s.scoreBelow = Number.isFinite(Number(s.scoreBelow)) ? Number(s.scoreBelow) : DEFAULTS.scoreBelow;
     s.chainLength = Math.min(10, Math.max(3, parseInt(s.chainLength, 10) || DEFAULTS.chainLength));
@@ -488,7 +490,7 @@
       return;
     }
     if (body.childNodes.length === 0) return; // still loading; retry on next mutation
-    if (settings.rules.politics && politicalRules.isCandidate(body.textContent)) politicalCandidates.add(el);
+    if (settings.rules.politics && politicalRules.isCandidate(body.textContent, settings.politicsSensitivity)) politicalCandidates.add(el);
     else politicalCandidates.delete(el);
 
     const kind = decide(el, body);
@@ -527,7 +529,7 @@
   }
 
   function politicalMatch(el, body) {
-    if (!politicalRules.isCandidate(body.textContent) || body.querySelector('blockquote, a, pre, code')) return false;
+    if (!politicalRules.isCandidate(body.textContent, settings.politicsSensitivity) || body.querySelector('blockquote, a, pre, code')) return false;
     if (!metaContainer(el)) return false; // no safe place for an explanation/reveal control
     if (/(^|\.)reddit\.com$/.test(location.hostname) && !/\/comments\//.test(location.pathname)) return false;
     const posts = document.querySelectorAll('shreddit-post, .thing.link');
@@ -550,7 +552,7 @@
     }
     return politicalRules.shouldCollapse(body.textContent, {
       title, subreddit, ancestors, complete: true, postText: post.textContent,
-    });
+    }, settings.politicsSensitivity);
   }
 
   function isChainLink(el) {

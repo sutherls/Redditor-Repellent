@@ -3,6 +3,25 @@ const assert = require('node:assert/strict');
 require('../src/politics-rules.js');
 const { shouldCollapse } = globalThis.RedditorRepellentPolitics;
 const hobby = { title: 'Show us your new keyboard', subreddit: 'MechanicalKeyboards', postText: 'My latest build.', ancestors: [], complete: true };
+test('Standard adds bounded templates symmetrically; Conservative does not', () => {
+  for (const target of ['Trump', 'Biden', 'Democrats', 'Republicans', 'liberals', 'conservatives', 'capitalism', 'socialism']) {
+    for (const text of [`This is what happens when you vote for ${target}!`, `${target} ruined everything.`]) {
+      assert.equal(shouldCollapse(text, hobby, 'standard'), true, text);
+      assert.equal(shouldCollapse(text, hobby, 'conservative'), false, text);
+      assert.equal(shouldCollapse(text, { ...hobby, ancestors: ['How did the election affect prices?'] }, 'standard'), false, text);
+    }
+  }
+  for (const text of ["This is Trump's fault.", "That is Biden’s fault!", 'This is all the Republicans fault.']) assert.equal(shouldCollapse(text, hobby, 'standard'), true, text);
+});
+test('Standard preserves elaboration, quoted references, missing context and unrelated criticism', () => {
+  for (const text of ['Biden is awful.', 'Trump is awful.', 'Republicans ruined everything because the import regulation closed the factory.', 'This is what happens when you vote for Democrats: the policy changed.', 'The joke was that liberals ruined everything.', 'My keyboard ruined everything.', '"Conservatives ruined everything."']) {
+    assert.equal(shouldCollapse(text, hobby, 'standard'), false, text);
+  }
+  for (const patch of [{ complete: false }, { title: '' }, { subreddit: 'Conservative' }, { subreddit: 'Liberal' }, { postText: 'A dispute over workers rights.' }]) {
+    assert.equal(shouldCollapse('Democrats ruined everything.', { ...hobby, ...patch }, 'standard'), false);
+  }
+  assert.equal(shouldCollapse('Democrats ruined everything.', hobby, 'invalid'), false);
+});
 test('explicit political pivots use the same criteria across viewpoints', () => {
   for (const target of ['Trump', 'Biden', 'Democrats', 'Republicans', 'liberals', 'conservatives', 'capitalism', 'socialism']) {
     assert.equal(shouldCollapse(`Off topic, but ${target} is ruining everything.`, hobby), true, target);

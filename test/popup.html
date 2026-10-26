@@ -52,6 +52,10 @@
       politics.click();
       await wait();
       check('Political filter saves independently', state.stored.rules?.politics === true && state.stored.rules?.gif === true);
+      const politicalSensitivity = doc.getElementById('politicsSensitivity');
+      check('Political sensitivity defaults to Conservative', politicalSensitivity.value === 'conservative');
+      politicalSensitivity.value = 'standard';
+      politicalSensitivity.dispatchEvent(new win.Event('change'));
       chainSensitivity.value = 'conservative';
       chainSensitivity.dispatchEvent(new win.Event('change'));
       sensitivity.value = 'conservative';
@@ -63,6 +67,7 @@
       await wait(200);
       check('Reload requested exactly once', state.reloads === 1);
       check('Pending sensitivity saved before reload', state.atReload?.clicheSensitivity === 'conservative');
+      check('Political sensitivity saved before reload independently', state.atReload?.politicsSensitivity === 'standard');
       check('Reply-chain sensitivity saves independently', state.atReload?.chainSensitivity === 'conservative');
       check('Pending typed patterns saved before reload', state.atReload?.customPatterns === 'test phrase');
       // Simulate a new click after the mocked reload and a storage failure.

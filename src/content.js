@@ -36,8 +36,12 @@
   const { normalizeText, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;
   const { isStockPhrase, isCopypasta, chainPattern } = globalThis.RedditorRepellentTextRules;
   const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
-  const politicalRules = globalThis.RedditorRepellentPolitics;
-  const momentRules = globalThis.RedditorRepellentMoments;
+  // An unpacked-extension update can leave a page without a newly added module.
+  // Disable only that optional rule instead of aborting the entire first scan.
+  const hasPolitics = typeof globalThis.RedditorRepellentPolitics?.isCandidate === 'function' && typeof globalThis.RedditorRepellentPolitics?.shouldCollapse === 'function';
+  const hasMoments = typeof globalThis.RedditorRepellentMoments?.classify === 'function';
+  const politicalRules = hasPolitics ? globalThis.RedditorRepellentPolitics : { isCandidate: () => false, shouldCollapse: () => false };
+  const momentRules = hasMoments ? globalThis.RedditorRepellentMoments : { classify: () => null };
   const momentReasons = new WeakMap();
   const politicalCandidates = new Set();
   const POLITICAL_REASON = 'Political pivot template; no political or policy context found in the visible post and ancestor comments. This heuristic can be wrong.';
@@ -663,6 +667,8 @@
       revealedCount,
       counted: countedIds.size,
       lifetime,
+      unavailableRules: [settings.rules.moment && !hasMoments ? 'Reddit Moment' : null,
+        settings.rules.politics && !hasPolitics ? 'Political derailment' : null].filter(Boolean),
     };
   }
 

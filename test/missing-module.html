@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Missing optional module startup regression</title>
+<link rel="stylesheet" href="../src/content.css"><h1>Missing optional module startup regression</h1><pre id="results">Waiting</pre><div class="commentarea" id="comments">
+<shreddit-comment author="reader"><div slot="commentMeta">reader</div><div slot="comment">A useful comment with enough information to remain visible.</div></shreddit-comment>
+<shreddit-comment author="reader"><div slot="commentMeta">reader</div><div slot="comment">Take my upvote!</div></shreddit-comment></div>
+<script>
+window.chrome={storage:{sync:{get:async()=>({rules:{moment:true}})},local:{get:async()=>({lifetime:0})},onChanged:{addListener(){}}},runtime:{onMessage:{addListener(){}},sendMessage:async()=>({})}};
+</script>
+<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script>
+<!-- Deliberately omit moment-rules.js to simulate an outdated script registration. -->
+<script src="../src/content.js"></script>
+<script>
+setTimeout(()=>{
+ const checks=[];const check=(name,ok)=>checks.push(`${ok?'PASS':'FAIL'} ${name}`);
+ check('Existing phrase filter survives missing optional module',document.querySelectorAll('[data-rgc-kind="phrase"]').length===1);
+ check('Missing module reported',__rgc.stats().unavailableRules?.includes('Reddit Moment'));
+ const el=document.createElement('shreddit-comment');el.setAttribute('author','reader');el.innerHTML='<div slot="commentMeta">reader</div><div slot="comment">And my axe!</div>';document.getElementById('comments').append(el);
+ setTimeout(()=>{check('Observer processes later comments',el.getAttribute('data-rgc-kind')==='phrase');document.getElementById('results').textContent=checks.join('\n');},500);
+},500);
+</script></html>

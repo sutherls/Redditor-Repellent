@@ -265,6 +265,10 @@ async function refreshStats() {
       $status.textContent = 'Paused on this page.';
       return;
     }
+    if (s.unavailableRules?.length) {
+      $status.textContent = `${s.unavailableRules.join(', ')} did not load. Other filters remain active. Reload Redditor Repellent from chrome://extensions or edge://extensions, then refresh this Reddit tab.`;
+      return;
+    }
     if (s.revealed) {
       $status.textContent = `Showing ${s.revealedCount} low-effort comment${s.revealedCount === 1 ? '' : 's'} on this page (you clicked "Show them").`;
       return;

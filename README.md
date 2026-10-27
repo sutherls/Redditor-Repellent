@@ -71,6 +71,8 @@ This fork has not published a browser-store release yet.
 
 The installed extension appears as **Redditor Repellent**. After pulling changes, reload the extension and refresh your Reddit tabs to update its scripts, name, and icon.
 
+If an update leaves a new filter unavailable, use **Reload** on Redditor Repellent's card at `chrome://extensions` or `edge://extensions`, then refresh Reddit. The popup reports missing optional modules; existing filters continue working. `test/missing-module.html` verifies this recovery behavior.
+
 The popup also has a **Reload extension** button that saves pending settings before restarting the extension. Refresh your open Reddit tabs afterward to load the updated code. Ordinary settings changes apply automatically and do not require a reload.
 
 The extension rechecks comments when Reddit replaces their bodies or updates their text after loading. This addresses a reproduced stale-comment problem; if filtering still disappears after a thread refresh, report the thread URL and what the popup shows so we can investigate that case.

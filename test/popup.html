@@ -93,6 +93,10 @@
       doc.getElementById('reloadExtension').click();
       await wait(200);
       check('Retry saves pending text and reloads', state.reloads === 2 && state.atReload.customPatterns === 'unsaved phrase');
+      win.chrome.tabs.query = async () => [{ id: 1 }];
+      win.chrome.tabs.sendMessage = async () => ({ enabled: true, total: 0, unavailableRules: ['Reddit Moment'] });
+      await win.refreshStats();
+      check('Missing module warning explains recovery', doc.getElementById('status').textContent.includes('Reddit Moment did not load') && doc.getElementById('status').textContent.includes('chrome://extensions'));
     } catch (error) {
       output.push(`FAIL ${error.message}`);
     }

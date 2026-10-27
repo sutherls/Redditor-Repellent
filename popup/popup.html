@@ -21,6 +21,14 @@
 
   <div id="body">
     <fieldset>
+      <legend>Reddit Moment filtering</legend>
+      <label class="row"><input type="checkbox" data-rule="moment"> Collapse combinations of mocking, shaming, and dismissive patterns</label>
+      <label class="row" for="momentSensitivity">Sensitivity
+        <select id="momentSensitivity"><option value="standard">Standard</option><option value="conservative">Conservative</option></select>
+      </label>
+      <p class="hint">Works independently of political relevance. Standard requires multiple matched patterns; Conservative requires stronger evidence. Hover the REDDIT MOMENT label for the reasons and click to reveal. Replies remain visible, even in Hide mode. English-only rules can miss comments or make mistakes.</p>
+    </fieldset>
+    <fieldset>
       <legend>Political derailment — experimental</legend>
       <label class="row"><input type="checkbox" data-rule="politics"> Off-topic political pivots</label>
       <label class="row" for="politicsSensitivity">Sensitivity

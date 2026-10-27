@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Reddit Moment filter checks</title>
+<link rel="stylesheet" href="../src/content.css"><h1>Reddit Moment filter checks</h1><button id="run">Run filter tests</button><pre id="results">Ready</pre><div class="commentarea" id="comments"></div>
+<script>
+const listeners = [];
+window.chrome = { storage: { sync: { get: async () => ({}) }, local: { get: async () => ({lifetime:0}) }, onChanged: {addListener: fn => listeners.push(fn)} }, runtime: {onMessage:{addListener(){}},sendMessage:async()=>({})} };
+</script>
+<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script><script src="../src/content.js"></script>
+<script>
+const wait = () => new Promise(r => setTimeout(r,400));
+const comments = document.getElementById('comments'); let id = 0;
+function add(text, old, parent=comments, author='reader') {
+  const el = document.createElement(old?'div':'shreddit-comment'); el.id = `moment-${++id}`; el.dataset.author=author; el.setAttribute('author',author);
+  el.innerHTML=old?'<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>':'<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+  if(old) el.className='thing comment noncollapsed';
+  el.querySelector(old?'.md':'[slot="comment"]').textContent=text; parent.append(el); return el;
+}
+const hit=el=>el.getAttribute('data-rgc-kind')==='moment';
+document.getElementById('run').onclick=async()=>{
+  const button=document.getElementById('run'); button.disabled=true; const results=[]; const check=(name,ok)=>results.push(`${ok?'PASS':'FAIL'} ${name}`);
+  try { for(const old of [false,true]) {
+    const label=old?'old':'modern'; __rgc.restoreAll(); comments.replaceChildren();
+    __rgc.settings={rules:{moment:true},mode:'hide',allowedUsers:['friend']};
+    const a=add('Well, maybe if Donnie Diapers wasn’t running the country...',old);
+    const b=add('Well, maybe if Sleepy Joe wasn’t running the country...',old);
+    const keep=add('I avoid that company because of its labor practices.',old);
+    const allowed=add('Found the corporate shill.',old,comments,'friend');
+    const reply=add('Which policy changed?',old,a.querySelector(old?'.child':'#comment-children'));
+    await wait(); check(`${label}: both political targets collapse`,hit(a)&&hit(b));
+    check(`${label}: actual collapse even in Hide mode`,a.classList.contains('rgc-collapsed')&&!a.classList.contains('rgc-hidden'));
+    check(`${label}: useful criticism and allowed users preserved`,!hit(keep)&&!hit(allowed));
+    check(`${label}: replies visible`,!reply.classList.contains('rgc-part-hidden')&&!reply.parentElement.classList.contains('rgc-part-hidden'));
+    const badge=a.querySelector('[data-label="REDDIT MOMENT"]'); check(`${label}: specific reasons`,badge.title.includes('Mocking label')&&badge.title.includes('Sweeping blame'));
+    badge.click(); await wait(); check(`${label}: reveal works`,!a.classList.contains('rgc-collapsed'));
+    listeners.forEach(fn=>fn({momentSensitivity:{newValue:'conservative'}},'sync')); await wait(); check(`${label}: Conservative restores weaker matches`,!hit(b));
+    listeners.forEach(fn=>fn({momentSensitivity:{newValue:'standard'}},'sync')); await wait(); check(`${label}: Standard reapplies live`,hit(b));
+    b.querySelector(old?'.md':'[slot="comment"]').textContent='A useful replacement with details about the repair.'; await wait(); check(`${label}: edited useful comment restored`,!hit(b));
+    const source=add('',old); source.querySelector(old?'.md':'[slot="comment"]').innerHTML='<blockquote>Found the corporate shill.</blockquote>'; await wait(); check(`${label}: quotation preserved`,!hit(source));
+    const sweeney=add('They just mean politics that challenge their world view. The wealth extraction machine makes him richer. He thinks his politics are more important because he controls levers of capital.',old); await wait(); check(`${label}: motive/framing combination collapses`,hit(sweeney));
+    listeners.forEach(fn=>fn({rules:{newValue:{moment:false}}},'sync')); await wait(); check(`${label}: disabling restores`,!hit(sweeney));
+  }} catch(e){results.push(`FAIL ${e.stack}`);}
+  document.getElementById('results').textContent=results.join('\n'); button.disabled=false;
+};
+</script></html>

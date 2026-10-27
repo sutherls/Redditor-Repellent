@@ -6,6 +6,7 @@ const RULE_DEFAULTS = {
   gif: true, image: false, emote: true, phrase: true, link: true,
   bot: true, pasta: true, quote: false, short: false, score: false, chain: false,
   politics: false,
+  moment: false,
 };
 const DEFAULTS = {
   enabled: true, mode: 'collapse', showCounter: true, keepReplies: false,
@@ -13,12 +14,13 @@ const DEFAULTS = {
   clicheSensitivity: 'standard',
   chainSensitivity: 'standard',
   politicsSensitivity: 'conservative',
+  momentSensitivity: 'standard',
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
   gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
   bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
-  muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot',
+  muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment',
 };
 // From src/patterns.js, the same matching the content script uses.
 const { MAX_PATTERN_CHARS, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;
@@ -37,6 +39,7 @@ const $allowedUsers = $('allowedUsers');
 const $chainLength = $('chainLength');
 const $chainSensitivity = $('chainSensitivity');
 const $politicsSensitivity = $('politicsSensitivity');
+const $momentSensitivity = $('momentSensitivity');
 const $clicheSensitivity = $('clicheSensitivity');
 const $customPatterns = $('customPatterns');
 const $patternErrors = $('patternErrors');
@@ -51,6 +54,7 @@ function normalize(raw) {
   s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
   s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
   s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';
+  s.momentSensitivity = s.momentSensitivity === 'conservative' ? 'conservative' : 'standard';
   if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
   s.mutedUsers = Array.isArray(s.mutedUsers) ? s.mutedUsers : [];
   s.allowedUsers = Array.isArray(s.allowedUsers) ? s.allowedUsers : [];
@@ -112,6 +116,7 @@ function render(s) {
   $chainLength.value = s.chainLength;
   $chainSensitivity.value = s.chainSensitivity;
   $politicsSensitivity.value = s.politicsSensitivity;
+  $momentSensitivity.value = s.momentSensitivity;
   $clicheSensitivity.value = s.clicheSensitivity;
   $customPatterns.value = s.customPatterns;
   renderPatternErrors();
@@ -197,6 +202,10 @@ $chainSensitivity.addEventListener('change', async () => {
 
 $politicsSensitivity.addEventListener('change', async () => {
   await save({ politicsSensitivity: $politicsSensitivity.value });
+});
+$momentSensitivity.addEventListener('change', async () => {
+  await save({ momentSensitivity: $momentSensitivity.value });
+  statsSoon();
 });
 
 // Save text boxes a moment after the last keystroke.

@@ -10,7 +10,7 @@ A fork of [Not This.](https://github.com/recruiterguy/not-this) by Chris Hoyt, b
 
 ## Where things stand
 
-This project is in early development. Low-effort comment filters and a narrow experimental political-pivot filter are available today. Broader contextual political filtering, rage bait, and performative moralizing remain planned.
+This project is in early development. Low-effort filters, a narrow political-pivot filter, and a Reddit Moment filter for combinations of rhetorical patterns are available today. Broader contextual classification remains in development.
 
 Chrome and Microsoft Edge are our first development targets. The inherited code supports both modern Reddit and old.reddit.com and includes Firefox support.
 
@@ -23,6 +23,7 @@ Chrome and Microsoft Edge are our first development targets. The inherited code 
 - Set reply-chain sensitivity independently: **Standard** keeps the original short-reply behavior; **Conservative** requires consecutive replies from the same recognized meme family (such as "and my axe/sword/bow") or repetitions of the same recognized reaction. It preserves short question-and-answer exchanges and unknown joke or lyric chains. Enable the reply-chain rule to use either mode; the configured minimum chain length still applies.
 - Conservative chains also recognize repeated image-only replies using the same image URL, including known Reddit preview-size variants. Different images and images with explanatory text stay outside this rule. No images are downloaded or analyzed: captions inside images, cropped/reuploaded copies, and sequences of different reaction memes are not recognized. Repeated useful images can also match, so collapse remains reversible.
 - Both cliché sensitivities recognize bounded variations of upvote reactions, "you win the internet today," "that's enough Reddit for today," and "the real … was the friends we made along the way." These match whole comments only; added explanations stay outside these new patterns. Conservative chains group variations of the same template. Other enabled rules still apply.
+- **Reddit Moment filtering (opt-in):** collapses combinations of mocking labels, sweeping blame, personal attacks, shaming, dismissals, and formulaic motive/ideology framing. It works independently of political relevance. Standard requires at least two pattern families totaling 4 points; Conservative raises the threshold to 6. These are deterministic rules, not learned judgments or probabilities. Matches show a REDDIT MOMENT badge with reasons on hover and click-to-reveal; replies stay visible even in Hide mode. Quotes, links, code, comments over 3,000 characters, and some concrete-explanation markers are skipped. This covers a subset of the supplied examples and variations; it can miss comments or produce false positives. The historical review lab is not required and uses a separate prototype scorer.
 - **Experimental political pivots (off by default):** **Conservative**, the default sensitivity, requires an explicit introduction such as "Off topic, but…" followed by recognized political terms. **Standard** also recognizes bounded whole-comment blame/taunt templates such as "This is what happens when you vote for Republicans" or "Democrats ruined everything," using the same templates across supported targets. Added explanations do not match these new templates. Both check the visible post, subreddit, and ancestor comments, preserving recognized political/policy contexts and skipping missing or ambiguous context. Names alone never trigger it. Matches retain replies and always offer collapse/reveal with an explanation, even in Hide mode. Other filters still apply. These English-only heuristics will miss most subtle derailments and can still make mistakes; they do not understand intent, linked articles, or image text.
 - Add your own wildcard or regex patterns and try them in the popup's comment tester.
 - Maintain muted-user and always-show lists.
@@ -97,6 +98,7 @@ Run the text-rule tests with Node.js:
 node --test test/text-rules.test.cjs
 node --test test/media-rules.test.cjs
 node --test test/politics-rules.test.cjs
+node --test test/moment-rules.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.
@@ -108,6 +110,8 @@ The same server also provides `test/lifecycle.html` for comment replacement, edi
 `test/chains.html` checks both reply-chain sensitivities on old and modern Reddit markup, including useful conversations, meme families, late replies, minimum length, and always-show users.
 
 `test/politics.html` checks political pivots on old and modern Reddit markup, including viewpoint symmetry, missing/late context, ancestor protection, always-show users, reveal, and live disabling. These are local fixtures; real Reddit testing is still needed.
+
+`test/moments.html` checks actual Reddit Moment collapse/reveal, explanations, reply preservation, sensitivity changes, edited comments, quotations, and live disabling on both layouts.
 
 For a distributable ZIP on Windows:
 

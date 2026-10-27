@@ -7,7 +7,8 @@
 const listeners = [];
 window.chrome = { storage: { sync: { get: async () => ({}) }, local: { get: async () => ({ lifetime: 0 }) }, onChanged: { addListener: fn => listeners.push(fn) } }, runtime: { onMessage: { addListener() {} }, sendMessage: async () => ({}) } };
 </script>
-<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/content.js"></script>
+<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script>
+<script src="../src/content.js"></script>
 <script>
 const wait = () => new Promise(r => setTimeout(r, 450));
 const comments = document.getElementById('comments');

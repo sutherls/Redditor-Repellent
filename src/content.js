@@ -25,6 +25,7 @@
     score: false,  // score below `scoreBelow`
     chain: false,  // a run of `chainLength`+ short replies, each replying to the last
     politics: false, // experimental explicit off-topic political pivots
+    moment: false, // combinations of low-value rhetorical patterns
   };
 
   // A reply counts as part of a chain when it's low-effort or at most this many words.
@@ -36,6 +37,8 @@
   const { isStockPhrase, isCopypasta, chainPattern } = globalThis.RedditorRepellentTextRules;
   const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
   const politicalRules = globalThis.RedditorRepellentPolitics;
+  const momentRules = globalThis.RedditorRepellentMoments;
+  const momentReasons = new WeakMap();
   const politicalCandidates = new Set();
   const POLITICAL_REASON = 'Political pivot template; no political or policy context found in the visible post and ancestor comments. This heuristic can be wrong.';
 
@@ -50,6 +53,7 @@
     chainLength: 3,
     chainSensitivity: 'standard',
     politicsSensitivity: 'conservative',
+    momentSensitivity: 'standard',
     clicheSensitivity: 'standard',
     mutedUsers: [],
     allowedUsers: [],      // never collapsed, whatever they post
@@ -60,12 +64,12 @@
   const LABELS = {
     gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
     bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
-    muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot',
+    muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment',
   };
   const BADGES = {
     gif: 'GIF', image: 'IMG', emote: 'EMOJI', phrase: 'LOW EFFORT', link: 'LINK', bot: 'BOT',
     pasta: 'PASTA', quote: 'QUOTE', short: 'SHORT', score: 'DOWNVOTED', muted: 'MUTED',
-    custom: 'CUSTOM', chain: 'CHAIN', politics: 'POLITICAL PIVOT',
+    custom: 'CUSTOM', chain: 'CHAIN', politics: 'POLITICAL PIVOT', moment: 'REDDIT MOMENT',
   };
 
   function userList(list) {
@@ -84,6 +88,7 @@
     s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';
+    s.momentSensitivity = s.momentSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.shortWords = Math.min(20, Math.max(1, parseInt(s.shortWords, 10) || DEFAULTS.shortWords));
     s.scoreBelow = Number.isFinite(Number(s.scoreBelow)) ? Number(s.scoreBelow) : DEFAULTS.scoreBelow;
     s.chainLength = Math.min(10, Math.max(3, parseInt(s.chainLength, 10) || DEFAULTS.chainLength));
@@ -322,7 +327,7 @@
 
   // A chain is mostly its replies, so "keep replies visible" doesn't apply to it.
   function keepsReplies(el) {
-    return el.getAttribute(KIND_ATTR) === 'politics' || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
+    return ['politics', 'moment'].includes(el.getAttribute(KIND_ATTR)) || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
   }
 
   function setOwnCollapsed(el, collapsed) {
@@ -345,7 +350,7 @@
     badge.className = BADGE_CLASS;
     badge.dataset.label = BADGES[kind] || 'LOW EFFORT';
     badge.textContent = badge.dataset.label;
-    badge.title = kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
+    badge.title = kind === 'moment' ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
     meta.appendChild(badge);
     return badge;
   }
@@ -376,13 +381,14 @@
     }
     const hidden = el.classList.contains(OWN_CLASS);
     badge.textContent = hidden ? `${label} · show` : `${label} · hide`;
-    badge.title = (el.getAttribute(KIND_ATTR) === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
+    const kind = el.getAttribute(KIND_ATTR);
+    badge.title = (kind === 'moment' ? `${momentReasons.get(el)} ` : kind === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
   }
 
   function apply(el, kind) {
     el.setAttribute(KIND_ATTR, kind);
 
-    if (settings.mode === 'hide' && kind !== 'politics') {
+    if (settings.mode === 'hide' && !['politics', 'moment'].includes(kind)) {
       el.classList.add(HIDDEN_CLASS);
       el.setAttribute(ATTR, 'hidden');
       tally(el);
@@ -469,6 +475,13 @@
     if (isAllowed(el)) return null;
     if (matchesCustom(body)) return 'custom';
     if (rules.bot && isBot(author, body)) return 'bot';
+    if (rules.moment && metaContainer(el) && !body.querySelector('blockquote, pre, code, a')) {
+      const match = momentRules.classify(body.textContent, settings.momentSensitivity);
+      if (match) {
+        momentReasons.set(el, `Matched wording: ${match.reason}. Pattern-based estimate, not a judgment of intent.`);
+        return 'moment';
+      }
+    }
     if (rules.politics && politicalMatch(el, body)) return 'politics';
     if (rules.score) {
       const score = scoreOf(el);
@@ -556,7 +569,7 @@
   }
 
   function isChainLink(el) {
-    if (el.getAttribute(KIND_ATTR) === 'politics') return false; // retain this rule's explanation and visible replies
+    if (['politics', 'moment'].includes(el.getAttribute(KIND_ATTR))) return false; // retain explanation and visible replies
     const body = bodyOf(el);
     if (!body || body.childNodes.length === 0 || isAllowed(el)) return false;
     const { kind, words } = classified(el, body);
@@ -809,7 +822,7 @@
       text.textContent = `Showing ${describe(count, revealedByKind)}`;
       btn.textContent = 'Hide again';
     } else {
-      const verb = settings.mode === 'hide' ? (s.byKind.politics ? 'hidden or collapsed' : 'hidden') : 'collapsed';
+      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment ? 'hidden or collapsed' : 'hidden') : 'collapsed';
       const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
       text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';

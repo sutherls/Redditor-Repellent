@@ -29,9 +29,9 @@ Collect submission topic, subreddit, and parent-reply context before adding cons
 
 Available experimentally: opt-in political pivots, with visible post/subreddit/ancestor context, late-context rechecks, and reversible explanations. Conservative (default) requires explicit pivot wording. Standard additionally recognizes a small set of whole-comment political blame/taunt templates without an introduction, using the same patterns across supported targets. English-only recognition remains narrow. Subtle derailments, richer topic matching, and moralizing remain planned. A political keyword alone is never sufficient.
 
-## 3. Hostility and engagement bait — planned
+## 3. Hostility and engagement bait — in progress
 
-Review milestone available: the independent [Reddit Moment score](REDDIT_MOMENT_SCORE.md), using the user's 250 synthetic examples and context pairs as calibration material. The isolated review fixture shows evidence, protections, and missed candidates; automatic collapse is not enabled. Relevance does not exempt personally hostile delivery, and familiar wording alone is insufficient to filter a comment. Calibration and independent evaluation come next.
+The Reddit Moment filter now runs in the extension through an independent opt-in switch and Standard/Conservative sensitivity. It combines multiple rhetorical pattern families, including mocking blame, moral pressure, dismissals, and formulaic motive/ideology framing. Relevant topics do not exempt these patterns. Matched comments collapse with explanations and reveal controls. The earlier [review lab](REDDIT_MOMENT_SCORE.md) is historical development tooling, not required to use the filter. Broader coverage and false-positive refinement remain ongoing.
 
 Combines sections 5, 6, 7, 8, and bait-related parts of 9.
 

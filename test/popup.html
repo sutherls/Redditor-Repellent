@@ -52,6 +52,13 @@
       politics.click();
       await wait();
       check('Political filter saves independently', state.stored.rules?.politics === true && state.stored.rules?.gif === true);
+      const moment = doc.querySelector('[data-rule="moment"]');
+      check('Reddit Moment is opt-in', !moment.checked);
+      moment.click(); await wait();
+      check('Reddit Moment saves independently', state.stored.rules?.moment === true && state.stored.rules?.politics === true);
+      const momentSensitivity = doc.getElementById('momentSensitivity');
+      check('Reddit Moment defaults to Standard', momentSensitivity.value === 'standard');
+      momentSensitivity.value = 'conservative'; momentSensitivity.dispatchEvent(new win.Event('change'));
       const politicalSensitivity = doc.getElementById('politicsSensitivity');
       check('Political sensitivity defaults to Conservative', politicalSensitivity.value === 'conservative');
       politicalSensitivity.value = 'standard';
@@ -67,6 +74,7 @@
       await wait(200);
       check('Reload requested exactly once', state.reloads === 1);
       check('Pending sensitivity saved before reload', state.atReload?.clicheSensitivity === 'conservative');
+      check('Reddit Moment sensitivity saved before reload', state.atReload?.momentSensitivity === 'conservative');
       check('Political sensitivity saved before reload independently', state.atReload?.politicsSensitivity === 'standard');
       check('Reply-chain sensitivity saves independently', state.atReload?.chainSensitivity === 'conservative');
       check('Pending typed patterns saved before reload', state.atReload?.customPatterns === 'test phrase');

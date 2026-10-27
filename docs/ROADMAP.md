@@ -31,6 +31,8 @@ Available experimentally: opt-in political pivots, with visible post/subreddit/a
 
 ## 3. Hostility and engagement bait — planned
 
+Next proposed milestone: the independent [Reddit Moment score](REDDIT_MOMENT_SCORE.md), using the user's 250 synthetic examples and context pairs as calibration material. Begin with a review fixture and visible evidence, before enabling automatic collapse. Relevance does not exempt personally hostile delivery, and familiar wording alone is insufficient to filter a comment.
+
 Combines sections 5, 6, 7, 8, and bait-related parts of 9.
 
 Use multiple observable signals and category-specific controls for formulaic provocation, empty dismissals, shame, and repetitive outrage. Profanity, negativity, disagreement, a political name, or a phrase such as "actually" is insufficient by itself. Do not claim to establish bad faith, fabricated stories, AI authorship, or hidden motives from writing style alone.

@@ -1,0 +1,490 @@
+# Redditor Repellent — 250 Examples of Reddit-Tier Commentary
+
+## Purpose
+
+These are synthetic examples of comments that may warrant filtering because they are performative, cliché-ridden, smug, inflammatory, repetitive, patronizing, ideologically shoehorned into unrelated discussions, or designed to win audience approval rather than facilitate meaningful conversation.
+
+**Important:** These examples should not become a simplistic keyword blacklist. Use them as test fixtures and patterns for developing contextual detection.
+
+The objective is to identify **the rhetorical behavior**, not censor a particular viewpoint.
+
+---
+
+## 1. Drive-by anti-Trump commentary
+
+- "Well, maybe if Donnie Diapers wasn't running the country..."
+- "Everything makes sense when you remember we elected a literal orange clown."
+- "Somehow this is still less embarrassing than the guy in the White House."
+- "Thanks, MAGA. Really doing wonders for this country."
+- "And yet half the country voted for a convicted felon. Let that sink in."
+- "But sure, tell me again how the orange man is going to save us."
+- "This is what happens when you elect a reality TV host."
+- "MAGA voters aren't exactly known for their critical thinking skills."
+- "Just another day in Trump's America, folks."
+- "The leopards are absolutely feasting on faces right now."
+
+## 2. Drive-by anti-Democrat / anti-progressive commentary
+
+- "This is what happens when the woke mob runs everything."
+- "Thanks, Sleepy Joe. Another brilliant decision."
+- "Of course the liberals found a way to ruin this too."
+- "You can practically smell the blue hair and pronouns."
+- "Another stunning victory for the participation-trophy generation."
+- "The woke mind virus strikes again."
+- "I'm sure the Democrats will blame Trump somehow."
+- "This is what happens when feelings matter more than facts."
+- "Another perfectly normal thing destroyed by political correctness."
+- "The left can't even let people enjoy video games anymore."
+
+## 3. Gratuitous political pivots
+
+- "You know what the REAL problem is? Republicans."
+- "This is actually a perfect metaphor for late-stage capitalism."
+- "Everything is political, whether you like it or not."
+- "It's almost like elections have consequences."
+- "You can trace pretty much every problem in America back to Reagan."
+- "This is what happens after decades of neoliberal policies."
+- "Both parties are just wings of the same corrupt bird."
+- "And people wonder why this country is circling the drain."
+- "Somehow this all leads back to Citizens United."
+- "Just another symptom of living in a failed state."
+
+## 4. Billionaire hatred as an automatic applause line
+
+- "Billionaires have no right to even speak. They produce nothing."
+- "There is no ethical way to become a billionaire. Period."
+- "Eat the rich."
+- "Imagine defending someone who wouldn't piss on you if you were on fire."
+- "Bootlickers defending billionaires will never not be hilarious."
+- "You don't become a billionaire without exploiting millions of people."
+- "Every billionaire is a policy failure."
+- "Billionaires shouldn't exist. That's it. That's the comment."
+- "Imagine simping for the people hoarding all the world's wealth."
+- "Reminder that these people could solve world hunger tomorrow but choose not to."
+
+## 5. Generic anti-capitalism / anti-corporate talking points
+
+- "Capitalism working exactly as intended."
+- "Welcome to late-stage capitalism."
+- "There is no ethical consumption under capitalism."
+- "Corporations aren't your friends, people."
+- "Won't somebody PLEASE think of the shareholders?"
+- "Line must go up. Humanity must suffer."
+- "Another reminder that capitalism is a death cult."
+- "Profits over people. Every. Single. Time."
+- "The cruelty is the point."
+- "But hey, at least the shareholders are happy!"
+
+## 6. Performative moral superiority
+
+- "It's called being a decent human being."
+- "Some of us actually have empathy."
+- "Imagine needing someone to explain basic human decency to you."
+- "Being kind costs literally nothing."
+- "The bar is in hell, and somehow people still can't clear it."
+- "It's really not that difficult to be a good person."
+- "I can't believe this even needs to be explained in 2026."
+- "If you don't understand why this is wrong, I can't help you."
+- "Some of us were raised to care about other people."
+- "Maybe try having a functioning moral compass."
+
+## 7. Virtue signaling and moral purity tests
+
+- "If you still support this company, you're part of the problem."
+- "Your silence speaks volumes."
+- "Choosing not to care is still a choice."
+- "I don't know how anyone with a conscience can enjoy this."
+- "It's a privilege to be able to ignore these issues."
+- "Must be nice not having to think about how your choices affect others."
+- "You can tell a lot about someone by what they're willing to overlook."
+- "I'm not interested in being friends with anyone who supports this."
+- "History will remember who stood on the right side."
+- "Sorry, but some things are bigger than your personal entertainment."
+
+## 8. Performative consumer shaming
+
+- "Imagine paying actual money to support these monsters."
+- "Enjoy your blood-stained consumer products, I guess."
+- "I'll sleep better knowing I didn't contribute to this."
+- "Must be nice being able to turn your conscience off at checkout."
+- "I haven't bought from them in years, and neither should you."
+- "Imagine prioritizing a shiny new toy over basic ethics."
+- "I guess principles go out the window when there's a sale."
+- "People will literally support anything if it has their favorite logo."
+- "Couldn't be me giving another dollar to that company."
+- "You do you, but personally I prefer not funding evil."
+
+## 9. Culture-war grandstanding
+
+- "Of course the patriarchy had to ruin this too."
+- "This is why we can't have nice things in a society built on misogyny."
+- "Everything is about maintaining existing power structures."
+- "Another perfect example of toxic masculinity."
+- "The war on traditional values continues."
+- "Western civilization is collapsing in real time."
+- "They just had to inject identity politics into everything."
+- "It's almost like representation matters."
+- "Everything has to pass the ideological purity test now."
+- "Just another casualty of the culture war."
+
+## 10. Smug, pseudo-intellectual responses
+
+- "Tell me you don't understand economics without telling me."
+- "I see critical thinking isn't your strong suit."
+- "Media literacy is truly dead."
+- "This is why we need to fund education."
+- "Reading comprehension is apparently optional these days."
+- "It's almost as if there are systemic factors at play."
+- "I'm begging you to open a book."
+- "The lack of self-awareness is genuinely breathtaking."
+- "Imagine being this confidently incorrect."
+- "This comment is a perfect demonstration of the Dunning-Kruger effect."
+
+## 11. Condescending rhetorical questions
+
+- "Are you seriously incapable of understanding something this simple?"
+- "Do you actually think before you type?"
+- "Did you miss the part where reality exists?"
+- "How is this even a question in the current year?"
+- "Have you considered thinking critically for five seconds?"
+- "Are we really pretending this is complicated?"
+- "Do words just mean whatever you want them to mean now?"
+- "Do you need someone to draw you a picture?"
+- "Did you even bother reading the article?"
+- "Is the concept of empathy really that foreign to you?"
+
+## 12. Moralized personal attacks disguised as arguments
+
+- "Found the bootlicker."
+- "Found the corporate shill."
+- "Found the incel."
+- "Found the terminally online activist."
+- "Found the guy who thinks he's temporarily embarrassed royalty."
+- "You sound exactly like someone who watches too much Fox News."
+- "This is exactly the kind of take I'd expect from a Reddit moderator."
+- "Imagine publicly admitting you believe this."
+- "You're really telling on yourself here."
+- "The fact that you think this is normal says everything I need to know."
+
+## 13. Gaming discussion hijacking
+
+- "Too bad the lead developer is a problematic person."
+- "Wish I could enjoy this, but Nintendo is a greedy capitalist machine."
+- "Another game made by an industry built on exploitation."
+- "This looks great, but I refuse to support a company that doesn't respect workers."
+- "Imagine caring about graphics while the world is burning."
+- "Gamers really will ignore anything if the trailer looks pretty."
+- "Another reminder that AAA gaming is just corporate greed with better lighting."
+- "You know the executives are laughing at everyone buying this, right?"
+- "The fact that people are excited for this tells you everything about consumer culture."
+- "Gamers are never beating the allegations."
+
+## 14. Movie, television, and music discussions hijacking
+
+- "Too bad the director is a terrible human being."
+- "Another Hollywood millionaire lecturing ordinary people."
+- "Of course people are celebrating another soulless corporate product."
+- "The lack of media literacy in this thread is concerning."
+- "Imagine watching this and missing the obvious commentary on capitalism."
+- "It's hilarious how people think this movie isn't political."
+- "You can enjoy it, but that doesn't mean you're free from criticism."
+- "Reminder that your favorite celebrity is not your friend."
+- "The amount of people ignoring the problematic history here is wild."
+- "I wish people cared this much about actual social issues."
+
+## 15. Technology and AI outrage farming
+
+- "AI is literally just plagiarism with extra steps."
+- "Enjoy watching your job get replaced by a billionaire's algorithm."
+- "Every AI enthusiast is just a tech bro who thinks stealing is innovation."
+- "Nobody asked for this dystopian garbage."
+- "Congratulations, you've automated being mediocre."
+- "This is why tech billionaires shouldn't be allowed to make decisions."
+- "Another solution nobody wanted to a problem nobody had."
+- "We are speedrunning the collapse of human creativity."
+- "Silicon Valley really looked at the world and decided it needed more exploitation."
+- "The AI bros will defend literally anything if you tell them it's the future."
+
+## 16. Anti-religious and pro-religious grandstanding
+
+- "Religion is a cancer on society."
+- "Imagine still believing in sky daddy in 2026."
+- "This is what happens when religious people get to make decisions."
+- "Nothing says love quite like religious hatred."
+- "There's no hate like Christian love."
+- "The godless degeneracy of modern society is on full display."
+- "This is what happens when people abandon traditional values."
+- "We wouldn't have this problem if people still had faith."
+- "Another perfect example of why organized religion is holding humanity back."
+- "Maybe if people feared God, society wouldn't look like this."
+
+## 17. Performative social awareness
+
+- "It's honestly exhausting having to explain this to privileged people."
+- "This is why representation is so important."
+- "Not everyone has the luxury of ignoring oppression."
+- "Some people really need to examine their privilege."
+- "The fact that you can laugh about this is incredibly telling."
+- "I shouldn't have to educate you."
+- "This comment section is a perfect example of everything wrong with society."
+- "Normalize calling out problematic behavior."
+- "The amount of casual ignorance here is honestly disturbing."
+- "This is such a textbook example of internalized bias."
+
+## 18. Performative anti-woke reactions
+
+- "Everything is woke now."
+- "Can't even enjoy a movie without being lectured."
+- "Another character ruined by the diversity agenda."
+- "The woke crowd won't rest until they've destroyed everything."
+- "This is what happens when DEI matters more than talent."
+- "The politically correct brigade has arrived."
+- "Imagine being offended by literally everything."
+- "Another day, another imaginary problem invented by activists."
+- "Normal people are getting tired of this nonsense."
+- "Once again, ideology over quality."
+
+## 19. Workplace and labor moralizing
+
+- "Your boss would replace you tomorrow and not lose a minute of sleep."
+- "Reminder that HR is not your friend."
+- "We're all just wage slaves making billionaires richer."
+- "If you answer emails after five, you're part of the problem."
+- "Corporate loyalty is just Stockholm syndrome."
+- "Imagine bragging about working hard for someone else's yacht."
+- "The only reward for hard work is more work."
+- "Your employer doesn't care if you live or die."
+- "Anyone who takes pride in their job has been successfully brainwashed."
+- "Your coworkers aren't family. Stop pretending they are."
+
+## 20. Housing, money, and generational resentment
+
+- "Must be nice having rich parents."
+- "Boomers really pulled the ladder up behind them."
+- "Landlords are parasites."
+- "Housing is a human right, not an investment vehicle."
+- "Nobody needs a second house while people are homeless."
+- "Maybe stop buying avocado toast, am I right?"
+- "The entire economy is just a pyramid scheme for rich people."
+- "If you're a landlord, you're automatically part of the problem."
+- "The boomers destroyed everything and handed us the bill."
+- "Another reminder that meritocracy is a complete myth."
+
+## 21. Doomposting and catastrophizing
+
+- "We're living in a dystopia."
+- "Humanity was a mistake."
+- "This timeline is genuinely cursed."
+- "We deserve the extinction event."
+- "We're absolutely cooked as a species."
+- "Society is collapsing and everyone is pretending things are normal."
+- "Welcome to the end stages of civilization."
+- "Idiocracy was a documentary."
+- "The future is going to be so much worse than anyone realizes."
+- "At this point, the asteroid can't come soon enough."
+
+## 22. Empty pseudo-profound statements
+
+- "Read that again."
+- "Let that sink in."
+- "The silence is deafening."
+- "The math isn't mathing."
+- "Say it louder for the people in the back."
+- "This is the conversation nobody wants to have."
+- "People aren't ready for this truth."
+- "We're not having the conversations we need to be having."
+- "The irony is absolutely delicious."
+- "And that's everything you need to know."
+
+## 23. Audience applause and validation farming
+
+- "THIS. A thousand times this."
+- "Finally, someone said it."
+- "I wish I could upvote this twice."
+- "You dropped this, king."
+- "Louder for the people in the back!"
+- "This deserves to be the top comment."
+- "I came here looking for this exact comment."
+- "The most based take in this entire thread."
+- "Take my poor man's gold."
+- "Everyone needs to read this."
+
+## 24. Outrage and argument bait
+
+- "If this doesn't make you angry, you're not paying attention."
+- "Anyone defending this should be ashamed."
+- "I genuinely don't understand how people can support this."
+- "This is objectively indefensible."
+- "The fact that this is even controversial is terrifying."
+- "Imagine thinking there's another side to this."
+- "There are no good arguments against what I'm saying."
+- "If you're offended by this, you're probably the problem."
+- "You'd have to be willfully ignorant not to see what's happening."
+- "No reasonable person could possibly disagree."
+
+## 25. Condescending assumptions about other users
+
+- "Your comment history tells me everything I need to know."
+- "I can already guess who you voted for."
+- "Let me guess, straight white guy?"
+- "Found the guy who has never struggled a day in his life."
+- "You sound like someone whose entire personality is politics."
+- "I bet you're fun at parties."
+- "You probably think you're one of the good ones."
+- "Spoken like someone who's never left their hometown."
+- "I'm not surprised someone with your post history thinks that."
+- "You clearly live in a completely different reality from the rest of us."
+
+---
+
+# Instructions for implementing these examples
+
+## Do not use exact phrase matching as the primary strategy
+
+Recognize structural variations such as:
+
+- "Imagine defending X..."
+- "It's almost like X..."
+- "Tell me you X without telling me..."
+- "Found the X..."
+- "The fact that X says everything..."
+- "If you support X, you're part of the problem..."
+- "Another reminder that X..."
+- "This is what happens when X..."
+- "I can't believe people still X..."
+- "Some of us actually X..."
+- "It's called X. Look it up."
+- "X is a human right."
+- "X is literally violence."
+- "Say it louder for X."
+- "No ethical X under Y."
+- "You'd have to be X to believe Y."
+
+These structures should increase suspicion when paired with irrelevance, cliché usage, baiting, personal attacks, or a lack of substantive content.
+
+They should not automatically trigger filtering.
+
+## Context examples: what to filter versus preserve
+
+### Example A: Political derailment
+
+**Post:** "First look at the new Nintendo Zelda game."
+
+FILTER CANDIDATE:
+"Well, this is what happens when Donnie Diapers is running the country."
+
+KEEP:
+"The combat looks much more fluid than Breath of the Wild, although I'm not sure I like the new stamina system."
+
+### Example B: Capitalism and consumer criticism
+
+**Post:** "Nintendo confirms the new Zelda game will cost $80."
+
+FILTER CANDIDATE:
+"Capitalism is a disease and anyone defending this is a bootlicker."
+
+KEEP:
+"I think $80 is excessive, especially if the game doesn't offer substantially more content than the previous release."
+
+### Example C: Relevant political discussion
+
+**Post:** "What are the economic consequences of the proposed tariff changes?"
+
+KEEP:
+"Trump's proposed tariffs could raise consumer prices because importers may pass the additional costs on to customers."
+
+FILTER CANDIDATE:
+"Orange man and his cult of idiots strike again."
+
+### Example D: Moral grandstanding
+
+**Post:** "What is your favorite fast-food restaurant?"
+
+FILTER CANDIDATE:
+"Imagine still eating fast food knowing how these corporations exploit their employees. Couldn't be me."
+
+KEEP:
+"I usually avoid that chain because of its labor practices, but I understand why people like the food."
+
+### Example E: Right-wing derailment
+
+**Post:** "New trailer for the next Pixar movie."
+
+FILTER CANDIDATE:
+"Another day, another franchise destroyed by the woke mind virus."
+
+KEEP:
+"I wasn't impressed with the previous film's writing, but this trailer actually looks promising."
+
+### Example F: Serious allegations
+
+**Post:** "New investigation details alleged misconduct involving a film director."
+
+KEEP:
+"The allegations are directly relevant to whether the studio should continue working with the director."
+
+**Post:** "What's your favorite scene from the director's 2004 movie?"
+
+POSSIBLE FILTER CANDIDATE:
+"Imagine still liking anything made by that creep. Some of us actually have morals."
+
+The second example is not a candidate because misconduct can never be discussed. It's a candidate because it substitutes a personal moral attack for meaningful discussion. Substantive criticism should remain possible.
+
+### Example G: Billionaires
+
+**Post:** "What should the capital gains tax rate be?"
+
+KEEP:
+"I favor higher rates on very large capital gains because preferential taxation can contribute to wealth inequality."
+
+FILTER CANDIDATE:
+"Eat the rich. Billionaires shouldn't exist. End of discussion."
+
+### Example H: Sarcasm and genuine humor
+
+**Post:** "My cat knocked my new monitor off the desk."
+
+KEEP:
+"Your cat has officially entered its expensive-hobbies era."
+
+POSSIBLE FILTER CANDIDATE:
+"Play stupid games, win stupid prizes."
+
+Humor should not be automatically suppressed. Repetition, context, and low-effort delivery should affect classification.
+
+---
+
+# Classification priorities
+
+For each candidate comment, evaluate:
+
+1. **Relevance:** Does it directly relate to the submission or parent comment?
+2. **Substance:** Does it present meaningful reasoning, information, experience, or genuinely original humor?
+3. **Rhetorical style:** Is it primarily an applause line, smug dismissal, cliché, insult, or performative moral declaration?
+4. **Derailment:** Does it attempt to change the conversation to an unrelated political, ideological, or moral controversy?
+5. **Repetition:** Is it a predictable, recycled statement adding no new information?
+6. **Engagement bait:** Does it appear designed to provoke outrage, tribal agreement, or argumentative responses rather than discussion?
+7. **Context sensitivity:** Would the same statement be relevant in another subreddit or discussion?
+8. **Confidence:** Is there sufficient evidence to collapse it without harming legitimate conversation?
+
+## Suggested classification outputs
+
+- `KEEP` — Relevant, informative, substantive, or worthwhile conversation.
+- `LOW_VALUE` — Repetitive, cliché-ridden, or content-free.
+- `PERFORMATIVE` — Smug, self-congratulatory, moralizing, or primarily approval-seeking.
+- `POLITICAL_DERAILMENT` — Unrelated political or ideological pivot.
+- `RAGE_BAIT` — Deliberately provocative, antagonistic, or outrage-farming.
+- `CIRCLEJERK` — Repetitive tribal affirmation or group-approved talking points without substance.
+- `UNCERTAIN` — Insufficient context; leave visible by default.
+
+A comment may match multiple categories.
+
+For deterministic filtering, favor high-precision patterns. Do not pretend to know a commenter's intentions or political identity based on a short comment. Treat inferred motivation as a hypothesis, not a fact.
+
+**Ultimate design philosophy:**
+
+A comment shouldn't be filtered because someone believes something conservative, liberal, socialist, capitalist, religious, secular, or otherwise controversial.
+
+It should be filtered when its primary contribution is a predictable, low-effort, condescending, performative, or irrelevant attempt to generate approval or hostility rather than meaningful discussion.
+
+The desired experience is **Reddit without the stereotypical Redditor behavior**, not Reddit without disagreement.

@@ -13,6 +13,7 @@ body { font: 14px system-ui; padding: 20px; }
 <div class="commentarea"><div class="sitetable nestedlisting" id="comments"></div></div>
 <script>
   const remembered = new Set();
+  const prevented = [];
   // Model RES commentHidePersistor's delegated click handler: automatic
   // collapse reasons are ignored; ordinary user collapses are remembered.
   document.body.addEventListener('click', (event) => {
@@ -32,11 +33,12 @@ body { font: 14px system-ui; padding: 20px; }
     const el = document.createElement('div');
     el.className = `thing comment ${collapsed ? 'collapsed' : 'noncollapsed'}`;
     el.id = id;
-    el.innerHTML = '<div class="entry"><p class="tagline"><a class="expand" href="#">[–]</a> reader</p><div class="usertext-body"><div class="md"></div></div></div>';
+    el.innerHTML = '<div class="entry"><p class="tagline"><a class="expand" href="javascript:void(0)">[–]</a> reader</p><div class="usertext-body"><div class="md"></div></div></div>';
     el.querySelector('.md').textContent = text;
     const toggle = el.querySelector('.expand');
     toggle.textContent = collapsed ? '[+]' : '[–]';
     toggle.addEventListener('click', event => {
+      prevented.push(event.defaultPrevented);
       event.preventDefault();
       const isCollapsed = el.classList.toggle('collapsed');
       el.classList.toggle('noncollapsed', !isCollapsed);
@@ -65,6 +67,8 @@ body { font: 14px system-ui; padding: 20px; }
     const automatic = addComment('auto', 'Take my upvote!');
     await wait();
     check('Automatic collapse is not saved by RES', !remembered.has('auto'));
+    check('Automatic click cancels javascript URL navigation', prevented.at(-1) === true);
+    check('Reddit click handler still collapses', automatic.classList.contains('collapsed'));
     automatic.remove();
     const restored = addComment('restored', 'Take my upvote!', true);
     const unrelated = addComment('unrelated', 'Here is a detailed explanation with useful information.', true);
@@ -79,9 +83,21 @@ body { font: 14px system-ui; padding: 20px; }
     document.querySelector('.rgc-banner__btn')?.click();
     await wait();
     check('Explicit Show them reveals matched prior collapse', !restored.classList.contains('collapsed'));
+    check('Reveal also cancels javascript URL navigation', prevented.at(-1) === true);
     check('Show them leaves unrelated prior collapse alone', unrelated.classList.contains('collapsed'));
     restored.querySelector('.expand').click();
     check('Ordinary user collapse is still saved by RES', remembered.has('restored'));
+    check('Temporary navigation listener was removed', prevented.at(-1) === false);
+    window.__rgc.restoreAll();
+    document.getElementById('comments').replaceChildren();
+    window.__rgc.settings = {};
+    const noHandler = addComment('no-handler', 'Take my upvote!');
+    const originalToggle = noHandler.querySelector('.expand');
+    originalToggle.replaceWith(originalToggle.cloneNode(true));
+    await wait();
+    check('Missing Reddit handler falls back to native classes', noHandler.classList.contains('collapsed'));
+    window.__rgc.restoreAll();
+    check('Fallback reveal restores native classes', noHandler.classList.contains('noncollapsed') && !noHandler.classList.contains('collapsed'));
     document.getElementById('results').textContent = results.join('\n');
     button.disabled = false;
   });

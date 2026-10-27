@@ -308,6 +308,21 @@
     }
     const toggle = el.querySelector(':scope > .entry .tagline a.expand');
     if (toggle) {
+      // Legacy Reddit uses javascript: links. Dispatch its click handlers, but
+      // never navigate to that URL (blocked by extension CSP).
+      const preventNavigation = event => event.preventDefault();
+      const clickToggle = () => {
+        toggle.addEventListener('click', preventNavigation, true);
+        try { toggle.click(); }
+        finally { toggle.removeEventListener('click', preventNavigation, true); }
+        // An inline handler may also be blocked or not yet installed. Keep
+        // collapse/reveal functional using Reddit's native state classes.
+        if (el.classList.contains('collapsed') !== collapsed) {
+          el.classList.toggle('collapsed', collapsed);
+          el.classList.toggle('noncollapsed', !collapsed);
+          toggle.textContent = collapsed ? '[+]' : '[–]';
+        }
+      };
       if (collapsed) {
         // RES commentHidePersistor ignores automatic collapses carrying a
         // distinct reason. Otherwise this synthetic click becomes a saved
@@ -315,13 +330,13 @@
         const previousReason = toggle.getAttribute('collapse-reason');
         toggle.setAttribute('collapse-reason', 'redditor-repellent');
         try {
-          toggle.click();
+          clickToggle();
         } finally {
           if (previousReason === null) toggle.removeAttribute('collapse-reason');
           else toggle.setAttribute('collapse-reason', previousReason);
         }
       } else {
-        toggle.click();
+        clickToggle();
       }
     } else {
       el.classList.toggle('collapsed', collapsed);

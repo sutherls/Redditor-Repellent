@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reddit Moment — review lab</title>
+<style>
+:root{color-scheme:dark;font:15px/1.55 system-ui;background:#11151b;color:#eef1f7}body{max-width:1120px;margin:36px auto;padding:0 24px}h1{font-size:32px;margin:4px 0}h2{font-size:18px}p{color:#b8c2d3}.eyebrow{color:#ff9a70;font-weight:700;letter-spacing:.12em;font-size:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.card{background:#1a202b;border:1px solid #343e50;border-radius:16px;padding:24px}label{display:block;font-weight:600;margin:14px 0 5px}input,textarea,select,button{font:inherit;color:inherit;background:#11151b;border:1px solid #526078;border-radius:7px;padding:10px;box-sizing:border-box;width:100%}textarea{resize:vertical}button{background:#fa8053;color:#171717;font-weight:700;cursor:pointer;margin-top:18px}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8bbaff}#score{font-size:48px;font-weight:750;color:#ff9a70}progress{width:100%;height:14px;accent-color:#fa8053}small,.muted{color:#b8c2d3}li{margin:12px 0}code{white-space:pre-wrap;color:#ffd1bb}#outcome{font-weight:700}#summary{margin-top:24px}.note{border-left:3px solid #ff9a70;padding-left:12px}@media(max-width:760px){.grid{grid-template-columns:1fr}body{padding:0 14px}}
+</style>
+<div class="eyebrow">REDDITOR REPELLENT · REVIEW LAB</div>
+<h1>Reddit Moment score</h1>
+<p>Inspect the evidence before trusting the number. This is a provisional heuristic, not a probability or a judgment of intent.</p>
+<p class="note"><strong>Review only.</strong> Nothing is collapsed, sent to an AI service, or saved. Existing extension filters are unchanged.</p>
+<div class="grid"><section class="card">
+<label for="sample">Example</label><select id="sample"></select><small id="corpus">Loading supplied examples…</small>
+<label for="post">Post context</label><input id="post" placeholder="Post title or description">
+<label for="parent">Parent context</label><input id="parent" placeholder="Optional parent comment">
+<label for="text">Comment</label><textarea id="text" rows="8"></textarea>
+<label for="relevance">Reviewer’s relevance annotation</label><select id="relevance"><option value="unknown">Unknown — not inferred</option><option value="relevant">Relevant</option><option value="off-topic">Off topic</option></select>
+<label for="repeats">Confirmed identical occurrences in thread</label><input id="repeats" type="number" min="1" max="100" value="1">
+<small>Leave at 1 unless repetition was actually observed. The lab does not scan Reddit.</small>
+<button id="evaluate">Evaluate comment</button>
+</section><section class="card" aria-live="polite">
+<h2>Provisional score</h2><div id="score">0 / 10</div><progress id="meter" max="10" value="0" aria-label="Heuristic score"></progress>
+<p id="outcome"></p><p id="context"></p><p id="expected"></p>
+<h2>Matched evidence</h2><ul id="evidence"></ul>
+<h2>Protection / uncertainty</h2><ul id="protections"></ul>
+<p class="muted">No match means the rules found no evidence—not that the comment is necessarily useful. Relevance is an annotation and does not add points. Missing context, quotations, or possible supporting evidence force review.</p>
+</section></div>
+<section class="card" id="summary"><h2>Calibration snapshot</h2><p id="metrics"></p><p>Only explicitly labeled cases enter these counts. The 250 synthetic standalone examples are unlabelled context-dependent candidates. These are development checks, not independent accuracy estimates.</p><details><summary>Show labeled case results</summary><ul id="caseResults"></ul></details></section>
+<script src="scorer.js"></script><script src="cases.js"></script><script src="review.js"></script></html>

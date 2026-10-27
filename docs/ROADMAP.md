@@ -31,7 +31,7 @@ Available experimentally: opt-in political pivots, with visible post/subreddit/a
 
 ## 3. Hostility and engagement bait — planned
 
-Next proposed milestone: the independent [Reddit Moment score](REDDIT_MOMENT_SCORE.md), using the user's 250 synthetic examples and context pairs as calibration material. Begin with a review fixture and visible evidence, before enabling automatic collapse. Relevance does not exempt personally hostile delivery, and familiar wording alone is insufficient to filter a comment.
+Review milestone available: the independent [Reddit Moment score](REDDIT_MOMENT_SCORE.md), using the user's 250 synthetic examples and context pairs as calibration material. The isolated review fixture shows evidence, protections, and missed candidates; automatic collapse is not enabled. Relevance does not exempt personally hostile delivery, and familiar wording alone is insufficient to filter a comment. Calibration and independent evaluation come next.
 
 Combines sections 5, 6, 7, 8, and bait-related parts of 9.
 

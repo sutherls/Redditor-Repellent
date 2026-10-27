@@ -1,6 +1,12 @@
 # Reddit Moment score — development brief
 
-Status: proposed next feature; no scoring or automatic collapse is implemented yet.
+Status: isolated review scorer and interactive fixture implemented under `test/reddit-moment/`. No automatic collapse or extension integration.
+
+Open the fixture through a local server, or run `node scripts/build-review.cjs` and open `dist/reddit-moment-review.html` directly. The standalone page includes all examples and works offline. Run `node --test test/reddit-moment.test.cjs` for the scorer checks.
+
+Initial weights: familiar template 1, personal attack 3, moral pressure 3, dismissal 2, reviewer-confirmed repetition 2; capped at 10. Each family counts once and matched spans cannot overlap. Review candidates require at least 5 points and two non-template families without a protection marker. These are provisional choices, not calibrated weights. Relevance is explicitly reviewer-annotated or unknown, not inferred by keyword overlap.
+
+Initial development snapshot: 0 of 6 KEEP cases flagged, 3 of 6 CANDIDATE cases missed, 2 uncertain reference cases excluded. The missed cases include the Tim Sweeney example. These tiny development counts are not accuracy estimates. None of the 250 context-free examples has been silently assigned a collapse label. Independent held-out evaluation remains future work.
 
 ## Purpose
 

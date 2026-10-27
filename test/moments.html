@@ -49,7 +49,12 @@ document.getElementById('run').onclick=async()=>{
     check(`${label}: question alone preserved`,!hit(plain));
     const evidence=document.createElement('a');evidence.href='https://example.com/report';evidence.textContent='Report';reactionBody.append(evidence);
     await wait();check(`${label}: source link preserves reaction commentary`,!hit(reaction));
-    listeners.forEach(fn=>fn({rules:{newValue:{moment:false}}},'sync')); await wait(); check(`${label}: disabling restores`,!hit(sweeney)&&!hit(influence)&&!hit(linked));
+    const condescending=add('Do you actually think before you type? I’m begging you to open a book.',old);
+    const correction=add('Please read the second paragraph; it explains the exception.',old);
+    await wait();check(`${label}: competence attack plus dismissal collapses`,hit(condescending));
+    check(`${label}: constructive correction preserved`,!hit(correction));
+    check(`${label}: competence reason displayed`,condescending.querySelector('[data-label="REDDIT MOMENT"]')?.title.includes('comprehension or intelligence'));
+    listeners.forEach(fn=>fn({rules:{newValue:{moment:false}}},'sync')); await wait(); check(`${label}: disabling restores`,!hit(sweeney)&&!hit(influence)&&!hit(linked)&&!hit(condescending));
   }} catch(e){results.push(`FAIL ${e.stack}`);}
   document.getElementById('results').textContent=results.join('\n'); button.disabled=false;
 };

@@ -35,6 +35,8 @@ The Reddit Moment filter now runs in the extension through an independent opt-in
 
 Combines sections 5, 6, 7, 8, and bait-related parts of 9.
 
+Reddit Moment tuning also covers direct attacks on comprehension/intelligence paired with dismissive instructions (for example, a personal put-down followed by "educate yourself"). Standard catches these combinations; Conservative requires additional evidence. Standalone reading questions, constructive instructions, and individual weak signals are preserved by these additions.
+
 Use multiple observable signals and category-specific controls for formulaic provocation, empty dismissals, shame, and repetitive outrage. Profanity, negativity, disagreement, a political name, or a phrase such as "actually" is insufficient by itself. Do not claim to establish bad faith, fabricated stories, AI authorship, or hidden motives from writing style alone.
 
 ## 4. Feed filtering and user feedback — planned

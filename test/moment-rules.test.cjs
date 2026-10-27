@@ -2,6 +2,19 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 require('../src/moment-rules.js');
 const { classify } = globalThis.RedditorRepellentMoments;
+test('competence attacks combined with dismissive instructions match variations', () => {
+  for (const text of ['Do you actually think before you type? I’m begging you to open a book.', 'You clearly cannot read. Educate yourself.', 'Reading comprehension is apparently optional these days. Go do your research.', 'Your critical thinking is not your strong suit. End of discussion.']) {
+    const result = classify(text); assert.ok(result, text);
+    assert.ok(result.signals.some(s => s.id === 'competence-attack'));
+    assert.equal(classify(text, 'conservative'), null, text);
+  }
+});
+test('questions, constructive corrections, self-description and single signals stay visible', () => {
+  for (const text of ['Did you read the article?', 'Please read the second paragraph; it explains the exception.', 'Try opening a book on electronics to learn the basics.', 'I struggle with reading comprehension.', 'Do you think before you type?', 'Reading comprehension is apparently optional these days.', 'Educate yourself.', 'You clearly cannot read the faded label; try a brighter light.', 'I do my research before I buy a replacement.']) assert.equal(classify(text), null, text);
+  assert.equal(classify('"You clearly cannot read. Educate yourself."'), null);
+  assert.equal(classify('You clearly cannot read the faded label. Open a book with a clearer schematic.'), null);
+  assert.equal(classify('You clearly cannot read. Educate yourself. For example, the 12 volts were measured at the input.'), null);
+});
 test('sarcastic influence framing matches but ordinary influence criticism stays', () => {
   const text = 'It’s crazy, it’s like he’s not bought and paid for. Amazing the things you can accomplish when you’re not hemmed in by special interest groups or dare I say another country….';
   assert.ok(classify(text));

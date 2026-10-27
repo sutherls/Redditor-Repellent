@@ -494,8 +494,19 @@
     if (isAllowed(el)) return null;
     if (matchesCustom(body)) return 'custom';
     if (rules.bot && isBot(author, body)) return 'bot';
-    if (rules.moment && metaContainer(el) && !body.querySelector('blockquote, pre, code, a')) {
-      const match = momentRules.classify(body.textContent, settings.momentSensitivity);
+    if (rules.moment && metaContainer(el) && !body.querySelector('blockquote, pre, code')) {
+      let hasGif = [...body.querySelectorAll(MEDIA_SELECTOR)].some(node => mediaKind(node, node) === 'gif');
+      const clone = body.cloneNode(true);
+      clone.querySelectorAll(MEDIA_SELECTOR).forEach(node => node.remove());
+      // Preserve evidence links, but don't mistake a GIF's own link for a source.
+      clone.querySelectorAll('a[href]').forEach(link => {
+        if (GIF_HINT.test(link.getAttribute('href') || '')) { hasGif = true; link.remove(); }
+      });
+      const text = clone.textContent.replace(/!\[gif\]\(([^)]+)\)/gi, (markdown, source) => {
+        if (!GIF_HINT.test(source)) return markdown;
+        hasGif = true; return '';
+      });
+      const match = clone.querySelector('a[href]') ? null : momentRules.classify(text, settings.momentSensitivity, { hasGif });
       if (match) {
         momentReasons.set(el, `Matched wording: ${match.reason}. Pattern-based estimate, not a judgment of intent.`);
         return 'moment';

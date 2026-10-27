@@ -11,13 +11,24 @@
     ['motives', 2, 'Claims about hidden motives or beliefs', /\b(?:they just mean|he thinks his|she thinks her|they think their|only care about (?:money|profits)|wouldnt (?:piss on you|care if you)|executives are laughing at)\b/i],
     ['ideological-frame', 2, 'Formulaic ideological framing', /\b(?:wealth extraction machine|levers of capital|late stage capitalism|no ethical .{1,40} under capitalism|ideological purity test|diversity agenda|politically correct brigade)\b/i],
   ];
-  function classify(value, sensitivity = 'standard') {
+  const sarcasticFraming = /\b(?:its (?:crazy|almost like)|amazing (?:the things|what) you can accomplish)\b/i;
+  const influenceInsinuation = /\b(?:bought and paid for|hemmed in by special interest groups|dare i say (?:another country|foreign interests))\b/i;
+  const disbeliefQuestion = /^[^.!?]{1,80}\blied\?\s*(?:about|to|over) [^.!?]{1,160}\?[.!?]*$/i;
+  function classify(value, sensitivity = 'standard', media = {}) {
     const raw = String(value || '').trim();
     if (!raw || raw.length > 3000 || /^\s*>/m.test(raw) || /[“”"]/.test(raw)) return null;
     const text = raw.toLowerCase().replace(/[’']/g, '').replace(/[-–—]/g, ' ').replace(/\s+/g, ' ');
     // Sources and concrete explanations get the benefit of doubt in this first version.
     if (/https?:\/\//i.test(raw) || (/\b(?:because|for example|measured|tested|data|study)\b/.test(text) && /\d/.test(text))) return null;
     const signals = rules.filter(([, , , pattern]) => pattern.test(text)).map(([id, weight, label, pattern]) => ({ id, weight, label, excerpt: text.match(pattern)[0] }));
+    if (sarcasticFraming.test(text)) signals.push({ id: 'sarcastic-framing', weight: 2, label: 'Sarcastic-style framing', excerpt: text.match(sarcasticFraming)[0] });
+    if (influenceInsinuation.test(text)) signals.push({ id: 'influence-insinuation', weight: 2, label: 'Hidden-influence insinuation', excerpt: text.match(influenceInsinuation)[0] });
+    // Media strengthens this bounded rhetorical-question pattern only. A GIF,
+    // party name, or identity reference alone does not count toward this rule.
+    if (disbeliefQuestion.test(text.replace(/[*_]/g, ''))) {
+      signals.push({ id: 'disbelief-question', weight: 2, label: 'Rhetorical disbelief question', excerpt: text });
+      if (media.hasGif === true) signals.push({ id: 'reaction-gif', weight: 2, label: 'GIF accompanying rhetorical question', excerpt: 'GIF in this comment' });
+    }
     // One contribution per family; overlapping shame/template wording is one signal.
     if (signals.some(s => s.id === 'shame')) {
       const index = signals.findIndex(s => s.id === 'template' && s.excerpt.startsWith('imagine'));

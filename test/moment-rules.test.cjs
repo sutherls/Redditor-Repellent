@@ -2,6 +2,20 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 require('../src/moment-rules.js');
 const { classify } = globalThis.RedditorRepellentMoments;
+test('sarcastic influence framing matches but ordinary influence criticism stays', () => {
+  const text = 'It’s crazy, it’s like he’s not bought and paid for. Amazing the things you can accomplish when you’re not hemmed in by special interest groups or dare I say another country….';
+  assert.ok(classify(text));
+  assert.equal(classify(text, 'conservative'), null);
+  for (const text of ['He is not bought and paid for.', 'It is crazy how much the repair costs.', 'Special interest groups donated to the campaign.', 'Amazing what you can accomplish with practice.']) assert.equal(classify(text), null, text);
+});
+test('rhetorical disbelief requires accompanying GIF and ignores identity or party', () => {
+  for (const text of ['Republicans lied? About a successful brown person?', 'Democrats lied? About a successful white person?', 'Republicans lied? *About a successful brown person?*']) {
+    assert.ok(classify(text, 'standard', { hasGif: true }));
+    assert.equal(classify(text), null);
+    assert.equal(classify(text, 'conservative', { hasGif: true }), null);
+  }
+  for (const text of ['Did Republicans lie about the figures?', 'A successful brown person.', 'Democrats lied about the figures in the report.', 'Republicans lied? About the budget? Here is what the report says.']) assert.equal(classify(text, 'standard', { hasGif: true }), null, text);
+});
 test('original user-supplied Sweeney comment is matched by combined wording', () => {
   const text = `When people like tim say they want politics out of, well, anything, they just mean the politics that challenge their world view.
 A billionaire is complaining that people who don't like the wealth extraction machine that helps make him richer are making a political statement and that it just isn't fair

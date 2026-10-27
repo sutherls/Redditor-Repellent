@@ -36,7 +36,20 @@ document.getElementById('run').onclick=async()=>{
     b.querySelector(old?'.md':'[slot="comment"]').textContent='A useful replacement with details about the repair.'; await wait(); check(`${label}: edited useful comment restored`,!hit(b));
     const source=add('',old); source.querySelector(old?'.md':'[slot="comment"]').innerHTML='<blockquote>Found the corporate shill.</blockquote>'; await wait(); check(`${label}: quotation preserved`,!hit(source));
     const sweeney=add('They just mean politics that challenge their world view. The wealth extraction machine makes him richer. He thinks his politics are more important because he controls levers of capital.',old); await wait(); check(`${label}: motive/framing combination collapses`,hit(sweeney));
-    listeners.forEach(fn=>fn({rules:{newValue:{moment:false}}},'sync')); await wait(); check(`${label}: disabling restores`,!hit(sweeney));
+    const influence=add('It’s crazy, it’s like he’s not bought and paid for. Amazing the things you can accomplish when you’re not hemmed in by special interest groups or dare I say another country….',old);
+    const reaction=add('Republicans lied? About a successful brown person?',old);
+    const reactionBody=reaction.querySelector(old?'.md':'[slot="comment"]');
+    if(old) reactionBody.append(document.createTextNode(' ![gif](giphy|shocked)'));
+    else { const img=document.createElement('img');img.setAttribute('data-src','https://media.giphy.com/media/shocked/giphy.gif');reactionBody.append(img); }
+    const plain=add('Republicans lied? About a successful brown person?',old);
+    const linked=add('Democrats lied? About a successful white person?',old);
+    const gifLink=document.createElement('a');gifLink.href='https://media.giphy.com/media/shocked/giphy.gif';gifLink.textContent='GIF';linked.querySelector(old?'.md':'[slot="comment"]').append(gifLink);
+    await wait();check(`${label}: sarcastic influence combination`,hit(influence));
+    check(`${label}: question and GIF combination`,hit(reaction)&&hit(linked));
+    check(`${label}: question alone preserved`,!hit(plain));
+    const evidence=document.createElement('a');evidence.href='https://example.com/report';evidence.textContent='Report';reactionBody.append(evidence);
+    await wait();check(`${label}: source link preserves reaction commentary`,!hit(reaction));
+    listeners.forEach(fn=>fn({rules:{newValue:{moment:false}}},'sync')); await wait(); check(`${label}: disabling restores`,!hit(sweeney)&&!hit(influence)&&!hit(linked));
   }} catch(e){results.push(`FAIL ${e.stack}`);}
   document.getElementById('results').textContent=results.join('\n'); button.disabled=false;
 };

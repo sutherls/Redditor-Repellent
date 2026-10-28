@@ -55,6 +55,25 @@ document.getElementById('run').onclick=async()=>{
     check(`${label}: constructive correction preserved`,!hit(correction));
     check(`${label}: competence reason displayed`,condescending.querySelector('[data-label="REDDIT MOMENT"]')?.title.includes('comprehension or intelligence'));
     listeners.forEach(fn=>fn({rules:{newValue:{moment:false}}},'sync')); await wait(); check(`${label}: disabling restores`,!hit(sweeney)&&!hit(influence)&&!hit(linked)&&!hit(condescending));
+    __rgc.restoreAll();comments.replaceChildren();
+    __rgc.settings={rules:{politicalNoise:true},keepReplies:true,mode:'hide',allowedUsers:['friend']};
+    const root=add('conservatives built a gold statue of this pedo hog',old);
+    const branch=root.querySelector(old?'.child':'#comment-children');
+    add('A reply without political keywords.',old,branch,'friend');
+    const useful=add('A useful unrelated keyboard discussion.',old);
+    const exempt=add('Republicans discussed the policy.',old,comments,'friend');
+    const opposite=add('Democrats discussed the policy.',old);
+    await wait();
+    check(`${label}: aggressive mode labels political root`,root.getAttribute('data-rgc-kind')==='politicalNoise');
+    check(`${label}: entire branch folds despite keepReplies`,branch.classList.contains('rgc-part-hidden'));
+    check(`${label}: relevant wording also folds`,opposite.getAttribute('data-rgc-kind')==='politicalNoise');
+    check(`${label}: unrelated sibling and allowed root stay open`,!useful.hasAttribute('data-rgc-kind')&&!exempt.hasAttribute('data-rgc-kind'));
+    const noiseBadge=root.querySelector('[data-label="POLITICAL NOISE"]');
+    check(`${label}: explanation identifies matched term`,noiseBadge?.title.includes('conservatives'));
+    noiseBadge.click();await wait();check(`${label}: reveal opens branch`,!branch.classList.contains('rgc-part-hidden'));
+    noiseBadge.click();await wait();check(`${label}: recollapse folds branch`,branch.classList.contains('rgc-part-hidden'));
+    listeners.forEach(fn=>fn({rules:{newValue:{politicalNoise:false}}},'sync'));await wait();
+    check(`${label}: disabling aggressive mode restores branch`,!branch.classList.contains('rgc-part-hidden')&&!root.hasAttribute('data-rgc-kind'));
   }} catch(e){results.push(`FAIL ${e.stack}`);}
   document.getElementById('results').textContent=results.join('\n'); button.disabled=false;
 };

@@ -56,6 +56,10 @@
       check('Reddit Moment is opt-in', !moment.checked);
       moment.click(); await wait();
       check('Reddit Moment saves independently', state.stored.rules?.moment === true && state.stored.rules?.politics === true);
+      const noise = doc.querySelector('[data-rule="politicalNoise"]');
+      check('Aggressive political noise starts off', !noise.checked);
+      noise.click(); await wait();
+      check('Aggressive preference saves independently', state.stored.rules?.politicalNoise === true && state.stored.rules?.moment === true);
       const momentSensitivity = doc.getElementById('momentSensitivity');
       check('Reddit Moment defaults to Standard', momentSensitivity.value === 'standard');
       momentSensitivity.value = 'conservative'; momentSensitivity.dispatchEvent(new win.Event('change'));

@@ -26,6 +26,7 @@
     chain: false,  // a run of `chainLength`+ short replies, each replying to the last
     politics: false, // experimental explicit off-topic political pivots
     moment: false, // combinations of low-value rhetorical patterns
+    politicalNoise: false, // aggressive political topic blocking, including replies
   };
 
   // A reply counts as part of a chain when it's low-effort or at most this many words.
@@ -68,12 +69,12 @@
   const LABELS = {
     gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
     bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
-    muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment',
+    muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment', politicalNoise: 'political noise',
   };
   const BADGES = {
     gif: 'GIF', image: 'IMG', emote: 'EMOJI', phrase: 'LOW EFFORT', link: 'LINK', bot: 'BOT',
     pasta: 'PASTA', quote: 'QUOTE', short: 'SHORT', score: 'DOWNVOTED', muted: 'MUTED',
-    custom: 'CUSTOM', chain: 'CHAIN', politics: 'POLITICAL PIVOT', moment: 'REDDIT MOMENT',
+    custom: 'CUSTOM', chain: 'CHAIN', politics: 'POLITICAL PIVOT', moment: 'REDDIT MOMENT', politicalNoise: 'POLITICAL NOISE',
   };
 
   function userList(list) {
@@ -346,6 +347,7 @@
 
   // A chain is mostly its replies, so "keep replies visible" doesn't apply to it.
   function keepsReplies(el) {
+    if (el.getAttribute(KIND_ATTR) === 'politicalNoise') return false;
     return ['politics', 'moment'].includes(el.getAttribute(KIND_ATTR)) || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
   }
 
@@ -369,7 +371,7 @@
     badge.className = BADGE_CLASS;
     badge.dataset.label = BADGES[kind] || 'LOW EFFORT';
     badge.textContent = badge.dataset.label;
-    badge.title = kind === 'moment' ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
+    badge.title = ['moment', 'politicalNoise'].includes(kind) ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
     meta.appendChild(badge);
     return badge;
   }
@@ -401,13 +403,13 @@
     const hidden = el.classList.contains(OWN_CLASS);
     badge.textContent = hidden ? `${label} · show` : `${label} · hide`;
     const kind = el.getAttribute(KIND_ATTR);
-    badge.title = (kind === 'moment' ? `${momentReasons.get(el)} ` : kind === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
+    badge.title = (['moment', 'politicalNoise'].includes(kind) ? `${momentReasons.get(el)} ` : kind === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
   }
 
   function apply(el, kind) {
     el.setAttribute(KIND_ATTR, kind);
 
-    if (settings.mode === 'hide' && !['politics', 'moment'].includes(kind)) {
+    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise'].includes(kind)) {
       el.classList.add(HIDDEN_CLASS);
       el.setAttribute(ATTR, 'hidden');
       tally(el);
@@ -426,7 +428,7 @@
     addBadge(el, kind);
     tally(el);
 
-    if (keepsReplies(el)) {
+    if (keepsReplies(el) || kind === 'politicalNoise') {
       // Reddit's own collapse always takes the replies with it, so do it ourselves.
       setOwnCollapsed(el, true);
       return;
@@ -492,6 +494,13 @@
 
     if (author && settings.mutedUsers.includes(author.toLowerCase())) return 'muted';
     if (isAllowed(el)) return null;
+    if (rules.politicalNoise && metaContainer(el)) {
+      const term = momentRules.matchPoliticalNoise?.(body.textContent);
+      if (term) {
+        momentReasons.set(el, `Aggressive political-noise filter matched “${term}”. This branch is collapsed by your topic preference, regardless of relevance or accuracy.`);
+        return 'politicalNoise';
+      }
+    }
     if (matchesCustom(body)) return 'custom';
     if (rules.bot && isBot(author, body)) return 'bot';
     if (rules.moment && metaContainer(el) && !body.querySelector('blockquote, pre, code')) {
@@ -599,7 +608,7 @@
   }
 
   function isChainLink(el) {
-    if (['politics', 'moment'].includes(el.getAttribute(KIND_ATTR))) return false; // retain explanation and visible replies
+    if (['politics', 'moment', 'politicalNoise'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
     const body = bodyOf(el);
     if (!body || body.childNodes.length === 0 || isAllowed(el)) return false;
     const { kind, words } = classified(el, body);
@@ -694,6 +703,7 @@
       counted: countedIds.size,
       lifetime,
       unavailableRules: [settings.rules.moment && !hasMoments ? 'Reddit Moment' : null,
+        settings.rules.politicalNoise && typeof momentRules.matchPoliticalNoise !== 'function' ? 'Political noise' : null,
         settings.rules.politics && !hasPolitics ? 'Political derailment' : null].filter(Boolean),
     };
   }
@@ -854,7 +864,7 @@
       text.textContent = `Showing ${describe(count, revealedByKind)}`;
       btn.textContent = 'Hide again';
     } else {
-      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment ? 'hidden or collapsed' : 'hidden') : 'collapsed';
+      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise ? 'hidden or collapsed' : 'hidden') : 'collapsed';
       const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
       text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';

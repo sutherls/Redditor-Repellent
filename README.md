@@ -16,6 +16,8 @@ Chrome and Microsoft Edge are our first development targets. The inherited code 
 
 ## What works today
 
+- **Political noise — aggressive (opt-in):** blocks recognized political names, parties, ideologies, and slogans on either side, regardless of relevance, sources, or accuracy. Examples include Republicans/conservatives/MAGA, Democrats/liberals/progressives, capitalism/socialism, and "orange Jesus" or "pedo-in-chief." A matching comment folds its entire reply branch, overriding Keep replies visible, with a POLITICAL NOISE reveal control and the matched term in its explanation. Always-show users remain exempt individually, but their replies can be inside a collapsed parent branch. This is deliberate keyword-based personal topic blocking, separate from contextual derailment detection; it does not classify an author's beliefs and can overmatch ordinary uses of words such as "liberal."
+
 - Collapse stock phrases, tired memes, known copypasta, GIF-only and emoji-only comments, bare links, and bot replies.
 - Optionally filter image-only comments, quote-only comments, short comments, downvoted comments, and chains of short replies.
 - Turn individual rules on or off and adjust word-count, score, and reply-chain thresholds.

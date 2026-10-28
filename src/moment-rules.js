@@ -40,5 +40,12 @@
     if (signals.length < 2 || score < threshold) return null;
     return { score, signals, reason: signals.map(s => s.label).join('; ') };
   }
-  globalThis.RedditorRepellentMoments = { classify };
+  // Explicitly aggressive personal topic preference: no relevance/accuracy gate.
+  // Match comment wording, not an author's inferred beliefs or identity.
+  const politicalNoise = /\b(?:trump(?:s)?|biden(?:s)?|obama(?:s)?|kamala(?: harris)?|maga(?:s)?|republicans?|democrats?|conservatives?|liberals?|progressives?|left[ -]wing(?:ers?)?|right[ -]wing(?:ers?)?|leftists?|marxists?|communists?|socialists?|capitalism|socialism|patriarchy|feminism|woke(?:ness)?|dei|culture[ -]war|identity politics|orange (?:jesus|man|clown)|donnie diapers|sleepy joe|pedo(?:phile)?[ -]in[ -]chief)\b/i;
+  function matchPoliticalNoise(value) {
+    const text = String(value || '').replace(/[’']/g, '').replace(/[–—]/g, '-');
+    return text.match(politicalNoise)?.[0] || null;
+  }
+  globalThis.RedditorRepellentMoments = { classify, matchPoliticalNoise };
 })();

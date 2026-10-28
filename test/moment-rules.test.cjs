@@ -2,6 +2,15 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 require('../src/moment-rules.js');
 const { classify } = globalThis.RedditorRepellentMoments;
+test('aggressive political noise matches topic wording regardless of rhetoric or accuracy', () => {
+  const match = globalThis.RedditorRepellentMoments.matchPoliticalNoise;
+  for (const text of ['conservatives built a gold statue of this pedo hog', 'Republicans are trash through and through.', 'They will protect orange jesus.', 'PEDO-IN-CHIEF', 'MAGA voters', 'Democrats support this policy.', 'Progressives proposed a tax change.', 'Liberals cited the report: https://example.com', 'The costs of capitalism', 'The benefits of socialism']) assert.ok(match(text), text);
+  for (const text of ['Try a brighter monitor.', 'This person is brown.', 'A personal account of abuse.', 'The magnetic switch is broken.', 'I prefer a liberal amount of salt.']) {
+    // Ordinary uses of a political word intentionally overmatch in this mode.
+    if (text.includes('liberal')) assert.ok(match(text));
+    else assert.equal(match(text), null, text);
+  }
+});
 test('competence attacks combined with dismissive instructions match variations', () => {
   for (const text of ['Do you actually think before you type? I’m begging you to open a book.', 'You clearly cannot read. Educate yourself.', 'Reading comprehension is apparently optional these days. Go do your research.', 'Your critical thinking is not your strong suit. End of discussion.']) {
     const result = classify(text); assert.ok(result, text);

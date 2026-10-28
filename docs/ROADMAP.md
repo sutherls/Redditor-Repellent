@@ -23,6 +23,8 @@ Reaction-image targets include meme-taking and "in front of my bath bombs" respo
 
 ## 2. Context and off-topic derailment — in progress
 
+Additional user-requested preference: an independent aggressive political-noise switch blocks recognized political wording regardless of context or factuality and collapses whole reply branches. This deliberately broad mode is separate from the relevance-preserving political-pivot filter and can hide useful discussion. It applies to wording on either political side without inferring an author's affiliation.
+
 Combines sections 1, 2, and 11, plus context-sensitive aspects of 7 and 8.
 
 Collect submission topic, subreddit, and parent-reply context before adding conservative rules for unrelated political pivots, moral lectures, and imported controversies. Preserve relevant politics, ethics, allegations, criticism, and disagreement regardless of viewpoint. Missing context should favor leaving a comment visible.

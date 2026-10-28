@@ -6,6 +6,7 @@ Development milestones for Redditor Repellent. The manifest remains at the inher
 
 ### Filtering
 
+- Expanded Reddit Moment combinations for consumer shaming: contempt about purchases paired with shaming or moral superiority. Standard and Conservative thresholds, source/quotation safeguards, explanations, and reveal behavior remain in place.
 - Aggressive political-noise filtering: independent opt-in political wording detection on either side, regardless of context or accuracy. Collapses whole reply branches with matched-term explanations and reveal controls. (`4498cdb`)
 - Actual Reddit Moment filtering: Standard/Conservative sensitivity for combined rhetorical patterns, with reasons, live settings, and preserved replies. The historical review lab is not required. (`d4cdba3`)
 - Sarcastic influence framing, rhetorical questions with GIFs, and condescending dismissals. (`8f7ad09`, `a09e4a2`)

@@ -49,6 +49,11 @@ document.getElementById('run').onclick=async()=>{
     check(`${label}: question alone preserved`,!hit(plain));
     const evidence=document.createElement('a');evidence.href='https://example.com/report';evidence.textContent='Report';reactionBody.append(evidence);
     await wait();check(`${label}: source link preserves reaction commentary`,!hit(reaction));
+    const consumer=add('Imagine paying actual money to support these monsters.',old);
+    const buyingChoice=add('I usually avoid that chain because of its labor practices, but I understand why people like the food.',old);
+    await wait();check(`${label}: consumer shaming combination collapses`,hit(consumer));
+    check(`${label}: buying choice preserved`,!hit(buyingChoice));
+    check(`${label}: consumer explanation displayed`,consumer.querySelector('[data-label="REDDIT MOMENT"]')?.title.includes('consumer choices'));
     const condescending=add('Do you actually think before you type? I’m begging you to open a book.',old);
     const correction=add('Please read the second paragraph; it explains the exception.',old);
     await wait();check(`${label}: competence attack plus dismissal collapses`,hit(condescending));

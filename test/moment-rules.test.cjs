@@ -2,6 +2,36 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 require('../src/moment-rules.js');
 const { classify } = globalThis.RedditorRepellentMoments;
+test('consumer contempt combines with shaming or superiority without counting repetition twice', () => {
+  for (const text of [
+    'Imagine paying actual money to support these monsters.',
+    'Imagine prioritizing a shiny new toy over basic ethics.',
+    'Enjoy your blood-stained consumer products, I guess. Some of us have principles.',
+    'People will literally support anything if it has their favorite logo. Couldn’t be me.',
+    'Principles go out of the window when there’s a sale. At least I have a conscience.',
+    'You can turn your conscience off at checkout. Some of us have standards.'
+  ]) {
+    const result = classify(text); assert.ok(result, text);
+    assert.ok(result.signals.some(s => s.id === 'consumer-contempt'), text);
+    assert.equal(new Set(result.signals.map(s => s.id)).size, result.signals.length);
+  }
+  assert.equal(classify('Imagine paying actual money to support these monsters.', 'conservative'), null);
+  assert.ok(classify('Imagine paying actual money to support these monsters. Some of us have principles.', 'conservative'));
+});
+test('consumer choices, concrete criticism and isolated contempt remain visible', () => {
+  for (const text of [
+    'I usually avoid that chain because of its labor practices, but I understand why people like the food.',
+    'I prefer not buying from that company.',
+    'Imagine paying actual money for a game that crashes every hour.',
+    'Some of us have standards for battery life.',
+    'These monsters are difficult to defeat in the game.',
+    'Imagine supporting monster conservation.',
+    'Blood-stained consumer products.',
+    'Support these monsters. Support those monsters.'
+  ]) assert.equal(classify(text), null, text);
+  assert.equal(classify('"Imagine paying actual money to support these monsters."'), null);
+  assert.equal(classify('Imagine paying actual money to support these monsters. https://example.com/report'), null);
+});
 test('aggressive political noise matches topic wording regardless of rhetoric or accuracy', () => {
   const match = globalThis.RedditorRepellentMoments.matchPoliticalNoise;
   for (const text of ['conservatives built a gold statue of this pedo hog', 'Republicans are trash through and through.', 'They will protect orange jesus.', 'PEDO-IN-CHIEF', 'MAGA voters', 'Democrats support this policy.', 'Progressives proposed a tax change.', 'Liberals cited the report: https://example.com', 'The costs of capitalism', 'The benefits of socialism']) assert.ok(match(text), text);

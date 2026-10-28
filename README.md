@@ -10,11 +10,23 @@ A fork of [Not This.](https://github.com/recruiterguy/not-this) by Chris Hoyt, b
 
 ## Where things stand
 
-This project is in early development. Low-effort filters, a narrow political-pivot filter, and a Reddit Moment filter for combinations of rhetorical patterns are available today. Broader contextual classification remains in development.
+This project is in early development. Low-effort filters, contextual political-pivot rules, Reddit Moment pattern filtering, and optional aggressive political-noise blocking are available today. Broader contextual classification remains in development. See the [changelog](CHANGELOG.md) for completed milestones.
 
 Chrome and Microsoft Edge are our first development targets. The inherited code supports both modern Reddit and old.reddit.com and includes Firefox support.
 
 ## What works today
+
+### Choose your filtering level
+
+| Setting | Purpose | Replies |
+| --- | --- | --- |
+| Political derailment | Bounded political pivots with relevance safeguards | Remain visible |
+| Reddit Moment | Combinations of mocking, shaming, and dismissive patterns | Remain visible |
+| Political noise — aggressive | Recognized political wording, even when relevant or factual | Entire branch collapses |
+
+These switches are independent and start off. Enable **Political noise — aggressive** for broad political blocking, or **Reddit Moment → Standard** for rhetorical filtering. Conservative requires stronger evidence. Hover a label for the reason and click its reveal control to inspect a match. Reload the extension from the browser's Extensions page after source updates, then refresh Reddit. Ordinary settings changes apply immediately.
+
+### Available filters
 
 - **Political noise — aggressive (opt-in):** blocks recognized political names, parties, ideologies, and slogans on either side, regardless of relevance, sources, or accuracy. Examples include Republicans/conservatives/MAGA, Democrats/liberals/progressives, capitalism/socialism, and "orange Jesus" or "pedo-in-chief." A matching comment folds its entire reply branch, overriding Keep replies visible, with a POLITICAL NOISE reveal control and the matched term in its explanation. Always-show users remain exempt individually, but their replies can be inside a collapsed parent branch. This is deliberate keyword-based personal topic blocking, separate from contextual derailment detection; it does not classify an author's beliefs and can overmatch ordinary uses of words such as "liberal."
 
@@ -45,7 +57,7 @@ The current rules are deterministic heuristics. They can make mistakes, and shor
 - **More control:** add individual category sensitivity settings and clearer explanations.
 - **Feedback:** eventually support choices such as "Never show me comments like this."
 
-The goal is to filter disruptive behavior, not particular viewpoints. Changes will be incremental and tested against examples that should be filtered and conversations that should stay visible.
+The contextual filters aim to reduce disruptive behavior while preserving useful discussion. The separate aggressive political-noise mode deliberately prioritizes a personal topic preference over relevance. Changes are incremental and tested against both matches and conversations that should stay visible.
 
 See the [grouped roadmap](docs/ROADMAP.md) and [comprehensive filtering targets](docs/FILTERING_TARGETS.md) for the full direction. These are development goals, not claims that every category is already supported.
 

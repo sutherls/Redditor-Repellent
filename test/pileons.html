@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Pile-on filter tests</title>
+<link rel="stylesheet" href="../src/content.css">
+<h1>Pile-on filter tests</h1><button id="run">Run pile-on tests</button><pre id="results">Ready</pre><div class="commentarea" id="comments"></div>
+<script>
+const listeners=[];
+window.chrome={storage:{sync:{get:async()=>({})},local:{get:async()=>({lifetime:0})},onChanged:{addListener:fn=>listeners.push(fn)}},runtime:{onMessage:{addListener(){}},sendMessage:async()=>({})}};
+</script>
+<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script><script src="../src/content.js"></script>
+<script>
+const wait=()=>new Promise(r=>setTimeout(r,400)), comments=document.getElementById('comments');let id=0;
+function add(text,old,parent=comments,author='reader') {
+  const el=document.createElement(old?'div':'shreddit-comment');el.id=`pileon-${++id}`;el.dataset.author=author;el.setAttribute('author',author);
+  el.innerHTML=old?'<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>':'<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+  if(old) el.className='thing comment noncollapsed';
+  body(el,old).textContent=text;parent.append(el);return el;
+}
+const body=(el,old)=>el.querySelector(old?'.md':'[slot="comment"]');
+const children=(el,old)=>el.querySelector(old?'.child':'#comment-children');
+const hit=el=>el.getAttribute('data-rgc-kind')==='pileon';
+document.getElementById('run').onclick=async()=>{
+  const button=document.getElementById('run');button.disabled=true;const results=[];
+  const check=(name,ok)=>results.push(`${ok?'PASS':'FAIL'} ${name}`);
+  try {for(const old of [false,true]) {
+    const label=old?'old':'modern';__rgc.restoreAll();comments.replaceChildren();
+    __rgc.settings={rules:{pileon:true},mode:'hide',keepReplies:false,allowedUsers:['friend']};
+    const text='This clown deserves another shiny gold participation trophy.';
+    const root=add('Discuss the announcement here.',old), branch=children(root,old);
+    const a=add(text,old,branch), b=add('Honestly, '+text,old,branch);
+    await wait();check(`${label}: two occurrences stay open`,!hit(a)&&!hit(b));
+    const c=add('Really, '+text,old,children(b,old));
+    const useful=add('Try connecting the cable to the other input.',old,children(b,old));
+    const otherRoot=add(text,old);
+    const other=add('A separate conversation.',old);
+    add(text,old,children(other,old));add(text,old,children(other,old));
+    const friend=add(text,old,branch,'friend');
+    const negation=add('This clown does not deserve another shiny gold participation trophy.',old,branch);
+    const question=add(text+'?',old,branch);
+    const source=add(text,old,branch);body(source,old).innerHTML+='<a href="https://example.com">Source</a>';
+    await wait();check(`${label}: late third occurrence collapses repetitions`,!hit(a)&&hit(b)&&hit(c));
+    check(`${label}: separate branches stay separate`,!hit(otherRoot)&&!other.querySelector('[data-rgc-kind="pileon"]'));
+    check(`${label}: allowed, question, negation, source kept`,![friend,negation,question,source].some(hit));
+    check(`${label}: useful replies visible in Hide mode`,!children(b,old).classList.contains('rgc-part-hidden')&&!hit(useful)&&!b.classList.contains('rgc-hidden'));
+    const badge=b.querySelector('[data-label="PILE-ON"]');
+    check(`${label}: explanation and stats`,badge?.title.includes('at least three')&&__rgc.stats().byKind.pileon===2);
+    badge.click();__rgc.scan();check(`${label}: reveal survives scan`,!b.classList.contains('rgc-collapsed'));
+    badge.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));check(`${label}: keyboard recollapse`,b.classList.contains('rgc-collapsed'));
+    body(c,old).textContent='A useful replacement with new details about the announcement.';
+    await wait();check(`${label}: edit below threshold restores repetitions`,!hit(b)&&!hit(c));
+    body(c,old).textContent=text;await wait();check(`${label}: edited repetition reapplies`,hit(b)&&hit(c));
+    a.remove();await wait();check(`${label}: removing first drops below threshold`,!hit(b)&&!hit(c));
+    add(text,old,branch);await wait();check(`${label}: first remaining comment stays open`,!hit(b)&&hit(c));
+    listeners.forEach(fn=>fn({rules:{newValue:{pileon:false}}},'sync'));await wait();check(`${label}: live disable restores`,!comments.querySelector('[data-rgc-kind="pileon"]'));
+  }}catch(e){results.push(`FAIL ${e.stack}`);}
+  document.getElementById('results').textContent=results.join('\n');button.disabled=false;
+};
+</script></html>

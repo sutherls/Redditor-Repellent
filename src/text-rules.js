@@ -132,5 +132,38 @@
     return null;
   }
 
-  globalThis.RedditorRepellentTextRules = { isStockPhrase, isCopypasta, chainPattern };
+  // Bounded wording similarity, not semantic agreement or author classification.
+  function pileonSignature(value) {
+    const raw = String(value || '').trim();
+    if (raw.length > 180 || /[?？\d“”"<>]|https?:|www\.|\[[^\]]*\]\(/i.test(raw)) return null;
+    const text = raw.toLowerCase().replace(/[’']/g, '').replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (/\b(?:no|not|never|dont|doesnt|didnt|isnt|arent|wasnt|werent|cant|cannot|wont|wouldnt|shouldnt|couldnt|without|neither|nor|but|however|because|since|example|instead|actually)\b/.test(text)) return null;
+    const words = text.split(' ');
+    if (words.length < 4 || words.length > 24) return null;
+    const tokens = words.filter(w => !/^(?:the|a|an|and|just|really|literally|honestly|lol|lmao)$/.test(w));
+    return new Set(tokens).size >= 4 ? tokens : null;
+  }
+
+  function similarPileon(a, b) {
+    if (!a || !b || Math.abs(a.length - b.length) > 2) return false;
+    if (a.length === b.length) return a.filter((word, i) => word === b[i]).length / a.length >= 0.85;
+    const [short, long] = a.length < b.length ? [a, b] : [b, a];
+    let i = 0;
+    for (const word of long) if (word === short[i]) i++;
+    return i === short.length && short.length / long.length >= 0.85;
+  }
+
+  function pileonDuplicates(signatures) {
+    const groups = [];
+    signatures.forEach((signature, index) => {
+      if (!signature) return;
+      const group = groups.find(g => similarPileon(g.signature, signature));
+      if (group) group.indices.push(index);
+      // Bound comparisons per comment even in very large branches.
+      else if (groups.length < 100) groups.push({ signature, indices: [index] });
+    });
+    return groups.filter(g => g.indices.length >= 3).flatMap(g => g.indices.slice(1));
+  }
+
+  globalThis.RedditorRepellentTextRules = { isStockPhrase, isCopypasta, chainPattern, pileonSignature, similarPileon, pileonDuplicates };
 })();

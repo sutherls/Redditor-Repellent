@@ -61,6 +61,8 @@
 
     <fieldset>
       <legend>Reply-chain filtering</legend>
+      <label class="row"><input type="checkbox" data-rule="pileon"> Collapse repetitive pile-ons</label>
+      <p class="hint">Independent of reply-chain filtering. When three or more short comments use closely similar wording within one top-level comment branch, keeps the first eligible comment and collapses repetitions. Replies stay visible, even in Hide mode. Click PILE-ON to reveal. Skips questions, links, quotes, and negations; wording similarity can still make mistakes. Other enabled filters still apply.</p>
       <label class="row" for="chainSensitivity">Sensitivity
         <select id="chainSensitivity" aria-describedby="chainHint">
           <option value="standard">Standard</option>

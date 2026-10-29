@@ -6,6 +6,7 @@ Development milestones for Redditor Repellent. The manifest remains at the inher
 
 ### Filtering
 
+- Added independent opt-in repetitive pile-on filtering: three or more closely worded short comments in one top-level branch retain the first eligible comment and collapse repetitions. Supports sibling and nested replies, explanation/reveal, always-show users, live settings, and updates after edits/removals. Replies stay visible in Hide mode. Matching is local, bounded, and skips common evidence/question/negation markers.
 - Expanded Reddit Moment combinations for consumer shaming: contempt about purchases paired with shaming or moral superiority. Standard and Conservative thresholds, source/quotation safeguards, explanations, and reveal behavior remain in place.
 - Aggressive political-noise filtering: independent opt-in political wording detection on either side, regardless of context or accuracy. Collapses whole reply branches with matched-term explanations and reveal controls. (`4498cdb`)
 - Actual Reddit Moment filtering: Standard/Conservative sensitivity for combined rhetorical patterns, with reasons, live settings, and preserved replies. The historical review lab is not required. (`d4cdba3`)

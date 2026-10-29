@@ -8,6 +8,7 @@ const RULE_DEFAULTS = {
   politics: false,
   moment: false,
   politicalNoise: false,
+  pileon: false,
 };
 const DEFAULTS = {
   enabled: true, mode: 'collapse', showCounter: true, keepReplies: false,
@@ -19,6 +20,7 @@ const DEFAULTS = {
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
+  pileon: 'repetitive pile-on',
   gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
   bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
   muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment', politicalNoise: 'political noise',

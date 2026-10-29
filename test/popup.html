@@ -44,6 +44,10 @@
       const state = win.testState;
       const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
       const sensitivity = doc.getElementById('clicheSensitivity');
+      const pileon = doc.querySelector('[data-rule="pileon"]');
+      check('Pile-on filter defaults off', !pileon.checked);
+      pileon.click(); await wait();
+      check('Pile-on saves independently of chain filtering', state.stored.rules?.pileon === true && state.stored.rules?.chain === false);
       check('Standard is selected by default', sensitivity.value === 'standard');
       const chainSensitivity = doc.getElementById('chainSensitivity');
       check('Reply-chain sensitivity defaults to Standard', chainSensitivity.value === 'standard');

@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Reaction-image chain checks</title>
+<link rel="stylesheet" href="../src/content.css"><h1>Reaction-image chain checks</h1>
+<button id="run">Run image-chain tests</button><pre id="results">Ready</pre><div id="comments" class="commentarea"></div>
+<script>
+const listeners=[];
+window.chrome={storage:{sync:{get:async()=>({})},local:{get:async()=>({lifetime:0})},onChanged:{addListener:fn=>listeners.push(fn)}},runtime:{onMessage:{addListener(){}},sendMessage:async()=>({})}};
+</script>
+<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script><script src="../src/content.js"></script>
+<script>
+const comments=document.getElementById('comments'), wait=()=>new Promise(r=>setTimeout(r,400));let id=0;
+const body=(el,old)=>el.querySelector(old?'.md':'[slot="comment"]');
+const children=(el,old)=>el.querySelector(old?':scope > .child':':scope > #comment-children');
+function add(old,parent=comments,author='reader'){
+  const el=document.createElement(old?'div':'shreddit-comment');el.id=`images-${++id}`;el.dataset.author=author;el.setAttribute('author',author);
+  el.innerHTML=old?'<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>':'<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+  if(old)el.className='thing comment noncollapsed';parent.append(el);return el;
+}
+function putImage(el,old,source='https://i.redd.it/'+el.id+'.png'){
+  const node=document.createElement(old?'a':'img');node.setAttribute(old?'href':'data-src',source);
+  if(old)node.textContent='<image>';else {node.width=100;node.height=100;}
+  body(el,old).replaceChildren(node);return node;
+}
+function chain(old,n=3,authors=[]){let parent=comments;return Array.from({length:n},(_,i)=>{const el=add(old,parent,authors[i]);putImage(el,old);parent=children(el,old);return el;});}
+const hit=el=>el.getAttribute('data-rgc-kind')==='imageChain';
+document.getElementById('run').onclick=async()=>{
+ const button=document.getElementById('run');button.disabled=true;const results=[];const check=(name,ok)=>results.push(`${ok?'PASS':'FAIL'} ${name}`);
+ try {for(const old of [false,true]){
+  const label=old?'old':'modern';__rgc.restoreAll();comments.replaceChildren();
+  const rules={imageChain:true,chain:false,gif:false,image:false,link:false,phrase:false,emote:false};
+  __rgc.settings={rules,mode:'hide',keepReplies:false,allowedUsers:['friend']};
+  const run=chain(old,2);await wait();check(`${label}: two images stay open`,run.every(el=>!hit(el)));
+  const last=add(old,children(run[1],old));putImage(last,old);run.push(last);
+  const text=add(old,children(run[1],old));body(text,old).textContent='Here is a useful explanation of the repair.';
+  await wait();check(`${label}: late third different image collapses later images`,!hit(run[0])&&hit(run[1])&&hit(last));
+  check(`${label}: text replies preserved in Hide mode`,!children(run[1],old).classList.contains('rgc-part-hidden')&&!run[1].classList.contains('rgc-hidden')&&!hit(text));
+  const badge=run[1].querySelector('[data-label="IMAGE CHAIN"]');check(`${label}: explanation and summary`,badge?.title.includes('not interpreted')&&__rgc.stats().byKind.imageChain===2);
+  badge.click();__rgc.scan();check(`${label}: manual reveal survives rescan`,!run[1].classList.contains('rgc-collapsed'));
+  badge.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));check(`${label}: keyboard recollapse`,run[1].classList.contains('rgc-collapsed'));
+  body(run[1],old).append(' This diagram shows the wiring.');await wait();check(`${label}: caption breaks chain and restores matches`,run.every(el=>!hit(el)));
+  putImage(run[1],old);await wait();check(`${label}: removing caption restores matching`,hit(run[1])&&hit(last));
+  last.remove();await wait();check(`${label}: removal below threshold restores`,!hit(run[1]));
+  const replacement=add(old,children(run[1],old));putImage(replacement,old);await wait();
+  const sibling=chain(old,1)[0];for(let i=0;i<3;i++)putImage(add(old,children(sibling,old)),old);
+  const allowed=chain(old,3,['reader','friend','reader']);
+  const quoted=chain(old);body(quoted[1],old).innerHTML='<blockquote>![img](https://i.redd.it/quote.png)</blockquote>';
+  const missing=chain(old);putImage(missing[1],old,'');
+  const captions=chain(old);body(captions[1],old).append(' Useful comparison.');
+  const unknown=chain(old);putImage(unknown[1],old,'https://example.com/article');
+  const markdown=chain(old);markdown.forEach((el,i)=>body(el,old).textContent=`![img](https://i.redd.it/markdown${i}.png)`);
+  await wait();check(`${label}: siblings do not create a consecutive chain`,!sibling.querySelector('[data-rgc-kind="imageChain"]'));
+  check(`${label}: allowed user breaks chain`,allowed.every(el=>!hit(el)));
+  check(`${label}: quotes, captions, missing URLs and article links preserved`,[quoted,missing,captions,unknown].every(group=>group.every(el=>!hit(el))));
+  check(`${label}: literal markdown images supported`,!hit(markdown[0])&&hit(markdown[1])&&hit(markdown[2]));
+  putImage(missing[1],old);await wait();check(`${label}: late source rechecked`,hit(missing[1])&&hit(missing[2]));
+  if(!old){const emotes=chain(old);emotes.forEach(el=>body(el,old).querySelector('img').width=20);await wait();check(`${label}: small emotes excluded`,emotes.every(el=>!hit(el)));}
+  listeners.forEach(fn=>fn({rules:{newValue:{...rules,chain:true}}},'sync'));await wait();check(`${label}: legacy chain rule does not replace image explanations`,hit(run[1])&&!hit(run[0])&&run[0].getAttribute('data-rgc-kind')!=='chain');
+  listeners.forEach(fn=>fn({rules:{newValue:{...rules,imageChain:false}}},'sync'));await wait();check(`${label}: live disable restores images`,!comments.querySelector('[data-rgc-kind="imageChain"]'));
+ }}catch(e){results.push(`FAIL ${e.stack}`);}
+ document.getElementById('results').textContent=results.join('\n');button.disabled=false;
+};
+</script></html>

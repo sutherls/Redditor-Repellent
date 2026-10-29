@@ -61,6 +61,8 @@
 
     <fieldset>
       <legend>Reply-chain filtering</legend>
+      <label class="row"><input type="checkbox" data-rule="imageChain"> Collapse reaction-image chains</label>
+      <p class="hint">Independent option: three or more consecutive image-only comments, including different images. Keeps the first image; later images collapse individually with IMAGE CHAIN reveal controls, even in Hide mode. Text replies remain visible. Captions break the run. Uses recognized image URLs, not image meaning: useful image sequences can match too. No OCR or image downloads. Other filters still apply. This option takes priority over the older reply-chain rule for image-only comments.</p>
       <label class="row"><input type="checkbox" data-rule="pileon"> Collapse repetitive pile-ons</label>
       <p class="hint">Independent of reply-chain filtering. When three or more short comments use closely similar wording within one top-level comment branch, keeps the first eligible comment and collapses repetitions. Replies stay visible, even in Hide mode. Click PILE-ON to reveal. Skips questions, links, quotes, and negations; wording similarity can still make mistakes. Other enabled filters still apply.</p>
       <label class="row" for="chainSensitivity">Sensitivity

@@ -9,6 +9,7 @@ const RULE_DEFAULTS = {
   moment: false,
   politicalNoise: false,
   pileon: false,
+  imageChain: false,
 };
 const DEFAULTS = {
   enabled: true, mode: 'collapse', showCounter: true, keepReplies: false,
@@ -20,6 +21,7 @@ const DEFAULTS = {
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
+  imageChain: 'image-chain reply',
   pileon: 'repetitive pile-on',
   gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
   bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',

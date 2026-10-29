@@ -9,11 +9,11 @@ The [comprehensive targets](FILTERING_TARGETS.md) are the product brief. Work is
 I develop this fork as a solo developer. My current sequence is:
 
 1. **Repetitive pile-ons — implemented:** independent opt-in matching of closely worded short comments within one top-level branch, retaining the first eligible comment and preserving replies.
-2. **Reaction-image chains — next:** detect runs of different images using reply structure. Caption reading and image meaning are outside the initial deterministic scope.
+2. **Reaction-image chains — implemented:** independent opt-in detection of three or more consecutive image-only comments, including different images. Keeps the first image and collapses later images individually, preserving text replies. Caption reading and image meaning are outside the deterministic scope.
 3. **Hide more like this — planned:** a comment action to save a phrase preference with undo, without implying AI learning or semantic matching. Storage and sync behavior will be documented when implemented.
 4. **Per-subreddit settings — planned:** community-specific preferences with a global fallback.
 
-I am implementing these one at a time. Existing custom patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
+I am implementing these one at a time. Items 1 and 2 are available; item 3 is next. Existing custom patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
 
 Combines target sections 3, 4, 9, and the repetitive-agreement parts of 6.
 
@@ -30,7 +30,7 @@ Repetitive pile-ons are also available: three or more closely worded eligible sh
 
 Remaining: broader paraphrase coverage beyond the implemented near-duplicate rule, further bounded cliché-template variations, lyric and quote sequences, recursive jokes, and better pun-chain evidence. Ordinary acknowledgments and useful text must not be treated as memes merely because they are short. Unknown joke/lyric chains are intentionally preserved by Conservative mode.
 
-Reaction-image targets include meme-taking and "in front of my bath bombs" responses. Recognizing those across different uploads or captions remains planned; URL repetition alone cannot identify them reliably.
+Reaction-image targets include meme-taking and "in front of my bath bombs" responses. The new structural option can collapse these when they occur in consecutive image-only replies, but does not recognize their captions or meaning. Isolated images and unrelated image siblings are outside this chain rule. Useful image sequences can also match.
 
 ## 2. Context and off-topic derailment — in progress
 

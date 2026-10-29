@@ -18,7 +18,7 @@ The all-time filtering counter is a single number in local extension storage. It
 
 ## Future features and support
 
-Different-image reaction chains, a Hide more like this action, per-subreddit settings, and optional OpenAI integration are not implemented. Any future data-sharing behavior will be documented before introduction.
+Reaction-image chains use only the existing page's image URLs and reply structure; no images are downloaded for analysis. A Hide more like this action, per-subreddit settings, and optional OpenAI integration are not implemented. Any future data-sharing behavior will be documented before introduction.
 
 If you voluntarily submit an issue, GitHub processes the information you include. Avoid posting private information in public issues.
 

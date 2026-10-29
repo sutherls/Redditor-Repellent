@@ -28,6 +28,7 @@
     moment: false, // combinations of low-value rhetorical patterns
     politicalNoise: false, // aggressive political topic blocking, including replies
     pileon: false, // repeated short wording within one top-level comment branch
+    imageChain: false, // consecutive image-only replies, including different images
   };
 
   // A reply counts as part of a chain when it's low-effort or at most this many words.
@@ -39,6 +40,8 @@
   const { isStockPhrase, isCopypasta, chainPattern } = globalThis.RedditorRepellentTextRules;
   const { pileonSignature, pileonDuplicates } = globalThis.RedditorRepellentTextRules;
   const pileonCache = new WeakMap();
+  const imageChainCache = new WeakMap();
+  const IMAGE_CHAIN_REASON = 'At least three consecutive image-only comments. Image content is not interpreted; different images can qualify. The first image stays open and text replies remain visible.';
   const PILEON_REASON = 'Closely repeated short wording: at least three similar comments in this branch. The first eligible comment stays open; replies remain visible. Similar wording can still have different meanings.';
   const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
   // An unpacked-extension update can leave a page without a newly added module.
@@ -71,12 +74,14 @@
 
   // Human labels for the banner/popup, and the short badge shown on the comment.
   const LABELS = {
+    imageChain: 'image-chain reply',
     pileon: 'repetitive pile-on',
     gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
     bot: 'bot', pasta: 'copypasta', quote: 'quote-only', short: 'short', score: 'downvoted',
     muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment', politicalNoise: 'political noise',
   };
   const BADGES = {
+    imageChain: 'IMAGE CHAIN',
     pileon: 'PILE-ON',
     gif: 'GIF', image: 'IMG', emote: 'EMOJI', phrase: 'LOW EFFORT', link: 'LINK', bot: 'BOT',
     pasta: 'PASTA', quote: 'QUOTE', short: 'SHORT', score: 'DOWNVOTED', muted: 'MUTED',
@@ -354,7 +359,7 @@
   // A chain is mostly its replies, so "keep replies visible" doesn't apply to it.
   function keepsReplies(el) {
     if (el.getAttribute(KIND_ATTR) === 'politicalNoise') return false;
-    return ['politics', 'moment', 'pileon'].includes(el.getAttribute(KIND_ATTR)) || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
+    return ['politics', 'moment', 'pileon', 'imageChain'].includes(el.getAttribute(KIND_ATTR)) || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
   }
 
   function setOwnCollapsed(el, collapsed) {
@@ -377,7 +382,7 @@
     badge.className = BADGE_CLASS;
     badge.dataset.label = BADGES[kind] || 'LOW EFFORT';
     badge.textContent = badge.dataset.label;
-    badge.title = kind === 'pileon' ? PILEON_REASON : ['moment', 'politicalNoise'].includes(kind) ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
+    badge.title = kind === 'imageChain' ? IMAGE_CHAIN_REASON : kind === 'pileon' ? PILEON_REASON : ['moment', 'politicalNoise'].includes(kind) ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
     meta.appendChild(badge);
     return badge;
   }
@@ -409,13 +414,13 @@
     const hidden = el.classList.contains(OWN_CLASS);
     badge.textContent = hidden ? `${label} · show` : `${label} · hide`;
     const kind = el.getAttribute(KIND_ATTR);
-    badge.title = (kind === 'pileon' ? `${PILEON_REASON} ` : ['moment', 'politicalNoise'].includes(kind) ? `${momentReasons.get(el)} ` : kind === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
+    badge.title = (kind === 'imageChain' ? `${IMAGE_CHAIN_REASON} ` : kind === 'pileon' ? `${PILEON_REASON} ` : ['moment', 'politicalNoise'].includes(kind) ? `${momentReasons.get(el)} ` : kind === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
   }
 
   function apply(el, kind) {
     el.setAttribute(KIND_ATTR, kind);
 
-    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise', 'pileon'].includes(kind)) {
+    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain'].includes(kind)) {
       el.classList.add(HIDDEN_CLASS);
       el.setAttribute(ATTR, 'hidden');
       tally(el);
@@ -557,7 +562,7 @@
     } else {
       el.setAttribute(ATTR, 'skip');
     }
-    if (settings.rules.chain) collapseChainEndingAt(el);
+    if (settings.rules.chain && !(settings.rules.imageChain && isReactionImage(el))) collapseChainEndingAt(el);
   }
 
   // ---------------------------------------------------------------------------
@@ -614,7 +619,8 @@
   }
 
   function isChainLink(el) {
-    if (['politics', 'moment', 'politicalNoise', 'pileon'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
+    if (settings.rules.imageChain && isReactionImage(el)) return false;
+    if (['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
     const body = bodyOf(el);
     if (!body || body.childNodes.length === 0 || isAllowed(el)) return false;
     const { kind, words } = classified(el, body);
@@ -675,6 +681,40 @@
   let revealed = false;
   let revealedCount = 0;
 
+  function isReactionImage(el) {
+    const body = bodyOf(el);
+    if (!body || body.childNodes.length === 0) return false; // retry lazy bodies
+    if (!imageChainCache.has(el)) {
+      const image = body?.querySelector('img, faceplate-img');
+      const eligible = !!body && !body.querySelector('blockquote, pre, code') && !!imageChainPattern(body)
+        && !(image && mediaKind(image, image) === 'emote')
+        && !EMOTE_HINT.test(body.textContent);
+      imageChainCache.set(el, eligible);
+    }
+    return imageChainCache.get(el);
+  }
+
+  function scanImageChains() {
+    if (!settings.rules.imageChain) return;
+    const comments = [...document.querySelectorAll('shreddit-comment, .commentarea .thing.comment')];
+    const runs = new Map(), wanted = new Set();
+    for (const el of comments) {
+      const kind = el.getAttribute(KIND_ATTR);
+      if (isAllowed(el) || !metaContainer(el) || (kind && !['imageChain', 'image', 'gif'].includes(kind)) || !isReactionImage(el)) continue;
+      const parent = parentComment(el), prior = runs.get(parent);
+      const run = { parent: prior ? parent : null, length: (prior?.length || 0) + 1 };
+      runs.set(el, run);
+      if (run.length < 3) continue;
+      // Mark only image replies, never the first image or unrelated text replies.
+      // Stop at an already-marked ancestor so long runs remain linear.
+      for (let node = el; runs.get(node)?.parent && !wanted.has(node); node = runs.get(node).parent) wanted.add(node);
+    }
+    for (const el of comments) {
+      if (el.getAttribute(KIND_ATTR) === 'imageChain' && !wanted.has(el)) { restore(el); consider(el); }
+      if (wanted.has(el) && !el.hasAttribute(KIND_ATTR)) apply(el, 'imageChain');
+    }
+  }
+
   function scanPileons() {
     if (!settings.rules.pileon || typeof pileonDuplicates !== 'function' || typeof pileonSignature !== 'function') return;
     const branches = new Map();
@@ -722,6 +762,7 @@
     }
     document.querySelectorAll(`shreddit-comment:not([${ATTR}])`).forEach(consider);
     document.querySelectorAll(`.commentarea .thing.comment:not([${ATTR}])`).forEach(consider);
+    scanImageChains();
     scanPileons();
     updateCounter();
   }
@@ -906,7 +947,7 @@
       text.textContent = `Showing ${describe(count, revealedByKind)}`;
       btn.textContent = 'Hide again';
     } else {
-      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise || s.byKind.pileon ? 'hidden or collapsed' : 'hidden') : 'collapsed';
+      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise || s.byKind.pileon || s.byKind.imageChain ? 'hidden or collapsed' : 'hidden') : 'collapsed';
       const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
       text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';
@@ -945,6 +986,7 @@
     for (const el of changed) {
       classCache.delete(el);
       pileonCache.delete(el);
+      imageChainCache.delete(el);
       processedBodies.set(el, bodyOf(el));
       // A user-expanded comment remains expanded, even if Reddit edits it.
       if (el.getAttribute(ATTR) === 'collapsed' &&
@@ -1011,7 +1053,7 @@
       childList: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['src', 'data-src', 'href', 'post-title', 'subreddit-name', 'subreddit-prefixed-name', 'data-subreddit', 'depth'],
+      attributeFilter: ['src', 'data-src', 'href', 'alt', 'title', 'width', 'height', 'post-title', 'subreddit-name', 'subreddit-prefixed-name', 'data-subreddit', 'depth'],
       subtree: true,
     });
   });

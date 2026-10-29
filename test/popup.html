@@ -44,6 +44,10 @@
       const state = win.testState;
       const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
       const sensitivity = doc.getElementById('clicheSensitivity');
+      const imageChain = doc.querySelector('[data-rule="imageChain"]');
+      check('Image chains default off', !imageChain.checked);
+      imageChain.click(); await wait();
+      check('Image chains save independently', state.stored.rules?.imageChain === true && state.stored.rules?.chain === false);
       const pileon = doc.querySelector('[data-rule="pileon"]');
       check('Pile-on filter defaults off', !pileon.checked);
       pileon.click(); await wait();

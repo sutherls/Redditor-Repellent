@@ -28,6 +28,9 @@ These switches are independent and start off. Enable **Political noise — aggre
 
 ### Available filters
 
+- **Reaction-image chains (opt-in):** enable **Reply-chain filtering → Collapse reaction-image chains**. Three or more consecutive image-only comments can form a chain even when every image is different. The first stays open; later images collapse individually with **IMAGE CHAIN** explanations and reveal controls. Text replies remain visible, including in Hide mode. Always-show users and captions break the run. Other enabled filters still apply, but this option takes priority over the older reply-chain rule for image-only comments.
+  - Detects structure, not image meaning. Uses supported image URLs in rendered images, image-only links, or literal Markdown. Small emotes, quoted/code images, missing URLs, and video players do not qualify. It cannot read “your meme” or “bath bombs” text inside images; useful image sequences can also match. Late content, edits, and removals are rechecked. No OCR, image downloads, AI, or new permissions.
+
 - **Repetitive pile-ons (opt-in):** enable **Reply-chain filtering → Collapse repetitive pile-ons**. When at least three eligible short comments have closely similar wording within one top-level comment branch, the first stays open and subsequent matches collapse with a **PILE-ON** explanation and reveal control. Replies remain visible even in Hide mode. This also catches side-by-side replies; it does not merge separate top-level branches. Other enabled filters still apply to the first comment.
   - Matches English wording of 4–24 words, up to 180 characters, with at least four distinct non-filler words. Ignores case, punctuation, and a small set of fillers; requires at least 85% ordered token agreement. Each branch compares against at most 100 representative comments to bound work. This is wording similarity, not semantic understanding: paraphrases can escape and similar useful comments can match.
   - Skips questions, negations, numbers, explanatory markers, quotes, links, code, and media. Always-show users are excluded. Late replies, edits, and removals are rechecked, and an individually revealed match stays open while it remains matched. The setting is independent of the existing reply-chain toggle and sensitivity.
@@ -53,7 +56,7 @@ The current rules are deterministic heuristics. They can make mistakes, and shor
 
 ## What I plan to build next
 
-Next, one feature at a time: reaction-image chains across different images, a local **Hide more like this** action with undo, and per-subreddit settings. These are not implemented yet. Existing image-chain detection recognizes repeated image URLs; it does not read captions or understand an image's meaning.
+Repetitive pile-ons and structural reaction-image chains are implemented. Next, one feature at a time: a **Hide more like this** action with undo, then per-subreddit settings. These two features are not implemented yet. Image filtering does not read captions or understand an image's meaning.
 
 - **Political derailment:** catch unrelated political or ideological commentary regardless of affiliation, without simply blocking political keywords.
 - **Repetition and joke chains:** improve detection of recycled jokes, song lyric chains, and low-effort pile-ons.
@@ -141,6 +144,8 @@ The same server also provides `test/lifecycle.html` for comment replacement, edi
 `test/pileons.html` checks branch isolation, late repetitions, protected comments, explanation/reveal, keyboard controls, edits, removals, and live disabling on both layouts. The popup fixture also checks that pile-on settings save independently of reply-chain settings.
 
 The pile-on milestone passed 41 Node rule tests and 94 browser-fixture checks (26 pile-on, 22 popup, and 46 existing chain checks). These are regression results, not an accuracy estimate across Reddit. The manifest remains at development version **1.2.1**.
+
+`test/image-chains.html` checks different-image chains, first-image preservation, text replies, captions, exclusions, reveal, late sources, edits/removals, live settings, and interaction with the older chain rule on both layouts.
 
 Build a distributable ZIP on Windows:
 

@@ -25,6 +25,7 @@ Development milestones for Redditor Repellent. The manifest remains at the inher
 
 ### Documentation and limitations
 
+- Refreshed README, store-listing draft, privacy policy, roadmap, and product brief for the current pile-on and rhetorical filters. Clarified the next three planned features, browser sync, and sole-developer ownership; retained upstream credit and historical prototype records.
 - Added filtering targets, synthetic examples, and this changelog; README now compares the three political/rhetorical filtering modes.
 - Filtering is deterministic and local, with no AI integration or extra permissions. English-language rules can miss comments or overmatch.
 - Aggressive political noise intentionally overrides relevance and folds entire branches. Always-show users are exempt individually, but their replies can sit inside a collapsed parent.

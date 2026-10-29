@@ -10,9 +10,9 @@ A fork of [Not This.](https://github.com/recruiterguy/not-this) by Chris Hoyt, b
 
 ## Where things stand
 
-This project is in early development. Low-effort filters, contextual political-pivot rules, Reddit Moment pattern filtering, and optional aggressive political-noise blocking are available today. Broader contextual classification remains in development. See the [changelog](CHANGELOG.md) for completed milestones.
+I develop and maintain this fork as a solo developer, building on the upstream project credited below. This project is in early development. Low-effort filters, repetitive pile-on detection, contextual political-pivot rules, Reddit Moment pattern filtering, and optional aggressive political-noise blocking are available today. Broader contextual classification remains in development. See the [changelog](CHANGELOG.md) for completed milestones.
 
-Chrome and Microsoft Edge are our first development targets. The inherited code supports both modern Reddit and old.reddit.com and includes Firefox support.
+Chrome and Microsoft Edge are my first development targets. The inherited code supports both modern Reddit and old.reddit.com and includes Firefox support.
 
 ## What works today
 
@@ -51,7 +51,9 @@ These switches are independent and start off. Enable **Political noise — aggre
 
 The current rules are deterministic heuristics. They can make mistakes, and short reply chains are detected by structure and length, not by understanding the conversation.
 
-## Where we're headed
+## What I plan to build next
+
+Next, one feature at a time: reaction-image chains across different images, a local **Hide more like this** action with undo, and per-subreddit settings. These are not implemented yet. Existing image-chain detection recognizes repeated image URLs; it does not read captions or understand an image's meaning.
 
 - **Political derailment:** catch unrelated political or ideological commentary regardless of affiliation, without simply blocking political keywords.
 - **Repetition and joke chains:** improve detection of recycled jokes, song lyric chains, and low-effort pile-ons.
@@ -69,7 +71,7 @@ See the [grouped roadmap](docs/ROADMAP.md) and [comprehensive filtering targets]
 
 Filtering currently runs in your browser using deterministic rules. There is no AI integration, tracking, analytics, or extension-initiated network traffic.
 
-Preferences use the browser's extension sync storage and may sync through your browser account. The all-time counter stays in local extension storage. Permissions are limited to storage and Reddit pages. See [PRIVACY.md](PRIVACY.md) for the inherited privacy policy.
+Preferences use the browser's extension sync storage and may sync through your browser account. The all-time counter stays in local extension storage. Permissions are limited to storage and Reddit pages. See [PRIVACY.md](PRIVACY.md) for the current privacy policy.
 
 Future OpenAI API integration may be offered as an optional feature for more advanced classification. There is no requirement for local AI models. Any future data-sharing behavior will be documented before that feature is introduced.
 
@@ -93,7 +95,7 @@ If an update leaves a new filter unavailable, use **Reload** on Redditor Repelle
 
 The popup also has a **Reload extension** button that saves pending settings before restarting the extension. Refresh your open Reddit tabs afterward to load the updated code. Ordinary settings changes apply automatically and do not require a reload.
 
-The extension rechecks comments when Reddit replaces their bodies or updates their text after loading. This addresses a reproduced stale-comment problem; if filtering still disappears after a thread refresh, report the thread URL and what the popup shows so we can investigate that case.
+The extension rechecks comments when Reddit replaces their bodies or updates their text after loading. This addresses a reproduced stale-comment problem; if filtering still disappears after a thread refresh, report the thread URL and what the popup shows so I can investigate that case.
 
 On old Reddit, automatic collapses are marked so Reddit Enhancement Suite does not save them as your manual choices. Matching comments that Reddit, RES, or you already collapsed still receive labels and appear in the summary as **already collapsed**, without increasing the lifetime tally. They stay closed when settings change; clicking **Show them** explicitly opens matched comments, including those prior collapses.
 
@@ -105,7 +107,9 @@ Plain JavaScript, HTML, and CSS. No dependency installation or build step is nee
 |---|---|
 | `manifest.json` | Extension configuration and permissions |
 | `src/content.js` | Reddit page handling, classification, collapsing, and counters |
-| `src/text-rules.js` | Stock-phrase and copypasta matching |
+| `src/text-rules.js` | Stock phrases, copypasta, meme families, and bounded pile-on similarity |
+| `src/politics-rules.js` | Political-pivot templates and context safeguards |
+| `src/moment-rules.js` | Reddit Moment combinations and aggressive political wording matching |
 | `src/media-rules.js` | Repeated-image URL identity without image downloads |
 | `src/patterns.js` | Normalization and custom pattern matching |
 | `src/background.js` | Toolbar badge and lifetime tally |
@@ -119,9 +123,10 @@ node --test test/text-rules.test.cjs
 node --test test/media-rules.test.cjs
 node --test test/politics-rules.test.cjs
 node --test test/moment-rules.test.cjs
+node --test test/pileon-rules.test.cjs
 ```
 
-To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765`, then open `http://localhost:8765/test/fixture.html` and click **Run all scenarios**.
+To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765 --bind 127.0.0.1`, then open `http://127.0.0.1:8765/test/fixture.html` and click **Run all scenarios**.
 
 The same server also provides `test/lifecycle.html` for comment replacement, edits, and settings updates, and `test/popup.html` for save-before-reload behavior. These fixtures simulate Reddit markup and browser extension APIs; they do not replace testing the installed extension on Reddit.
 
@@ -133,7 +138,11 @@ The same server also provides `test/lifecycle.html` for comment replacement, edi
 
 `test/moments.html` checks actual Reddit Moment collapse/reveal, explanations, reply preservation, sensitivity changes, edited comments, quotations, and live disabling on both layouts.
 
-For a distributable ZIP on Windows:
+`test/pileons.html` checks branch isolation, late repetitions, protected comments, explanation/reveal, keyboard controls, edits, removals, and live disabling on both layouts. The popup fixture also checks that pile-on settings save independently of reply-chain settings.
+
+The pile-on milestone passed 41 Node rule tests and 94 browser-fixture checks (26 pile-on, 22 popup, and 46 existing chain checks). These are regression results, not an accuracy estimate across Reddit. The manifest remains at development version **1.2.1**.
+
+Build a distributable ZIP on Windows:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/package.ps1

@@ -4,6 +4,8 @@
 
 **Guiding principle:** Filter behavior, not political affiliation. Preserve relevant, substantive discussion regardless of viewpoint. Prioritize context over individual keywords.
 
+This is my long-term product brief, not a list of implemented features. See the [README](../README.md) for current behavior and the [roadmap](ROADMAP.md) for upcoming work. The separate opt-in **Political noise — aggressive** mode intentionally overrides the contextual safeguards below: it blocks recognized political wording even when relevant or factual and collapses entire reply branches. Reddit Moment filtering can also match rhetorical patterns in a relevant discussion.
+
 ## 1. Political & ideological contamination
 
 - Unsolicited political commentary injected into completely unrelated discussions.
@@ -202,9 +204,9 @@
 
 ## Overall desired outcome
 
-**We are not trying to create a politically conservative Reddit, a politically liberal Reddit, or a humorless Reddit.**
+**I am not trying to create a politically conservative Reddit, a politically liberal Reddit, or a humorless Reddit.**
 
-We're trying to create Reddit without the obnoxious cultural baggage commonly associated with Redditors.
+I am trying to create Reddit without the obnoxious cultural baggage commonly associated with Redditors.
 
 A great Reddit experience should still contain funny comments, heated but meaningful debates, informed criticism, relevant political discussions, genuine disagreement, useful information, and entertaining conversations.
 

@@ -1,83 +1,65 @@
-# Store listing copy
+# Store listing draft
 
-Paste-ready text for the Chrome Web Store, Firefox Add-ons, and Edge Add-ons listings.
+Prepared copy for a future browser-store submission. This fork has not published a store release. Chrome and Microsoft Edge are my first development targets; Firefox support is inherited from the original project.
 
 ## Name
 
 Redditor Repellent
 
-## Short description (132 characters max on Chrome)
+## Short description
 
 Reddit without the Redditors. Customizable filters for repetitive comments, memes, bots, and low-effort reply chains.
 
 ## Full description
 
-You open a Reddit thread to see what people think. What you get is a reaction GIF, then "This.", then "lol", then a bot telling you it's a bot, then someone quoting the comment above them and adding nothing. Somewhere under all that is the actual discussion.
+Reddit without the Redditors. Cut through circlejerks, tired memes, political grandstanding, and repetitive commentary to find the discussion you came for.
 
-Redditor Repellent folds the low-effort replies out of the way. They're still there, marked with a small badge that says why, and any one of them expands with a click. What's left is the thread you came for.
+I develop Redditor Repellent as a solo developer. It builds on Not This. by Chris Hoyt, preserving its useful filtering and adding more control over repetitive and disruptive comments.
 
-WHAT IT COLLAPSES
+### Choose what gets filtered
 
-Each of these has its own switch in the popup, so you decide what counts.
+- GIF-only replies, emoji/emotes, stock phrases, bare links, bots, and known copypasta.
+- Optional static-image, quote-only, short-comment, low-score, and reply-chain filters.
+- Independent Standard/Conservative sensitivity for clichés and reply chains. Conservative chains recognize selected meme families, repeated reactions, and repeated image URLs, including supported Reddit preview variants.
+- **Repetitive pile-ons:** when three or more eligible short comments use closely similar wording in one top-level branch, retain the first and collapse repetitions. Includes sibling replies. Questions, negations, numbers, sources, quotes, and media are skipped.
+- **Reddit Moment:** combinations of mocking, shaming, dismissive, and formulaic rhetorical patterns, including consumer shaming. Standard and Conservative sensitivity; topic relevance alone does not exempt a match.
+- **Political derailment:** limited political-pivot templates checked against visible post, subreddit, and ancestor context.
+- **Political noise — aggressive:** optional political wording blocking even when relevant or factual. A matching comment folds its whole reply branch. Covers wording on either political side and can hide useful discussion.
 
-• GIF-only replies, whether from the GIPHY picker or uploaded
-• Emoji-only and emote-only comments
-• Stock phrases: "This.", "Came here to say this", "Take my upvote", "Username checks out", "lol", "F", r/whoosh, and a few hundred relatives. Whole-comment matches only, so "This is the part everyone misses" stays open.
-• Bare links with no commentary
-• Bot replies: AutoModerator, accounts ending in "bot", "I am a bot" footers, RemindMe! requests
-• Well-known copypasta
+Pile-ons, Reddit Moment, political derailment, and aggressive political noise start off. Each has an independent switch.
 
-Off by default, because they take judgment: image-only comments, replies that just quote the parent, comments under a word count you pick, comments below a score you pick, and reply chains (pun threads, "and my axe", song lyrics posted a line at a time).
+### Make it yours
 
-MAKE IT YOURS
+Add wildcard or regex patterns, mute usernames, or maintain an always-show list. A muted user takes precedence if also placed on the always-show list. An allowed user's reply may still sit inside a collapsed ancestor branch.
 
-• Your own patterns: add phrases, one per line. "rock and stone*" catches comments that start with it, "*and my axe*" catches any that mention it
-• Always show: usernames that are never collapsed, like a summary bot you actually want to read
-• Mute list: usernames you're done reading
+Choose collapse or hide for ordinary filters. Pile-ons, Reddit Moment, and political pivots always retain replies and use reversible collapse, even in Hide mode. Aggressive political noise always collapses the entire branch. Hover a label for its explanation and use its reveal control to inspect the comment.
 
-WHAT IT NEVER DOES
+A summary appears when comments match, with Show them/Hide again controls. The toolbar shows a count, and a local lifetime counter tracks automatic filtering. Settings apply live. After updating extension files, reload the extension and refresh Reddit.
 
-• Collapse a comment that has real words in it (unless you turn on the short-comment, score, or reply-chain rules, or add your own patterns)
-• Re-collapse a comment you've expanded
-• Touch a comment Reddit already collapsed
-• Vote, post, report, or click anything on your behalf
-• Send anything anywhere. No accounts, no analytics, no network requests. Your settings and a single all-time counter live in your browser and nowhere else.
+Works with modern and old Reddit comment layouts. Existing Reddit/user/RES collapse state is preserved during ordinary filtering; matched prior collapses can receive labels and appear in the summary. The explicit Show them action can open those matched prior collapses.
 
-SEE WHAT IT SAVED YOU
+### Privacy and limitations
 
-A line above each thread reads "22 low-effort comments collapsed (7 GIF, 4 "this", 4 bot)" with a Show them button if you want to check its work. The same count sits on the toolbar icon, and the popup keeps a running all-time total.
+All classification is deterministic and runs in your browser. No AI service, analytics, tracking, or extension-initiated network requests. Preferences, including custom patterns and user lists, use browser extension sync storage and may sync through your browser account. The lifetime counter stays in local extension storage. See [the privacy policy](PRIVACY.md).
 
-THE DETAILS
+Rules can miss unwanted comments and collapse useful ones. Pile-ons detect similar wording, not equivalent meaning. Image-chain detection compares URLs; it does not read captions or understand images. Feed/post filtering, different-image reaction chains, a Hide more like this action, and per-subreddit settings are not implemented yet.
 
-• Works on new Reddit and old.reddit.com
-• Collapse them with a badge, or hide them from the page entirely
-• Keep replies visible under a collapsed comment, if you'd rather not lose the conversation beneath a GIF
-• Open source and unminified. Every line is on GitHub: https://github.com/sutherls/Redditor-Repellent
-• Found a phrase it should catch, or one it shouldn't have? Open an issue on GitHub.
+Open source under the MIT license. Original Not This. copyright and attribution are preserved. Not affiliated with or endorsed by Reddit, Inc.
 
-Not affiliated with or endorsed by Reddit, Inc.
+[Source and support](https://github.com/sutherls/Redditor-Repellent) · [Report an issue](https://github.com/sutherls/Redditor-Repellent/issues)
 
-## Category
+## Permission explanations
 
-Chrome: Productivity (or Social & Communication). Firefox: Social & Communication.
+- **storage:** saves filter preferences, user lists, custom patterns, and a lifetime counter. Preferences may use browser sync; the counter is local.
+- **Reddit host access:** reads visible comments and relevant page context to filter comments and modify their display. Content scripts are restricted to the Reddit hosts listed in the manifest.
+- **Developer data collection:** none. Comment classification and comparison happen on the device; the extension does not upload browsing content.
 
-## Permission justifications (Chrome privacy tab)
+## Single purpose
 
-- **storage:** saves the user's rule toggles and settings, and a single all-time counter.
-- **Host permission for reddit.com:** the extension reads comment text on Reddit pages to
-  decide which comments to collapse, and modifies the page to collapse them. It runs nowhere else.
-- **Data collection:** none. The extension makes no network requests.
+Customizable filtering of repetitive, low-effort, and unwanted comments on Reddit comment pages.
 
-## Single purpose (Chrome)
+## Suggested screenshots
 
-Collapses low-effort comments on Reddit comment pages.
-
-## Website / support URL
-
-https://github.com/sutherls/Redditor-Repellent
-
-## Screenshot ideas (1280×800)
-
-1. A busy thread before/after, with the banner "22 low-effort comments collapsed (…)" visible.
-2. The popup with the rule switches.
-3. A close-up of two collapsed comments with GIF and BOT badges, one expanded.
+1. A matched thread with the summary and reveal controls visible.
+2. Independent popup controls for pile-ons, Reddit Moment, and political filtering.
+3. A PILE-ON explanation with the original comment and useful replies still visible.

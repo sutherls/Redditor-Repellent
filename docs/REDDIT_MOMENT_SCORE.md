@@ -1,5 +1,7 @@
 # Reddit Moment score — development brief
 
+I retain this document as a historical prototype record. For the current extension's Reddit Moment combinations, consumer-shaming additions, aggressive political-noise switch, and separate repetitive pile-on filter, see the [README](../README.md) and [changelog](../CHANGELOG.md). The examples and prototype measurements below are not a current feature checklist.
+
 Status: this document describes the earlier isolated review prototype under `test/reddit-moment/`. The user subsequently requested an actual extension filter instead. That filter is implemented separately in `src/moment-rules.js` and wired into the content script and popup, with opt-in collapse/reveal and Standard/Conservative sensitivity. The prototype's weights, results, and limitations below are historical and do not describe current production-filter coverage. The review lab is not required for using the extension.
 
 Open the fixture through a local server, or run `node scripts/build-review.cjs` and open `dist/reddit-moment-review.html` directly. The standalone page includes all examples and works offline. Run `node --test test/reddit-moment.test.cjs` for the scorer checks.

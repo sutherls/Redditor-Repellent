@@ -6,6 +6,15 @@ The [comprehensive targets](FILTERING_TARGETS.md) are the product brief. Work is
 
 ## 1. Repetitive comments and reply chains — in progress
 
+I develop this fork as a solo developer. My current sequence is:
+
+1. **Repetitive pile-ons — implemented:** independent opt-in matching of closely worded short comments within one top-level branch, retaining the first eligible comment and preserving replies.
+2. **Reaction-image chains — next:** detect runs of different images using reply structure. Caption reading and image meaning are outside the initial deterministic scope.
+3. **Hide more like this — planned:** a comment action to save a phrase preference with undo, without implying AI learning or semantic matching. Storage and sync behavior will be documented when implemented.
+4. **Per-subreddit settings — planned:** community-specific preferences with a global fallback.
+
+I am implementing these one at a time. Existing custom patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
+
 Combines target sections 3, 4, 9, and the repetitive-agreement parts of 6.
 
 Available now:
@@ -17,7 +26,9 @@ Available now:
 - Repeated image-only chains use image URL identity, including known Reddit preview variants. This detects repetition, not the image's meaning; different reaction images and embedded captions are not classified.
 - Minimum chain length, protection for always-show users, and preservation of the first chain comment and useful sibling replies, subject to other enabled rules.
 
-Remaining: further carefully bounded cliché-template variations, lyric and quote sequences, near-duplicate replies, recursive jokes, and better pun-chain evidence. Ordinary acknowledgments and useful text must not be treated as memes merely because they are short. Unknown joke/lyric chains are intentionally preserved by Conservative mode.
+Repetitive pile-ons are also available: three or more closely worded eligible short comments in a branch retain the first and collapse repetitions, including sibling replies. Matching skips questions, negations, numbers, sources, quotes, and media. It supports always-show users, reveal controls, live settings, and rechecks after edits or removals.
+
+Remaining: broader paraphrase coverage beyond the implemented near-duplicate rule, further bounded cliché-template variations, lyric and quote sequences, recursive jokes, and better pun-chain evidence. Ordinary acknowledgments and useful text must not be treated as memes merely because they are short. Unknown joke/lyric chains are intentionally preserved by Conservative mode.
 
 Reaction-image targets include meme-taking and "in front of my bath bombs" responses. Recognizing those across different uploads or captions remains planned; URL repetition alone cannot identify them reliably.
 
@@ -40,6 +51,8 @@ Combines sections 5, 6, 7, 8, and bait-related parts of 9.
 Reddit Moment tuning also covers direct attacks on comprehension/intelligence paired with dismissive instructions (for example, a personal put-down followed by "educate yourself"). Standard catches these combinations; Conservative requires additional evidence. Standalone reading questions, constructive instructions, and individual weak signals are preserved by these additions.
 
 Use multiple observable signals and category-specific controls for formulaic provocation, empty dismissals, shame, and repetitive outrage. Profanity, negativity, disagreement, a political name, or a phrase such as "actually" is insufficient by itself. Do not claim to establish bad faith, fabricated stories, AI authorship, or hidden motives from writing style alone.
+
+Recent Reddit Moment additions cover consumer contempt combined with shaming or moral superiority, alongside sarcastic influence framing and bounded rhetorical questions accompanied by GIFs. These are wording patterns, not judgments about intent or the meaning of an image. Ordinary criticism and standalone weak signals remain outside these combinations.
 
 ## 4. Feed filtering and user feedback — planned
 

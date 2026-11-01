@@ -107,7 +107,7 @@
   }
 
   function normalizeSettings(raw) {
-    const r = raw || {};
+    const r = globalThis.RedditorRepellentPatterns.communitySettings(raw || {}, globalThis.RedditorRepellentPatterns.communityFromPath(location.pathname));
     const s = { ...DEFAULTS, ...r };
     s.rules = { ...RULE_DEFAULTS, ...(r.rules || {}) };
     s.rules.link = false; // Ignore the retired bare-link preference.
@@ -142,6 +142,7 @@
   const storage = api?.storage?.sync ?? null;
 
   let rawSettings = {};
+  let activeCommunity = globalThis.RedditorRepellentPatterns.communityFromPath(location.pathname);
   let settings = normalizeSettings({});
 
   // ---------------------------------------------------------------------------
@@ -815,6 +816,12 @@
   }
 
   function scan() {
+    const community = globalThis.RedditorRepellentPatterns.communityFromPath(location.pathname);
+    if (community !== activeCommunity) {
+      activeCommunity = community;
+      settings = normalizeSettings(rawSettings);
+      classCache = new WeakMap(); revealed = false; restoreAll();
+    }
     if (!settings.enabled) { document.querySelectorAll('.rgc-feedback-button, .rgc-exception-button, .rgc-personal-dialog').forEach(el => el.remove()); return; }
     if (revealed) return;
     for (const el of tragedyCandidates) {
@@ -854,6 +861,8 @@
       commentsChecked: [...document.querySelectorAll('shreddit-comment, .commentarea .thing.comment')]
         .filter(el => checkedComments.has(el) && bodyOf(el)?.childNodes.length > 0).length,
       isCommentThread: /\/comments\//.test(location.pathname),
+      community: globalThis.RedditorRepellentPatterns.communityFromPath(location.pathname),
+      communityOverride: !!rawSettings[`community:${globalThis.RedditorRepellentPatterns.communityFromPath(location.pathname)}`],
       total: acted.length,
       alreadyCollapsed: document.querySelectorAll(`[${NATIVE_ATTR}]`).length,
       byKind,
@@ -1199,10 +1208,10 @@
     if (area !== 'sync') return;
     let touched = false;
     for (const [key, change] of Object.entries(changes)) {
-      if (key in DEFAULTS || key === 'includeImages') {
+      if (key in DEFAULTS || key === 'includeImages' || key.startsWith('community:')) {
         if ('newValue' in change && change.newValue !== undefined) rawSettings[key] = change.newValue;
         else delete rawSettings[key];
-        touched = true;
+        if (!key.startsWith('community:') || key === `community:${globalThis.RedditorRepellentPatterns.communityFromPath(location.pathname)}`) touched = true;
       }
     }
     if (!touched) return;
@@ -1215,8 +1224,10 @@
   });
 
   api?.runtime?.onMessage?.addListener((msg, _sender, sendResponse) => {
-    if (msg && msg.type === 'rgc:stats') sendResponse(stats());
+    if (msg && msg.type === 'rgc:stats') { scan(); sendResponse(stats()); }
   });
+
+  window.addEventListener('popstate', schedule);
 
   // Exposed for the local test fixture (test/fixture.html); harmless on Reddit.
   globalThis.__rgc = {

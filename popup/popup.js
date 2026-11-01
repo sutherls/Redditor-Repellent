@@ -113,6 +113,23 @@ function renderPatternTest() {
 }
 
 let current = normalize({});
+const { communityName, communityFields, communitySettings, COMMUNITY_FIELDS } = globalThis.RedditorRepellentPatterns;
+let storedSettings = {}, selectedCommunity = '', tabCommunity = null, communityEdited = false;
+const $scope = $('settingsScope'), $scopeStatus = $('scopeStatus'), $resetCommunity = $('resetCommunity');
+
+function renderScope() {
+  const names = new Set(Object.keys(storedSettings).filter(k => k.startsWith('community:')).map(k => communityName(k.slice(10))).filter(Boolean));
+  if (tabCommunity) names.add(tabCommunity);
+  if (selectedCommunity) names.add(selectedCommunity);
+  $scope.replaceChildren(new Option('Global defaults', ''));
+  for (const name of [...names].sort()) $scope.append(new Option(`r/${name}${name === tabCommunity ? ' (current tab)' : ''}`, name));
+  $scope.value = selectedCommunity;
+  const overridden = !!storedSettings[`community:${selectedCommunity}`];
+  $resetCommunity.hidden = !selectedCommunity || !overridden;
+  $scopeStatus.textContent = !selectedCommunity ? 'Editing global defaults. Saved community overrides remain separate.'
+    : overridden ? `Editing custom filters for r/${selectedCommunity}.`
+    : `r/${selectedCommunity} uses global defaults. Changing a filter here creates an override.`;
+}
 
 function render(s) {
   $enabled.checked = s.enabled;
@@ -137,17 +154,61 @@ function render(s) {
 }
 
 async function load() {
-  const stored = await api.storage.sync.get(null);
-  current = normalize(stored);
+  storedSettings = await api.storage.sync.get(null);
+  try {
+    const [tab] = await api.tabs.query({active:true,currentWindow:true});
+    if (tab?.id) tabCommunity = communityName((await api.tabs.sendMessage(tab.id,{type:'rgc:stats'}))?.community);
+  } catch { /* Global and saved community settings are still editable. */ }
+  renderScope();
+  current = normalize(communitySettings(storedSettings, selectedCommunity));
   render(current);
 }
 
 let saveQueue = Promise.resolve();
-function save(patch) {
+function save(patch, retry = false) {
+  const scope = selectedCommunity;
+  const initial = communityFields(current);
+  const scoped = scope ? communityFields(patch) : {};
+  if (scope && scoped.rules && !retry) scoped.rules = Object.fromEntries(Object.entries(scoped.rules).filter(([key,value]) => current.rules[key] !== value));
   Object.assign(current, patch);
-  saveQueue = saveQueue.catch(() => {}).then(() => api.storage.sync.set(patch));
+  const globalPatch = Object.fromEntries(Object.entries(patch).filter(([key]) => key in DEFAULTS && (!scope || !COMMUNITY_FIELDS.includes(key))));
+  if (Object.keys(scoped).length) communityEdited = true;
+  saveQueue = saveQueue.catch(() => {}).then(async () => {
+    if (Object.keys(globalPatch).length) { await api.storage.sync.set(globalPatch); Object.assign(storedSettings,globalPatch); }
+    if (Object.keys(scoped).length) {
+      const response = await api.runtime.sendMessage({type:'rgc:community',action:'save',community:scope,initial,patch:scoped});
+      if (!response || response.error) throw new Error(response?.error || 'Could not save community filters. Reload the extension and reopen the popup.');
+      storedSettings[`community:${scope}`] = response.profile;
+    }
+    renderScope();
+  }).catch(error => { $scopeStatus.textContent = `Settings could not be saved: ${error.message} Try the change again.`; throw error; });
   return saveQueue;
 }
+
+$scope.addEventListener('change', async () => {
+  const next = $scope.value; $scope.disabled = true;
+  try {
+    await Promise.all([...pendingTextSaves.values()].map(flush => flush()));
+    await saveQueue;
+    storedSettings = await api.storage.sync.get(null);
+    selectedCommunity = next; communityEdited = false;
+    current = normalize(communitySettings(storedSettings, selectedCommunity));
+    render(current); renderScope();
+  } catch { $scope.value = selectedCommunity; }
+  $scope.disabled = false;
+});
+$resetCommunity.addEventListener('click', async () => {
+  $resetCommunity.disabled = true;
+  try {
+    await Promise.all([...pendingTextSaves.values()].map(flush => flush()));
+    await saveQueue.catch(() => {});
+    const response = await api.runtime.sendMessage({type:'rgc:community',action:'reset',community:selectedCommunity});
+    if (!response || response.error) throw new Error(response?.error || 'Could not reset community filters.');
+    storedSettings = await api.storage.sync.get(null); communityEdited = false;
+    current = normalize(communitySettings(storedSettings,selectedCommunity)); render(current); renderScope(); statsSoon();
+  } catch(error) { $scopeStatus.textContent = error.message; }
+  $resetCommunity.disabled = false;
+});
 
 function statsSoon() {
   setTimeout(refreshStats, 350);
@@ -262,7 +323,8 @@ $('reloadExtension').addEventListener('click', async () => {
   try {
     await Promise.all([...pendingTextSaves.values()].map((flush) => flush()));
     // Retry any earlier failed control save before closing the popup.
-    await save({ ...current });
+    if (!selectedCommunity || communityEdited || storedSettings[`community:${selectedCommunity}`]) await save({ ...current }, true);
+    else await saveQueue;
     api.runtime.reload();
   } catch {
     $('reloadStatus').textContent = 'Could not save settings or reload. Please try again.';
@@ -280,7 +342,7 @@ async function refreshStats() {
     if (!s) throw new Error('no response');
     $status.textContent = '';
     if (!s.enabled) {
-      $status.textContent = 'Paused on this page.';
+      $status.textContent = s.communityOverride ? `Paused by r/${s.community} settings.` : 'Paused on this page.';
       return;
     }
     if (s.unavailableRules?.length) {
@@ -288,7 +350,7 @@ async function refreshStats() {
       return;
     }
     const checked = Number.isInteger(s.commentsChecked) && s.commentsChecked >= 0 ? s.commentsChecked : null;
-    const activity = checked === null ? 'Active' : `Active · ${checked} comment${checked === 1 ? '' : 's'} checked`;
+    const activity = (checked === null ? 'Active' : `Active · ${checked} comment${checked === 1 ? '' : 's'} checked`) + (s.communityOverride ? ` · r/${s.community} filters` : '');
     if (s.revealed) {
       $status.textContent = `${activity} · Showing ${s.revealedCount} low-effort comment${s.revealedCount === 1 ? '' : 's'} on this page (you clicked "Show them").`;
       return;

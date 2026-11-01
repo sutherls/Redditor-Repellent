@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Community settings checks</title>
+<link rel="stylesheet" href="/src/content.css"><style>body{font:14px system-ui;padding:20px}iframe{width:440px;height:520px}.thing.comment,shreddit-comment{display:block;padding:8px}</style>
+<h1>Community settings checks</h1><button id="run">Run community tests</button><button id="preview" hidden>Show settings preview</button><pre id="results">Ready</pre><div class="commentarea" id="comments"></div><iframe id="popup" title="Extension settings"></iframe>
+<script>
+const listeners=[],messages=[],stored={},local={lifetime:0};let failSync=false;
+window.chrome={action:{setBadgeText(){},setBadgeBackgroundColor(){}},tabs:{query:async()=>[{id:1}],sendMessage:async()=>__rgc.stats()},storage:{
+ sync:{get:async()=>structuredClone(stored),set:async patch=>{if(failSync)throw Error('Storage failed');const changes={};for(const key in patch){changes[key]={newValue:structuredClone(patch[key])};stored[key]=structuredClone(patch[key]);}listeners.forEach(fn=>fn(changes,'sync'));},remove:async key=>{if(failSync)throw Error('Storage failed');delete stored[key];listeners.forEach(fn=>fn({[key]:{newValue:undefined}},'sync'));}},
+ local:{get:async()=>structuredClone(local),set:async patch=>Object.assign(local,patch)},onChanged:{addListener:fn=>listeners.push(fn)}},runtime:{reload(){},onMessage:{addListener:fn=>messages.push(fn)},sendMessage:msg=>new Promise(resolve=>{let pending=false,answered=false;for(const fn of messages){const result=fn(msg,{},value=>{answered=true;resolve(value);});if(result===true)pending=true;}if(!pending&&!answered)resolve({});})}};
+</script>
+<script src="/src/patterns.js"></script><script src="/src/background.js"></script><script src="/src/text-rules.js"></script><script src="/src/media-rules.js"></script><script src="/src/politics-rules.js"></script><script src="/src/moment-rules.js"></script><script src="/src/tragedy-rules.js"></script><script src="/src/content.js"></script>
+<script>
+const wait=()=>new Promise(r=>setTimeout(r,300)),comments=document.getElementById('comments');
+const move=async path=>{history.replaceState({},'',path);dispatchEvent(new PopStateEvent('popstate'));await wait();};
+const hits=()=>comments.querySelectorAll('[data-rgc-kind="phrase"]').length;
+document.getElementById('run').onclick=async()=>{
+ const output=[],check=(name,ok)=>{output.push(`${ok?'PASS':'FAIL'} ${name}`);document.getElementById('results').textContent=output.join('\n');};const run=document.getElementById('run');run.disabled=true;
+ try{
+ for(const key of Object.keys(stored))delete stored[key];__rgc.restoreAll();comments.innerHTML='<shreddit-comment thingid="t1_abc" author="reader"><div slot="commentMeta">reader</div><div slot="comment">Take my upvote!</div></shreddit-comment><div class="thing comment noncollapsed" data-fullname="t1_def" data-author="reader"><div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md">Take my upvote!</div></div></div></div>';
+ await move('/r/Games/comments/test/example/');await chrome.storage.sync.set({enabled:true,rules:{phrase:true},customPatterns:'',mutedUsers:[]});await wait();
+ check('No profile uses global filters on both layouts',hits()===2&&__rgc.stats().community==='games'&&!__rgc.stats().communityOverride);
+ const frame=document.getElementById('popup'),html=await(await fetch('/popup/popup.html')).text(),ready=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=html.replace('<head>','<head><base href="'+location.origin+'/popup/"><script>window.chrome=parent.chrome;<\/script>');await ready;await wait();
+ const doc=frame.contentDocument,win=frame.contentWindow,scope=doc.getElementById('settingsScope');
+ const select=async name=>{scope.value=name;scope.dispatchEvent(new win.Event('change'));await wait();};
+ check('Popup offers current community and defaults to global',scope.value===''&&[...scope.options].some(o=>o.value==='games'));
+ await select('games');check('Inherited community is explicit',doc.getElementById('scopeStatus').textContent.includes('uses global defaults'));
+ doc.querySelector('[data-rule="phrase"]').click();await wait();
+ check('First edit creates profile without changing global rule',stored['community:games']?.rules.phrase===false&&stored.rules.phrase===true);
+ check('Profile applies live on both layouts',hits()===0&&__rgc.stats().communityOverride);
+ doc.getElementById('customPatterns').value='shared';doc.getElementById('customPatterns').dispatchEvent(new win.Event('input'));await new Promise(r=>setTimeout(r,600));
+ check('Custom patterns remain global',stored.customPatterns==='shared'&&!Object.hasOwn(stored['community:games'],'customPatterns'));
+ await move('/r/news/comments/test/example/');check('Navigation to another community uses global settings',hits()===2&&!__rgc.stats().communityOverride);
+ await move('/r/games/comments/test/example/');check('Navigation back restores override',hits()===0);
+ await select('');doc.querySelector('[data-rule="gif"]').click();await wait();
+ check('Global edits leave saved community snapshot unchanged',stored.rules.gif===false&&stored['community:games'].rules.gif===true);
+ await select('games');doc.getElementById('enabled').click();await wait();check('Community can pause independently',!__rgc.stats().enabled&&stored.enabled===true);
+ await move('/r/news/comments/test/example/');check('Leaving paused community resumes filtering',__rgc.stats().enabled&&hits()===2);
+ await move('/r/games/comments/test/example/');
+ failSync=true;doc.getElementById('resetCommunity').click();await wait();check('Failed reset is visible and preserves profile',!!stored['community:games']&&doc.getElementById('scopeStatus').textContent.includes('Storage failed'));failSync=false;
+ doc.getElementById('resetCommunity').click();await wait();check('Reset restores latest global settings immediately',!stored['community:games']&&hits()===2&&__rgc.settings.rules.gif===false&&__rgc.stats().enabled);
+ doc.getElementById('reloadExtension').click();await wait();check('Reload while inheriting does not create a profile',!stored['community:games']);
+ await chrome.runtime.sendMessage({type:'rgc:community',action:'save',community:'games',initial:{rules:{phrase:true}},patch:{rules:{phrase:false}}});await wait();
+ check('Another tab profile write updates filtering',hits()===0);
+ await move('/r/games+news/comments/test/example/');check('Multi-community path falls back to global',hits()===2&&__rgc.stats().community===null);
+ await move('/r/games/comments/test/example/');
+ await win.load();await select('games');
+ check('Saved community reopens with persisted preferences',!doc.querySelector('[data-rule="phrase"]').checked);
+ failSync=true;await win.save({rules:{...__rgc.settings.rules,image:true}}).catch(()=>{});await wait();
+ check('Failed profile save is visible without changing stored rule',!stored['community:games'].rules.image&&doc.getElementById('scopeStatus').textContent.includes('could not be saved'));
+ failSync=false;doc.getElementById('reloadExtension').disabled=false;doc.getElementById('reloadExtension').click();await wait();
+ check('Reload retries failed profile rule changes',stored['community:games'].rules.image===true);
+
+ }catch(error){check(error.stack,false);failSync=false;}
+ document.getElementById("preview").hidden=false;
+ run.disabled=false;
+};
+document.getElementById('preview').onclick=()=>{document.getElementById('results').hidden=true;comments.hidden=true;document.getElementById('popup').style.height='640px';};
+</script></html>

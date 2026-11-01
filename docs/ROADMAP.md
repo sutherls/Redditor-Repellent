@@ -11,9 +11,9 @@ I develop this fork as a solo developer. My current sequence is:
 1. **Repetitive pile-ons — implemented:** independent opt-in matching of closely worded short comments within one top-level branch, retaining the first eligible comment and preserving replies.
 2. **Reaction-image chains — implemented:** independent opt-in detection of three or more consecutive image-only comments, including different images. Keeps the first image and collapses later images individually, preserving text replies. Caption reading and image meaning are outside the deterministic scope.
 3. **Hide more like this — implemented:** a comment editor for device-only phrases, whole-comment or phrase-anywhere matching, save/undo, and popup removal/undo. No AI learning or semantic matching; rules apply across subreddits on this device.
-4. **Per-subreddit settings — planned:** community-specific preferences with a global fallback.
+4. **Per-subreddit settings — implemented:** separate filter/behavior snapshots, global fallback, popup scope selector, live updates, and reset. Up to 50 synced communities; user lists and custom patterns remain global.
 
-I am implementing these one at a time. Items 1–3 are available; per-subreddit settings are next. Existing synced wildcard/regex patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
+All four milestones are available. Feedback reasons/export and finer media controls remain candidates for the next incremental work. Existing synced wildcard/regex patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
 
 Combines target sections 3, 4, 9, and the repetitive-agreement parts of 6.
 

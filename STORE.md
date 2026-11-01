@@ -33,6 +33,8 @@ Tragedy-thread clichés, pile-ons, reaction-image chains, Reddit Moment, politic
 
 ### Make it yours
 
+Use **Settings scope** to edit global defaults or a community's own filter settings. The first community edit saves a separate snapshot of filters, sensitivities, thresholds, pause state, and display behavior. Reset it to use the latest globals. Saved communities remain available in the selector; up to 50 profiles sync through your browser account. User lists/custom patterns stay global, while saved phrases and comment exceptions stay device-wide. Combined-community feeds use global defaults.
+
 Correct false positives with **Always show this comment**. Device-local exceptions override all filters for the selected comment ID, including later edits, and can be undone beside the comment or in the popup. Other comments by the same author remain subject to filtering. Stores up to 1,000 IDs with no comment text or automatic reporting. In Hide mode, use Show them to access the action; collapsed parents can still conceal exempt replies.
 
 Use **Hide more like this** beside a text comment to edit and save a phrase. Choose whole-comment matching or a phrase anywhere; case and punctuation are ignored. Saved phrases stay on this device and apply across subreddits. Undo a new save, or remove phrases with undo from the popup. Matching comments retain replies and a SAVED PHRASE reveal control even in Hide mode. This matches wording, not meaning, and does not train an AI model.
@@ -51,7 +53,7 @@ Works with modern and old Reddit comment layouts. Existing Reddit/user/RES colla
 
 All classification is deterministic and runs in your browser. No AI service, analytics, tracking, or extension-initiated network requests. Preferences, including custom patterns and user lists, use browser extension sync storage and may sync through your browser account. The lifetime counter stays in local extension storage. See [the privacy policy](PRIVACY.md).
 
-Rules can miss unwanted comments and collapse useful ones. Pile-ons detect similar wording, not equivalent meaning. Image-chain detection uses URLs and reply structure; it does not read captions or understand images. Feed/post filtering and per-subreddit settings are not implemented yet. Device-only saved phrases are separate from the existing synced custom patterns; no comments are uploaded for classification.
+Rules can miss unwanted comments and collapse useful ones. Pile-ons detect similar wording, not equivalent meaning. Image-chain detection uses URLs and reply structure; it does not read captions or understand images. Feed/post filtering is not implemented yet. Device-only saved phrases are separate from the existing synced custom patterns; no comments are uploaded for classification.
 
 Open source under the MIT license. Original Not This. copyright and attribution are preserved. Not affiliated with or endorsed by Reddit, Inc.
 

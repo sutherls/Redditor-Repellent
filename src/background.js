@@ -54,6 +54,28 @@ function changeException(msg) {
   return run;
 }
 
+let communityQueue = Promise.resolve();
+function changeCommunity(msg) {
+  const run = communityQueue.then(async () => {
+    const { communityName, communityFields } = globalThis.RedditorRepellentPatterns;
+    const name = communityName(msg.community);
+    if (!name || !['save', 'reset'].includes(msg.action)) throw new Error('Invalid community settings action.');
+    const key = `community:${name}`;
+    if (msg.action === 'reset') { await api.storage.sync.remove(key); return { reset:true }; }
+    const stored = await api.storage.sync.get(null);
+    if (!stored[key] && Object.keys(stored).filter(k => k.startsWith('community:')).length >= 50) throw new Error('The 50-community limit is reached. Reset another community first.');
+    const patch = communityFields(msg.patch);
+    if (!Object.keys(patch).length) throw new Error('No filter settings to save.');
+    const profile = { ...communityFields(stored[key] || msg.initial), ...patch };
+    if (patch.rules) profile.rules = { ...(stored[key] || msg.initial)?.rules, ...patch.rules };
+    // Independent sync keys avoid one large item and preserve writes to other communities.
+    await api.storage.sync.set({ [key]:profile });
+    return { profile };
+  });
+  communityQueue = run.catch(() => {});
+  return run;
+}
+
 let tallyQueue = Promise.resolve();
 function addToLifetime(delta) {
   const run = tallyQueue.then(async () => {
@@ -81,6 +103,11 @@ function setBadge(tabId, count) {
 
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg) return;
+
+  if (msg.type === 'rgc:community') {
+    changeCommunity(msg).then(sendResponse, error => sendResponse({ error:error.message || 'Could not save community settings.' }));
+    return true;
+  }
 
   if (msg.type === 'rgc:comment-exception') {
     changeException(msg).then(sendResponse, error => sendResponse({ error: error.message || 'Could not save exception.' }));

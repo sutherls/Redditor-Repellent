@@ -101,5 +101,20 @@
   function commentExceptions(value) {
     return Array.isArray(value) ? [...new Set(value.map(exceptionId).filter(Boolean))].slice(0, 1000) : [];
   }
-  globalThis.RedditorRepellentPatterns = { exceptionId, commentExceptions, MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch, personalRule, personalRules, personalMatch };
+  const COMMUNITY_FIELDS = ['enabled', 'mode', 'showCounter', 'keepReplies', 'rules', 'shortWords', 'scoreBelow', 'chainLength', 'clicheSensitivity', 'chainSensitivity', 'politicsSensitivity', 'momentSensitivity', 'tragedySensitivity'];
+  function communityName(value) {
+    return typeof value === 'string' && /^[a-z0-9_]{2,21}$/i.test(value) ? value.toLowerCase() : null;
+  }
+  function communityFromPath(path) {
+    const name = communityName(String(path || '').match(/^\/r\/([^/]+)(?:\/|$)/i)?.[1]);
+    return ['all', 'popular', 'friends', 'mod'].includes(name) ? null : name;
+  }
+  function communityFields(value) {
+    return Object.fromEntries(COMMUNITY_FIELDS.filter(key => value && Object.hasOwn(value, key)).map(key => [key, value[key]]));
+  }
+  function communitySettings(raw, name) {
+    const profile = communityName(name) && raw?.[`community:${communityName(name)}`];
+    return { ...raw, ...communityFields(profile) };
+  }
+  globalThis.RedditorRepellentPatterns = { COMMUNITY_FIELDS, communityName, communityFromPath, communityFields, communitySettings, exceptionId, commentExceptions, MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch, personalRule, personalRules, personalMatch };
 })();

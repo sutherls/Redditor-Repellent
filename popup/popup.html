@@ -11,6 +11,14 @@
     <h1>Redditor Repellent <small>Reddit without the Redditors</small></h1>
   </header>
 
+  <fieldset>
+    <legend>Settings scope</legend>
+    <label class="row" for="settingsScope">Edit filters for <select id="settingsScope"><option value="">Global defaults</option></select></label>
+    <p id="scopeStatus" class="hint" role="status">Global defaults apply where no community override is saved.</p>
+    <button id="resetCommunity" type="button" hidden>Use global filters for this community</button>
+    <p class="hint">Community changes save a separate set of filter and behavior settings. User lists and custom patterns stay global; saved phrases and comment exceptions stay device-wide. Up to 50 communities, synced through your browser account.</p>
+  </fieldset>
+
   <label class="row switch-row">
     <span>Enabled</span>
     <span class="switch">

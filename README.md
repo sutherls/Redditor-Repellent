@@ -18,6 +18,8 @@ Chrome and Microsoft Edge are my first development targets. The inherited code s
 
 ### Choose your filtering level
 
+Use **Settings scope → Global defaults** to edit the fallback settings. On a Reddit community page, select **r/community (current tab)** to customize that community; saved communities are also listed for later editing. The first edit saves a separate snapshot of filter switches, sensitivities, thresholds, enabled/paused state, and display behavior. Subsequent global changes do not alter saved snapshots. **Use global filters for this community** removes the override and applies the latest global defaults immediately. Up to 50 communities are supported through browser sync. User lists and custom patterns remain global; saved phrases and comment exceptions remain device-wide. Combined community feeds use global defaults.
+
 | Setting | Purpose | Replies |
 | --- | --- | --- |
 | Political derailment | Bounded political pivots with relevance safeguards | Remain visible |
@@ -67,7 +69,7 @@ The current rules are deterministic heuristics. They can make mistakes, and shor
 
 ## What I plan to build next
 
-Repetitive pile-ons, structural reaction-image chains, and **Hide more like this** with undo are implemented. Next: per-subreddit settings, which are not implemented yet. Image filtering does not read captions or understand an image's meaning.
+The original four milestones are implemented: repetitive pile-ons, structural reaction-image chains, **Hide more like this** with undo, and per-subreddit settings. Further work includes feedback reasons/export and finer media controls. Image filtering does not read captions or understand an image's meaning.
 
 - **Political derailment:** catch unrelated political or ideological commentary regardless of affiliation, without simply blocking political keywords.
 - **Repetition and joke chains:** improve detection of recycled jokes, song lyric chains, and low-effort pile-ons.
@@ -142,6 +144,7 @@ node --test test/pileon-rules.test.cjs
 node --test test/personal-rules.test.cjs
 node --test test/tragedy-rules.test.cjs
 node --test test/exceptions.test.cjs
+node --test test/community.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765 --bind 127.0.0.1`, then open `http://127.0.0.1:8765/test/fixture.html` and click **Run all scenarios**.
@@ -167,6 +170,8 @@ The pile-on milestone passed 41 Node rule tests and 94 browser-fixture checks (2
 `test/tragedy.html` checks title/ancestor context, late updates, personal grief and source protections, sensitivity, reveal, preserved replies, and live disabling on both layouts. The tragedy milestone passed 49 Node tests and 30 tragedy browser checks, plus 27 popup checks. Local fixtures do not replace testing the installed extension on Reddit.
 
 `test/exceptions.html` checks false-positive correction and undo on both layouts, stable-ID persistence and fresh startup, failed writes and retry, Hide mode, reply/image chains, pile-ons, and popup removal. Exceptions store only comment IDs; feedback reasons and export are not implemented.
+
+`test/community.html` checks scope selection, first-save isolation, global fallback, live changes on both layouts, navigation, independent pause, reset, persistence, and save-failure recovery. Node tests cover scope parsing, shared preferences, concurrent saves, and profile limits.
 
 Build a distributable ZIP on Windows:
 

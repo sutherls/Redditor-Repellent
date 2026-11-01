@@ -44,6 +44,13 @@
       const state = win.testState;
       const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
       const sensitivity = doc.getElementById('clicheSensitivity');
+      const tragedy = doc.querySelector('[data-rule="tragedy"]');
+      check('Tragedy filter defaults off', !tragedy.checked);
+      tragedy.click(); await wait();
+      check('Tragedy filter saves independently', state.stored.rules?.tragedy === true && state.stored.rules?.gif === true);
+      const tragedySensitivity = doc.getElementById('tragedySensitivity');
+      tragedySensitivity.value='conservative';tragedySensitivity.dispatchEvent(new win.Event('change'));await wait();
+      check('Tragedy sensitivity saves', state.stored.tragedySensitivity==='conservative');
       const imageChain = doc.querySelector('[data-rule="imageChain"]');
       check('Image chains default off', !imageChain.checked);
       imageChain.click(); await wait();

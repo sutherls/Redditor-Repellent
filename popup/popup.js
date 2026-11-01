@@ -10,6 +10,7 @@ const RULE_DEFAULTS = {
   politicalNoise: false,
   pileon: false,
   imageChain: false,
+  tragedy: false,
 };
 const DEFAULTS = {
   enabled: true, mode: 'collapse', showCounter: true, keepReplies: false,
@@ -18,9 +19,11 @@ const DEFAULTS = {
   chainSensitivity: 'standard',
   politicsSensitivity: 'conservative',
   momentSensitivity: 'standard',
+  tragedySensitivity: 'standard',
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
+  tragedy: 'tragedy-thread cliché',
   personal: 'saved phrase',
   imageChain: 'image-chain reply',
   pileon: 'repetitive pile-on',
@@ -46,6 +49,7 @@ const $chainLength = $('chainLength');
 const $chainSensitivity = $('chainSensitivity');
 const $politicsSensitivity = $('politicsSensitivity');
 const $momentSensitivity = $('momentSensitivity');
+const $tragedySensitivity = $('tragedySensitivity');
 const $clicheSensitivity = $('clicheSensitivity');
 const $customPatterns = $('customPatterns');
 const $patternErrors = $('patternErrors');
@@ -61,6 +65,7 @@ function normalize(raw) {
   s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
   s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';
   s.momentSensitivity = s.momentSensitivity === 'conservative' ? 'conservative' : 'standard';
+  s.tragedySensitivity = s.tragedySensitivity === 'conservative' ? 'conservative' : 'standard';
   if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
   s.mutedUsers = Array.isArray(s.mutedUsers) ? s.mutedUsers : [];
   s.allowedUsers = Array.isArray(s.allowedUsers) ? s.allowedUsers : [];
@@ -123,6 +128,7 @@ function render(s) {
   $chainSensitivity.value = s.chainSensitivity;
   $politicsSensitivity.value = s.politicsSensitivity;
   $momentSensitivity.value = s.momentSensitivity;
+  $tragedySensitivity.value = s.tragedySensitivity;
   $clicheSensitivity.value = s.clicheSensitivity;
   $customPatterns.value = s.customPatterns;
   renderPatternErrors();
@@ -145,6 +151,11 @@ function save(patch) {
 function statsSoon() {
   setTimeout(refreshStats, 350);
 }
+
+$tragedySensitivity.addEventListener('change', async () => {
+  await save({ tragedySensitivity: $tragedySensitivity.value });
+  statsSoon();
+});
 
 $enabled.addEventListener('change', async () => {
   await save({ enabled: $enabled.checked });
@@ -283,7 +294,7 @@ async function refreshStats() {
       $status.textContent = 'No low-effort comments found on this page yet.';
       return;
     }
-    const hasCollapseOnly = ['personal', 'pileon', 'imageChain', 'moment', 'politics', 'politicalNoise'].some(kind => s.byKind?.[kind]);
+    const hasCollapseOnly = ['personal', 'pileon', 'imageChain', 'moment', 'politics', 'politicalNoise', 'tragedy'].some(kind => s.byKind?.[kind]);
     const verb = s.mode === 'hide' ? (hasCollapseOnly ? 'hidden or collapsed' : 'hidden') : 'collapsed';
     const parts = Object.entries(s.byKind || {})
       .sort((a, b) => b[1] - a[1])

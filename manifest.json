@@ -28,6 +28,7 @@
         "src/media-rules.js",
         "src/politics-rules.js",
         "src/moment-rules.js",
+        "src/tragedy-rules.js",
         "src/content.js"
       ],
       "css": [

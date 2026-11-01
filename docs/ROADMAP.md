@@ -19,6 +19,7 @@ Combines target sections 3, 4, 9, and the repetitive-agreement parts of 6.
 
 Available now:
 
+- Independent opt-in tragedy-thread clichés: supported disaster/death joke templates and, in Standard mode, stock coping defenses/dismissive replies. Requires visible title or ancestor context, preserves recognized personal grief accounts and sources, and offers explanations/reveal with replies retained. Conservative matches jokes only. This additional milestone does not implement per-subreddit settings or infer intent.
 - Existing media, bot, stock-phrase, copypasta, and custom-pattern filters.
 - Independent Standard/Conservative sensitivity for clichés and reply chains.
 - Bounded whole-comment variations for upvote reactions, internet-win reactions, enough-Reddit-for-today replies, and friends-along-the-way templates; shared template keys also support Conservative chains.

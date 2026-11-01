@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Tragedy filter checks</title>
+<link rel="stylesheet" href="../src/content.css"><h1>Tragedy filter checks</h1><button id="run">Run tragedy tests</button><pre id="results">Ready</pre><div id="post"></div><div class="commentarea" id="comments"></div>
+<script>
+const listeners=[];
+window.chrome={storage:{sync:{get:async()=>({})},local:{get:async()=>({lifetime:0})},onChanged:{addListener:fn=>listeners.push(fn)}},runtime:{onMessage:{addListener(){}},sendMessage:async()=>({})}};
+</script>
+<script src="../src/patterns.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script><script src="../src/tragedy-rules.js"></script><script src="../src/content.js"></script>
+<script>
+const wait=()=>new Promise(r=>setTimeout(r,400)),comments=document.getElementById('comments'),postHost=document.getElementById('post');let id=0;
+const body=(el,old)=>el.querySelector(old?'.md':'[slot="comment"]');
+const children=(el,old)=>el.querySelector(old?'.child':'#comment-children');
+function add(text,old,parent=comments,author='reader'){
+ const el=document.createElement(old?'div':'shreddit-comment');el.id=`tragedy-${++id}`;el.dataset.author=author;el.setAttribute('author',author);
+ el.innerHTML=old?'<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>':'<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+ if(old)el.className='thing comment noncollapsed';body(el,old).textContent=text;parent.append(el);return el;
+}
+const hit=el=>el.getAttribute('data-rgc-kind')==='tragedy';
+document.getElementById('run').onclick=async()=>{
+ const run=document.getElementById('run');run.disabled=true;const results=[];const check=(name,ok)=>results.push(`${ok?'PASS':'FAIL'} ${name}`);
+ try{for(const old of [false,true]){
+  const label=old?'old':'modern';__rgc.restoreAll();comments.replaceChildren();postHost.replaceChildren();
+  __rgc.settings={rules:{tragedy:true},mode:'hide',allowedUsers:['friend']};
+  const joke=add('To shreds, you say?',old),defense=add('Some people cope with tragedy and death by using humor ya know?',old);
+  const reply=add('The official report explains what happened.',old,children(joke,old));
+  const personal=add('When my father passed away I made jokes at his funeral. People cope with grief through humor.',old);
+  const complaint=add('I hate how many people make jokes when people died.',old);
+  const allowed=add('To shreds, you say?',old,comments,'friend');
+  const quoted=add('',old);body(quoted,old).innerHTML='<blockquote>To shreds, you say?</blockquote>';
+  const source=add('Some people cope with grief through humor.',old);body(source,old).innerHTML+='<a href="https://example.com">Research</a>';
+  await wait();check(`${label}: missing context stays open`,!hit(joke)&&!hit(defense));
+  const post=document.createElement(old?'div':'shreddit-post');if(old)post.className='thing link';post.innerHTML='<h1><a class="title">Business jet crashes in fatal accident</a></h1>';postHost.append(post);
+  await wait();check(`${label}: late title enables matching`,hit(joke)&&hit(defense));
+  check(`${label}: grief, objections, sources, quotes and allowed users kept`,![personal,complaint,source,quoted,allowed].some(hit));
+  check(`${label}: Hide mode retains replies and reveal`,!joke.classList.contains('rgc-hidden')&&!children(joke,old).classList.contains('rgc-part-hidden')&&!hit(reply));
+  const badge=joke.querySelector('[data-label="TRAGEDY CLICHÉ"]');check(`${label}: reason and summary`,badge?.title.includes('not a judgment')&&__rgc.stats().byKind.tragedy===2);
+  badge.click();__rgc.scan();check(`${label}: manual reveal stays open`,!joke.classList.contains('rgc-collapsed'));
+  post.querySelector('a').textContent='A scenic weekend drive';await wait();check(`${label}: removed context restores match`,!hit(defense));
+  post.querySelector('a').textContent='Plane crash kills passengers';await wait();check(`${label}: context restored reapplies`,hit(defense));
+  listeners.forEach(fn=>fn({tragedySensitivity:{newValue:'conservative'}},'sync'));await wait();check(`${label}: conservative keeps defense but catches joke`,hit(joke)&&!hit(defense));
+  listeners.forEach(fn=>fn({tragedySensitivity:{newValue:'standard'}},'sync'));await wait();check(`${label}: standard reapplies live`,hit(defense));
+  post.querySelector('a').textContent='Futurama plane crash episode';await wait();check(`${label}: fictional title excluded`,!hit(joke)&&!hit(defense));
+  post.remove();
+  const nested=add('To shreds, you say?',old,children(complaint,old));await wait();check(`${label}: ancestor death context works`,hit(nested));
+  body(complaint,old).textContent='I dislike repetitive jokes.';await wait();check(`${label}: edited ancestor restores match`,!hit(nested));
+  post.querySelector('a').textContent='Fatal plane crash';postHost.append(post);await wait();
+  body(defense,old).textContent='I lost my sister. Humor helped me cope.';await wait();check(`${label}: edited grief account restored`,!hit(defense));
+  listeners.forEach(fn=>fn({rules:{newValue:{tragedy:false}}},'sync'));await wait();check(`${label}: disable restores matches`,!comments.querySelector('[data-rgc-kind="tragedy"]'));
+ }}catch(e){results.push(`FAIL ${e.stack}`);}
+ document.getElementById('results').textContent=results.join('\n');run.disabled=false;
+};
+</script></html>

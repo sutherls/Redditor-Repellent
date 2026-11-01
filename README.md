@@ -28,6 +28,9 @@ These switches are independent and start off. Enable **Political noise — aggre
 
 ### Available filters
 
+- **Tragedy-thread clichés (opt-in):** enable **Collapse recurring tragedy jokes and stock defenses**. Requires recognized death/disaster wording in the visible post title or ancestor comments. **Standard** catches supported recurring jokes (such as “To shreds, you say?”, “can't land here,” and cameraman/bike-blame templates), generic humor-as-coping defenses, and selected dismissive replies. **Conservative — jokes only** excludes the defenses. Matches show a **TRAGEDY CLICHÉ** explanation and reveal control; replies stay visible even in Hide mode.
+  - Skips recognized personal grief accounts, sources, quoted passages, and selected fictional contexts. Always-show users remain exempt. Late context and edits are rechecked. These are limited English wording patterns, not judgments about anyone's grief or intent; they can miss variations or hide useful comments. Other enabled filters still apply. No AI, downloads, or new permissions.
+
 - **Hide more like this:** use the action beside a comment containing text, edit the phrase, and choose **Whole comment** (default) or **Phrase anywhere in a comment** before saving. Case and punctuation are ignored; words must match at word boundaries. This is a text preference, not AI learning or semantic classification. Saved phrases apply across subreddits on this device only, with a limit of 100 rules and 300 characters per phrase.
   - Matches use a **SAVED PHRASE** explanation and reveal control, preserving replies even in Hide mode. Always-show users are exempt unless also muted. Undo a new save in the editor, or remove a rule under **Saved phrases — this device** in the popup; the latest popup removal can be undone while the popup stays open. Duplicate saves do not create another rule. Other enabled filters still apply after removal. Rules survive browser restarts and are separate from the existing synced wildcard/regex patterns.
 
@@ -116,6 +119,7 @@ Plain JavaScript, HTML, and CSS. No dependency installation or build step is nee
 | `src/text-rules.js` | Stock phrases, copypasta, meme families, and bounded pile-on similarity |
 | `src/politics-rules.js` | Political-pivot templates and context safeguards |
 | `src/moment-rules.js` | Reddit Moment combinations and aggressive political wording matching |
+| `src/tragedy-rules.js` | Tragedy-context joke templates and stock humor defenses |
 | `src/media-rules.js` | Repeated-image URL identity without image downloads |
 | `src/patterns.js` | Normalization and custom pattern matching |
 | `src/background.js` | Toolbar badge, lifetime tally, and serialized device-only phrase writes |
@@ -131,6 +135,7 @@ node --test test/politics-rules.test.cjs
 node --test test/moment-rules.test.cjs
 node --test test/pileon-rules.test.cjs
 node --test test/personal-rules.test.cjs
+node --test test/tragedy-rules.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765 --bind 127.0.0.1`, then open `http://127.0.0.1:8765/test/fixture.html` and click **Run all scenarios**.
@@ -152,6 +157,8 @@ The pile-on milestone passed 41 Node rule tests and 94 browser-fixture checks (2
 `test/image-chains.html` checks different-image chains, first-image preservation, text replies, captions, exclusions, reveal, late sources, edits/removals, live settings, and interaction with the older chain rule on both layouts.
 
 `test/personal.html` exercises the actual saved-phrase background writer, comment editor, collapse/reveal, undo, duplicate prevention, failure/retry, live changes, and popup removal on old and modern markup. Node tests cover literal matching, concurrent saves, validation, and storage limits.
+
+`test/tragedy.html` checks title/ancestor context, late updates, personal grief and source protections, sensitivity, reveal, preserved replies, and live disabling on both layouts. The tragedy milestone passed 49 Node tests and 30 tragedy browser checks, plus 27 popup checks. Local fixtures do not replace testing the installed extension on Reddit.
 
 Build a distributable ZIP on Windows:
 

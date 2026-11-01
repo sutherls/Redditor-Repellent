@@ -21,6 +21,14 @@
 
   <div id="body">
     <fieldset>
+      <legend>Tragedy-thread clichés</legend>
+      <label class="row"><input type="checkbox" data-rule="tragedy"> Collapse recurring tragedy jokes and stock defenses</label>
+      <label class="row" for="tragedySensitivity">Sensitivity
+        <select id="tragedySensitivity"><option value="standard">Standard</option><option value="conservative">Conservative — jokes only</option></select>
+      </label>
+      <p class="hint">Requires death/disaster wording in the visible post title or ancestor comments. Standard also catches generic humor-as-coping defenses and dismissive responses; Conservative matches only supported joke templates. Personal grief accounts, sources, and quoted passages are skipped. Replies stay visible, even in Hide mode. Hover TRAGEDY CLICHÉ for the reason; click to reveal. This detects wording, not intent, and can make mistakes.</p>
+    </fieldset>
+    <fieldset>
       <legend>Political noise — aggressive</legend>
       <label class="row"><input type="checkbox" data-rule="politicalNoise"> Collapse political comments and their reply branches</label>
       <p class="hint">Blocks recognized political names, parties, ideologies, and slogans even when relevant or factual. Covers left- and right-wing rhetoric. Entire branches collapse, overriding Keep replies visible; click POLITICAL NOISE to reveal. This intentionally catches some useful discussion. Always-show users are exempt, but their replies can be inside a collapsed parent branch.</p>

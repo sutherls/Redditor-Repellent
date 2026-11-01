@@ -29,6 +29,7 @@
     politicalNoise: false, // aggressive political topic blocking, including replies
     pileon: false, // repeated short wording within one top-level comment branch
     imageChain: false, // consecutive image-only replies, including different images
+    tragedy: false, // recurring jokes and generic defenses in death/disaster context
   };
 
   // A reply counts as part of a chain when it's low-effort or at most this many words.
@@ -55,6 +56,9 @@
   const momentRules = hasMoments ? globalThis.RedditorRepellentMoments : { classify: () => null };
   const momentReasons = new WeakMap();
   const politicalCandidates = new Set();
+  const tragedyCandidates = new Set();
+  const tragedyReasons = new WeakMap();
+  const tragedyRules = globalThis.RedditorRepellentTragedy;
   const POLITICAL_REASON = 'Political pivot template; no political or policy context found in the visible post and ancestor comments. This heuristic can be wrong.';
 
   const DEFAULTS = {
@@ -69,6 +73,7 @@
     chainSensitivity: 'standard',
     politicsSensitivity: 'conservative',
     momentSensitivity: 'standard',
+    tragedySensitivity: 'standard',
     clicheSensitivity: 'standard',
     mutedUsers: [],
     allowedUsers: [],      // never collapsed, whatever they post
@@ -77,6 +82,7 @@
 
   // Human labels for the banner/popup, and the short badge shown on the comment.
   const LABELS = {
+    tragedy: 'tragedy-thread cliché',
     personal: 'saved phrase',
     imageChain: 'image-chain reply',
     pileon: 'repetitive pile-on',
@@ -85,6 +91,7 @@
     muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment', politicalNoise: 'political noise',
   };
   const BADGES = {
+    tragedy: 'TRAGEDY CLICHÉ',
     personal: 'SAVED PHRASE',
     imageChain: 'IMAGE CHAIN',
     pileon: 'PILE-ON',
@@ -110,6 +117,7 @@
     s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
     s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';
     s.momentSensitivity = s.momentSensitivity === 'conservative' ? 'conservative' : 'standard';
+    s.tragedySensitivity = s.tragedySensitivity === 'conservative' ? 'conservative' : 'standard';
     s.shortWords = Math.min(20, Math.max(1, parseInt(s.shortWords, 10) || DEFAULTS.shortWords));
     s.scoreBelow = Number.isFinite(Number(s.scoreBelow)) ? Number(s.scoreBelow) : DEFAULTS.scoreBelow;
     s.chainLength = Math.min(10, Math.max(3, parseInt(s.chainLength, 10) || DEFAULTS.chainLength));
@@ -363,6 +371,7 @@
 
   // A chain is mostly its replies, so "keep replies visible" doesn't apply to it.
   function keepsReplies(el) {
+    if (el.getAttribute(KIND_ATTR) === 'tragedy') return true;
     if (el.getAttribute(KIND_ATTR) === 'personal') return true;
     if (el.getAttribute(KIND_ATTR) === 'politicalNoise') return false;
     return ['politics', 'moment', 'pileon', 'imageChain'].includes(el.getAttribute(KIND_ATTR)) || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
@@ -391,6 +400,7 @@
     badge.title = kind === 'imageChain' ? IMAGE_CHAIN_REASON : kind === 'pileon' ? PILEON_REASON : ['moment', 'politicalNoise'].includes(kind) ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
     meta.appendChild(badge);
     if (kind === 'personal') badge.title = personalReasons.get(el);
+    if (kind === 'tragedy') badge.title = tragedyReasons.get(el);
     return badge;
   }
 
@@ -421,6 +431,10 @@
     const hidden = el.classList.contains(OWN_CLASS);
     badge.textContent = hidden ? `${label} · show` : `${label} · hide`;
     const kind = el.getAttribute(KIND_ATTR);
+    if (kind === 'tragedy') {
+      badge.title = `${tragedyReasons.get(el)} ${hidden ? 'Show this comment' : 'Hide this comment again'}`;
+      return;
+    }
     if (kind === 'personal') {
       badge.title = `${personalReasons.get(el)} ${hidden ? 'Show this comment' : 'Hide this comment again'}`;
       return;
@@ -431,7 +445,7 @@
   function apply(el, kind) {
     el.setAttribute(KIND_ATTR, kind);
 
-    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain', 'personal'].includes(kind)) {
+    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain', 'personal', 'tragedy'].includes(kind)) {
       el.classList.add(HIDDEN_CLASS);
       el.setAttribute(ATTR, 'hidden');
       tally(el);
@@ -530,6 +544,7 @@
     }
     if (matchesCustom(body)) return 'custom';
     if (rules.bot && isBot(author, body)) return 'bot';
+    if (rules.tragedy && tragedyMatch(el, body)) return 'tragedy';
     if (rules.moment && metaContainer(el) && !body.querySelector('blockquote, pre, code')) {
       let hasGif = [...body.querySelectorAll(MEDIA_SELECTOR)].some(node => mediaKind(node, node) === 'gif');
       const clone = body.cloneNode(true);
@@ -571,6 +586,8 @@
     if (body.childNodes.length === 0) return; // still loading; retry on next mutation
     if (settings.rules.politics && politicalRules.isCandidate(body.textContent, settings.politicsSensitivity)) politicalCandidates.add(el);
     else politicalCandidates.delete(el);
+    if (settings.rules.tragedy && tragedyRules?.classify(body.textContent, settings.tragedySensitivity)) tragedyCandidates.add(el);
+    else tragedyCandidates.delete(el);
 
     const kind = decide(el, body);
     if (kind) {
@@ -634,9 +651,27 @@
     }, settings.politicsSensitivity);
   }
 
+  function tragedyMatch(el, body) {
+    if (!tragedyRules?.match || !metaContainer(el) || body.querySelector('blockquote, a, pre, code')) return false;
+    if (/(^|\.)reddit\.com$/.test(location.hostname) && !/\/comments\//.test(location.pathname)) return false;
+    const posts = document.querySelectorAll('shreddit-post, .thing.link');
+    const post = posts.length === 1 ? posts[0] : null;
+    const title = post?.getAttribute('post-title') || post?.querySelector('h1, a.title')?.textContent || '';
+    const ancestors = [];
+    for (let parent = parentComment(el); parent && ancestors.length < 20; parent = parentComment(parent)) {
+      const text = bodyOf(parent)?.textContent.trim();
+      if (!text || /^\[(?:deleted|removed)\]$/i.test(text)) break;
+      ancestors.push(text.slice(0, 2000));
+    }
+    const reason = tragedyRules.match(body.textContent, { title, ancestors }, settings.tragedySensitivity);
+    if (!reason) return false;
+    tragedyReasons.set(el, `${reason}; death/disaster wording found in the visible post title or ancestor comments. Wording-based filter, not a judgment of coping or intent. Replies remain visible.`);
+    return true;
+  }
+
   function isChainLink(el) {
     if (settings.rules.imageChain && isReactionImage(el)) return false;
-    if (['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain', 'personal'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
+    if (['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain', 'personal', 'tragedy'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
     const body = bodyOf(el);
     if (!body || body.childNodes.length === 0 || isAllowed(el)) return false;
     const { kind, words } = classified(el, body);
@@ -768,6 +803,14 @@
   function scan() {
     if (!settings.enabled) { document.querySelectorAll('.rgc-feedback-button, .rgc-personal-dialog').forEach(el => el.remove()); return; }
     if (revealed) return;
+    for (const el of tragedyCandidates) {
+      if (!el.isConnected || !settings.rules.tragedy) { tragedyCandidates.delete(el); continue; }
+      const body = bodyOf(el);
+      if (!body) continue;
+      const matched = el.getAttribute(KIND_ATTR) === 'tragedy';
+      if (matched && !el.classList.contains(OWN_CLASS) && !isNativelyCollapsed(el)) continue;
+      if (matched !== (decide(el, body) === 'tragedy')) restore(el);
+    }
     // Context can arrive after comments. Only explicit candidates need rechecking.
     for (const el of politicalCandidates) {
       if (!el.isConnected || !settings.rules.politics) { politicalCandidates.delete(el); continue; }
@@ -803,6 +846,7 @@
       counted: countedIds.size,
       lifetime,
       unavailableRules: [settings.rules.moment && !hasMoments ? 'Reddit Moment' : null,
+        settings.rules.tragedy && !tragedyRules?.match ? 'Tragedy-thread clichés' : null,
         settings.rules.pileon && (typeof pileonSignature !== 'function' || typeof pileonDuplicates !== 'function') ? 'Repetitive pile-ons' : null,
         settings.rules.politicalNoise && typeof momentRules.matchPoliticalNoise !== 'function' ? 'Political noise' : null,
         settings.rules.politics && !hasPolitics ? 'Political derailment' : null].filter(Boolean),
@@ -965,7 +1009,7 @@
       text.textContent = `Showing ${describe(count, revealedByKind)}`;
       btn.textContent = 'Hide again';
     } else {
-      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise || s.byKind.pileon || s.byKind.imageChain || s.byKind.personal ? 'hidden or collapsed' : 'hidden') : 'collapsed';
+      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise || s.byKind.pileon || s.byKind.imageChain || s.byKind.personal || s.byKind.tragedy ? 'hidden or collapsed' : 'hidden') : 'collapsed';
       const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
       text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';

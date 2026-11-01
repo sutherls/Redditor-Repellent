@@ -20,6 +20,7 @@ I develop Redditor Repellent as a solo developer. It builds on Not This. by Chri
 
 - GIF-only replies, emoji/emotes, stock phrases, bare links, bots, and known copypasta.
 - Optional static-image, quote-only, short-comment, low-score, and reply-chain filters.
+- **Tragedy-thread clichés:** optional recurring disaster/death jokes and stock humor-as-coping defenses, requiring recognized context in the visible title or ancestor comments. Standard includes defenses; Conservative matches joke templates only. Skips recognized personal grief accounts, sources, quotes, and selected fiction contexts. Matches retain replies and explanation/reveal even in Hide mode. Detects wording, not intent; coverage is limited and mistakes are possible.
 - Independent Standard/Conservative sensitivity for clichés and reply chains. Conservative chains recognize selected meme families, repeated reactions, and repeated image URLs, including supported Reddit preview variants.
 - **Repetitive pile-ons:** when three or more eligible short comments use closely similar wording in one top-level branch, retain the first and collapse repetitions. Includes sibling replies. Questions, negations, numbers, sources, quotes, and media are skipped.
 - **Reaction-image chains:** three or more consecutive image-only comments, including different images. Retains the first image and collapses later images individually with reveal controls. Text replies remain visible; captions and always-show users break runs. Uses image URLs and reply structure, not image meaning. Takes priority over the older reply-chain rule for image-only comments.
@@ -27,7 +28,7 @@ I develop Redditor Repellent as a solo developer. It builds on Not This. by Chri
 - **Political derailment:** limited political-pivot templates checked against visible post, subreddit, and ancestor context.
 - **Political noise — aggressive:** optional political wording blocking even when relevant or factual. A matching comment folds its whole reply branch. Covers wording on either political side and can hide useful discussion.
 
-Pile-ons, reaction-image chains, Reddit Moment, political derailment, and aggressive political noise start off. Each has an independent switch.
+Tragedy-thread clichés, pile-ons, reaction-image chains, Reddit Moment, political derailment, and aggressive political noise start off. Each has an independent switch.
 
 ### Make it yours
 

@@ -3,7 +3,7 @@
 const api = globalThis.browser ?? globalThis.chrome;
 
 const RULE_DEFAULTS = {
-  gif: true, image: false, emote: true, phrase: true, link: true,
+  gif: true, image: false, emote: true, phrase: true, link: false,
   bot: true, pasta: true, quote: false, short: false, score: false, chain: false,
   politics: false,
   moment: false,
@@ -61,6 +61,7 @@ function normalize(raw) {
   const r = raw || {};
   const s = { ...DEFAULTS, ...r };
   s.rules = { ...RULE_DEFAULTS, ...(r.rules || {}) };
+  s.rules.link = false; // Ignore the retired bare-link preference.
   s.clicheSensitivity = s.clicheSensitivity === 'conservative' ? 'conservative' : 'standard';
   s.chainSensitivity = s.chainSensitivity === 'conservative' ? 'conservative' : 'standard';
   s.politicsSensitivity = s.politicsSensitivity === 'standard' ? 'standard' : 'conservative';

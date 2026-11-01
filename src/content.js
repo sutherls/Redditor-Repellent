@@ -17,7 +17,7 @@
     image: false,  // comment is only a static image
     emote: true,   // only emoji / Reddit emotes
     phrase: true,  // "This.", "lol", "Take my upvote", r/whoosh ...
-    link: true,    // a bare link and nothing else
+    link: false,   // retired: source links are not low effort by themselves
     bot: true,     // bot accounts, "I am a bot", RemindMe! invocations
     pasta: true,   // well-known copypasta
     quote: false,  // quotes the parent and adds nothing
@@ -47,7 +47,7 @@
   const imageChainCache = new WeakMap();
   const IMAGE_CHAIN_REASON = 'At least three consecutive image-only comments. Image content is not interpreted; different images can qualify. The first image stays open and text replies remain visible.';
   const PILEON_REASON = 'Closely repeated short wording: at least three similar comments in this branch. The first eligible comment stays open; replies remain visible. Similar wording can still have different meanings.';
-  const { imageIdentity } = globalThis.RedditorRepellentMediaRules;
+  const { imageIdentity, isGifUrl } = globalThis.RedditorRepellentMediaRules;
   // An unpacked-extension update can leave a page without a newly added module.
   // Disable only that optional rule instead of aborting the entire first scan.
   const hasPolitics = typeof globalThis.RedditorRepellentPolitics?.isCandidate === 'function' && typeof globalThis.RedditorRepellentPolitics?.shouldCollapse === 'function';
@@ -110,6 +110,7 @@
     const r = raw || {};
     const s = { ...DEFAULTS, ...r };
     s.rules = { ...RULE_DEFAULTS, ...(r.rules || {}) };
+    s.rules.link = false; // Ignore the retired bare-link preference.
     // v1.0 stored a single `includeImages` flag.
     if ('includeImages' in r && !(r.rules && 'image' in r.rules)) s.rules.image = !!r.includeImages;
     s.mode = s.mode === 'hide' ? 'hide' : 'collapse';
@@ -223,12 +224,15 @@
       const noLinks = clone.cloneNode(true);
       noLinks.querySelectorAll('a').forEach((a) => a.remove());
       if (noLinks.textContent.trim() === '') {
-        const allGif = [...links].every((a) => GIF_HINT.test(a.getAttribute('href') || ''));
+        const allGif = [...links].every((a) => isGifUrl?.(a.getAttribute('href') || ''));
         if (allGif) return { kind: 'gif', words: 0 };
+        if ([...links].every(a => imageIdentity(a.getAttribute('href') || ''))) return { kind: 'image', words: 0 };
         // "r/whoosh" and friends get autolinked; they're still stock phrases.
         const normLink = normalizeText(text);
         if (isStockPhrase(normLink, settings.clicheSensitivity)) return { kind: 'phrase', words: 0 };
-        return { kind: 'link', words: 0 };
+        // Preserve ordinary sources even with a legacy rules.link=true setting.
+        // Zero words also keeps these outside short-comment and reply-chain rules.
+        return { kind: null, words: 0 };
       }
     }
 

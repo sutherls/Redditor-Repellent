@@ -18,8 +18,9 @@ I develop Redditor Repellent as a solo developer. It builds on Not This. by Chri
 
 ### Choose what gets filtered
 
-- GIF-only replies, emoji/emotes, stock phrases, bare links, bots, and known copypasta.
+- GIF-only replies, emoji/emotes, stock phrases, bots, and known copypasta.
 - Optional static-image, quote-only, short-comment, low-score, and reply-chain filters.
+- Ordinary source/wiki links stay visible unless another enabled rule matches. The former bare-link filter is retired. Recognized GIF links use the GIF filter; direct image links use the optional static-image filter. Leave that option off to target image chains without filtering individual static images.
 - **Tragedy-thread clichés:** optional recurring disaster/death jokes and stock humor-as-coping defenses, requiring recognized context in the visible title or ancestor comments. Standard includes defenses; Conservative matches joke templates only. Skips recognized personal grief accounts, sources, quotes, and selected fiction contexts. Matches retain replies and explanation/reveal even in Hide mode. Detects wording, not intent; coverage is limited and mistakes are possible.
 - Independent Standard/Conservative sensitivity for clichés and reply chains. Conservative chains recognize selected meme families, repeated reactions, and repeated image URLs, including supported Reddit preview variants.
 - **Repetitive pile-ons:** when three or more eligible short comments use closely similar wording in one top-level branch, retain the first and collapse repetitions. Includes sibling replies. Questions, negations, numbers, sources, quotes, and media are skipped.

@@ -22,5 +22,17 @@
     }
   }
 
-  globalThis.RedditorRepellentMediaRules = { imageIdentity };
+  function isGifUrl(value) {
+    try {
+      const url = new URL(value);
+      if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return false;
+      if (/\.gifv?$/i.test(url.pathname)) return true;
+      const host = url.hostname.toLowerCase();
+      if (/(^|\.)giphy\.com$/.test(host)) return /^\/(?:gifs|media)\//.test(url.pathname);
+      if (/(^|\.)tenor\.com$/.test(host)) return /^\/view\//.test(url.pathname);
+      if (/(^|\.)redgifs\.com$/.test(host)) return /^\/watch\//.test(url.pathname);
+      return false;
+    } catch { return false; }
+  }
+  globalThis.RedditorRepellentMediaRules = { imageIdentity, isGifUrl };
 })();

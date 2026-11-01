@@ -20,3 +20,9 @@ test('unsupported sources cannot qualify as repeated images', () => {
     assert.equal(imageIdentity(value), null, value);
   }
 });
+
+test('GIF link detection uses URL structure rather than words in source links', () => {
+  const { isGifUrl } = globalThis.RedditorRepellentMediaRules;
+  for (const url of ['https://en.wikipedia.org/wiki/GIF','https://example.com/tenor','https://example.com/article?format=gif','https://giphy.com.evil.example/gifs/a','https://giphy.com/articles/gif-history','javascript:gif','https://i.redd.it/image.png']) assert.equal(isGifUrl(url),false,url);
+  for (const url of ['https://i.redd.it/a.gif?width=300','https://media.giphy.com/media/a/giphy.gif','https://giphy.com/gifs/reaction-a','https://tenor.com/view/reaction-123','https://redgifs.com/watch/reaction']) assert.equal(isGifUrl(url),true,url);
+});

@@ -121,7 +121,7 @@
     <div slot="comment"><div class="md"><p>lmaooo</p></div></div>
   </shreddit-comment>
 
-  <shreddit-comment data-conservative="link" thingid="t1_p4" author="nate" depth="0" data-expect="phrase">
+  <shreddit-comment data-conservative="keep" thingid="t1_p4" author="nate" depth="0" data-expect="phrase">
     <div slot="commentMeta">nate · 2h — "r/whoosh"</div>
     <div slot="comment"><div class="md"><p><a href="/r/whoosh">r/whoosh</a></p></div></div>
   </shreddit-comment>
@@ -131,7 +131,12 @@
     <div slot="comment"><div class="md"><p>This is the part most people miss: the second clause only applies after the first one fails.</p></div></div>
   </shreddit-comment>
 
-  <shreddit-comment thingid="t1_l1" author="pat" depth="0" data-expect="link">
+<shreddit-comment thingid="t1_linkwiki" author="reader" depth="0" data-expect="keep"><div slot="commentMeta">Link regression: wiki</div><div slot="comment"><a href="https://en.wikipedia.org/wiki/GIF">GIF</a></div></shreddit-comment>
+<shreddit-comment thingid="t1_linkguide" author="reader" depth="0" data-expect="keep"><div slot="commentMeta">Link regression: guide</div><div slot="comment"><a href="https://example.com/giphy-guide">guide</a></div></shreddit-comment>
+<shreddit-comment thingid="t1_linkquery" author="reader" depth="0" data-expect="keep"><div slot="commentMeta">Link regression: query</div><div slot="comment"><a href="https://example.com/article?format=gif">Source</a></div></shreddit-comment>
+<shreddit-comment thingid="t1_linkimage" author="reader" depth="0" data-expect="image"><div slot="commentMeta">Link regression: image</div><div slot="comment"><a href="https://i.redd.it/example.png">image</a></div></shreddit-comment>
+<shreddit-comment thingid="t1_linkgif" author="reader" depth="0" data-expect="gif"><div slot="commentMeta">Link regression: gif</div><div slot="comment"><a href="https://tenor.com/view/reaction-123">reaction</a></div></shreddit-comment>
+  <shreddit-comment thingid="t1_l1" author="pat" depth="0" data-expect="keep">
     <div slot="commentMeta">pat · 2h — bare link</div>
     <div slot="comment"><div class="md"><p><a href="https://example.com/news/story">https://example.com/news/story</a></p></div></div>
   </shreddit-comment>
@@ -368,7 +373,7 @@
       </div>
     </div>
 
-    <div class="thing comment noncollapsed" id="thing_t1_o5" data-fullname="t1_o5" data-author="frank" data-expect="link">
+    <div class="thing comment noncollapsed" id="thing_t1_o5" data-fullname="t1_o5" data-author="frank" data-expect="keep">
       <div class="entry">
         <p class="tagline"><a href="javascript:void(0)" class="expand" onclick="return togglecomment(this)">[–]</a> <a class="author">frank</a> 2h — bare link to an article</p>
         <form class="usertext"><div class="usertext-body"><div class="md"><p><a href="https://example.com/news/story">https://example.com/news/story</a></p></div></div></form>
@@ -429,6 +434,7 @@
     'defaults': {},
     'conservative': { clicheSensitivity: 'conservative' },
     'standard after conservative': { clicheSensitivity: 'standard' },
+      'legacy bare links enabled': { rules: { link: true, short: true, chain: true } },
     'everything on': { rules: { image: true, quote: true, short: true, score: true, chain: true }, shortWords: 3, scoreBelow: 0 },
     'hide mode': { mode: 'hide' },
     'keep replies': { keepReplies: true },

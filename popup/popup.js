@@ -21,6 +21,7 @@ const DEFAULTS = {
   mutedUsers: [], allowedUsers: [], customPatterns: '',
 };
 const LABELS = {
+  personal: 'saved phrase',
   imageChain: 'image-chain reply',
   pileon: 'repetitive pile-on',
   gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
@@ -282,7 +283,8 @@ async function refreshStats() {
       $status.textContent = 'No low-effort comments found on this page yet.';
       return;
     }
-    const verb = s.mode === 'hide' ? 'hidden' : 'collapsed';
+    const hasCollapseOnly = ['personal', 'pileon', 'imageChain', 'moment', 'politics', 'politicalNoise'].some(kind => s.byKind?.[kind]);
+    const verb = s.mode === 'hide' ? (hasCollapseOnly ? 'hidden or collapsed' : 'hidden') : 'collapsed';
     const parts = Object.entries(s.byKind || {})
       .sort((a, b) => b[1] - a[1])
       .map(([k, n]) => `${n} ${LABELS[k] || k}`)
@@ -348,3 +350,44 @@ $reset.addEventListener('click', async () => {
 
 load().then(refreshStats);
 loadLifetime();
+
+// Device-only phrase rules share the background writer with comment actions.
+const $personalRules = $('personalRules'), $personalStatus = $('personalStatus'), $undoPersonal = $('undoPersonalRemove');
+let removedPersonal = null;
+function renderPersonalRules(value) {
+  const rules = globalThis.RedditorRepellentPatterns.personalRules(value);
+  $personalRules.replaceChildren();
+  if (!rules.length) { $personalRules.textContent = 'No saved phrases.'; return; }
+  for (const rule of rules) {
+    const row = document.createElement('div'); row.className = 'personal-rule';
+    const text = document.createElement('span'); text.textContent = `${rule.mode === 'exact' ? 'Whole comment' : 'Phrase anywhere'}: ${rule.text}`;
+    const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', `Remove phrase: ${rule.text}`);
+    remove.onclick = async () => {
+      remove.disabled = true;
+      try {
+        const response = await api.runtime.sendMessage({ type:'rgc:personal-rule', action:'remove', id:rule.id });
+        if (!response || response.error) throw new Error(response?.error || 'Could not remove phrase. Please retry.');
+        removedPersonal = response.removed || null; $undoPersonal.hidden = !removedPersonal;
+        renderPersonalRules(response.rules); $personalStatus.textContent = 'Phrase removed. Other filters still apply.';
+        statsSoon();
+      } catch(error) { $personalStatus.textContent = error.message; remove.disabled = false; }
+    };
+    row.append(text, remove); $personalRules.append(row);
+  }
+}
+$undoPersonal.onclick = async () => {
+  if (!removedPersonal) return;
+  $undoPersonal.disabled = true;
+  try {
+    const response = await api.runtime.sendMessage({ type:'rgc:personal-rule', action:'add', text:removedPersonal.text, mode:removedPersonal.mode });
+    if (!response || response.error) throw new Error(response?.error || 'Could not restore phrase. Please retry.');
+    renderPersonalRules(response.rules); removedPersonal = null; $undoPersonal.hidden = true;
+    $personalStatus.textContent = 'Phrase restored.'; statsSoon();
+  } catch(error) { $personalStatus.textContent = error.message; }
+  $undoPersonal.disabled = false;
+};
+api.storage.local.get({ personalRules: [] }).then(data => renderPersonalRules(data.personalRules)).catch(() => { $personalStatus.textContent = 'Could not load saved phrases. Reopen the popup to retry.'; });
+api.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && 'personalRules' in changes) renderPersonalRules(changes.personalRules.newValue);
+});

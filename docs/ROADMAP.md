@@ -10,10 +10,10 @@ I develop this fork as a solo developer. My current sequence is:
 
 1. **Repetitive pile-ons — implemented:** independent opt-in matching of closely worded short comments within one top-level branch, retaining the first eligible comment and preserving replies.
 2. **Reaction-image chains — implemented:** independent opt-in detection of three or more consecutive image-only comments, including different images. Keeps the first image and collapses later images individually, preserving text replies. Caption reading and image meaning are outside the deterministic scope.
-3. **Hide more like this — planned:** a comment action to save a phrase preference with undo, without implying AI learning or semantic matching. Storage and sync behavior will be documented when implemented.
+3. **Hide more like this — implemented:** a comment editor for device-only phrases, whole-comment or phrase-anywhere matching, save/undo, and popup removal/undo. No AI learning or semantic matching; rules apply across subreddits on this device.
 4. **Per-subreddit settings — planned:** community-specific preferences with a global fallback.
 
-I am implementing these one at a time. Items 1 and 2 are available; item 3 is next. Existing custom patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
+I am implementing these one at a time. Items 1–3 are available; per-subreddit settings are next. Existing synced wildcard/regex patterns and same-image URL chains are separate features. See the [changelog](../CHANGELOG.md) for completed milestones.
 
 Combines target sections 3, 4, 9, and the repetitive-agreement parts of 6.
 
@@ -54,7 +54,9 @@ Use multiple observable signals and category-specific controls for formulaic pro
 
 Recent Reddit Moment additions cover consumer contempt combined with shaming or moral superiority, alongside sarcastic influence framing and bounded rhetorical questions accompanied by GIFs. These are wording patterns, not judgments about intent or the meaning of an image. Ordinary criticism and standalone weak signals remain outside these combinations.
 
-## 4. Feed filtering and user feedback — planned
+## 4. Feed filtering and user feedback — partially implemented
+
+Device-only saved phrases provide explicit user feedback today. Learned preferences, semantic similarity, and feed/post filtering remain planned.
 
 Combines section 10, post-level parts of 5, and feedback requirements in 11.
 

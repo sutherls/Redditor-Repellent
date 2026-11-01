@@ -175,3 +175,7 @@ footer {
   font-size: 11px;
   color: var(--muted);
 }
+/* Device-only phrase management. */
+.personal-rule { display: flex; align-items: start; gap: 8px; margin: 10px 0; }
+.personal-rule span { flex: 1; overflow-wrap: anywhere; }
+.personal-rule button { flex: 0 0 auto; }

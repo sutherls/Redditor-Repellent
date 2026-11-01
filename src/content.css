@@ -104,3 +104,12 @@
   content: "·";
   margin-right: 10px;
 }
+
+.rgc-feedback-button { margin-left: 8px; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; opacity: .7; }
+.rgc-feedback-button:hover, .rgc-feedback-button:focus-visible { opacity: 1; }
+.rgc-personal-dialog { color-scheme: light dark; width: min(440px, 85vw); max-height: 85vh; overflow: auto; border: 1px solid #888; border-radius: 12px; padding: 20px; font: 14px/1.5 system-ui, sans-serif; }
+.rgc-personal-dialog::backdrop { background: #0008; }
+.rgc-personal-dialog h2 { margin-top: 0; font-size: 20px; }
+.rgc-personal-dialog label { display: block; margin: 12px 0; }
+.rgc-personal-dialog textarea, .rgc-personal-dialog select { display: block; box-sizing: border-box; width: 100%; font: inherit; margin-top: 4px; }
+.rgc-personal-dialog button { padding: 6px 12px; margin-right: 8px; cursor: pointer; }

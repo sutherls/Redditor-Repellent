@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Saved phrase checks</title>
+<link rel="stylesheet" href="../src/content.css"><h1>Hide more like this checks</h1>
+<button id="run">Run saved-phrase tests</button><button id="demo">Show example editor</button><pre id="results">Ready</pre><div class="commentarea" id="comments"></div><iframe id="popup" title="Phrase manager"></iframe>
+<script>
+const listeners=[],messages=[];const local={personalRules:[],lifetime:0};let failLocal=false;
+window.chrome={action:{setBadgeText(){},setBadgeBackgroundColor(){}},tabs:{query:async()=>[]},storage:{
+ local:{get:async()=>structuredClone(local),set:async patch=>{if(failLocal)throw new Error('Storage failed');const changes={};for(const key in patch){changes[key]={oldValue:local[key],newValue:patch[key]};local[key]=structuredClone(patch[key]);}listeners.forEach(fn=>fn(changes,'local'));}},
+ sync:{get:async()=>({}),set:async()=>{}},onChanged:{addListener:fn=>listeners.push(fn)}},runtime:{onMessage:{addListener:fn=>messages.push(fn)},sendMessage:msg=>new Promise(resolve=>{let pending=false,answered=false;for(const fn of messages){const result=fn(msg,{},value=>{answered=true;resolve(value);});if(result===true)pending=true;}if(!pending&&!answered)resolve({});})}};
+</script>
+<script src="../src/patterns.js"></script><script src="../src/background.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script><script src="../src/content.js"></script>
+<script>
+const comments=document.getElementById('comments'),wait=()=>new Promise(r=>setTimeout(r,350));let id=0;
+function add(text,old,parent=comments,author='reader'){
+ const el=document.createElement(old?'div':'shreddit-comment');el.id=`personal-${++id}`;el.dataset.author=author;el.setAttribute('author',author);
+ el.innerHTML=old?'<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>':'<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+ if(old)el.className='thing comment noncollapsed';el.querySelector(old?'.md':'[slot="comment"]').textContent=text;parent.append(el);return el;
+}
+const children=(el,old)=>el.querySelector(old?'.child':'#comment-children');
+const hit=el=>el.getAttribute('data-rgc-kind')==='personal';
+const dialog=()=>document.querySelector('.rgc-personal-dialog');
+const button=text=>[...dialog().querySelectorAll('button')].find(el=>el.textContent===text);
+document.getElementById('run').onclick=async()=>{
+ const run=document.getElementById('run');run.disabled=true;const results=[];const check=(name,ok)=>results.push(`${ok?'PASS':'FAIL'} ${name}`);
+ try{for(const old of [false,true]){
+  const label=old?'old':'modern';__rgc.restoreAll();comments.replaceChildren();await chrome.storage.local.set({personalRules:[]});
+  __rgc.settings={mode:'hide',allowedUsers:['friend']};
+  const a=add('Synthetic flaming teapot patrol.',old),b=add('Another flaming teapot sighting.',old),friend=add('Synthetic flaming teapot patrol.',old,comments,'friend');
+  const reply=add('A useful reply with practical details.',old,children(a,old));await wait();
+  check(`${label}: action available`,!!a.querySelector('.rgc-feedback-button'));
+  a.querySelector('.rgc-feedback-button').click();check(`${label}: preview defaults to exact comment`,dialog().querySelector('textarea').value==='Synthetic flaming teapot patrol.'&&dialog().querySelector('select').value==='exact');
+  button('Close').click();await wait();check(`${label}: cancel saves nothing`,local.personalRules.length===0);
+  a.querySelector('.rgc-feedback-button').click();button('Save phrase').click();await wait();
+  check(`${label}: exact save filters original only`,hit(a)&&!hit(b)&&!hit(friend)&&local.personalRules.length===1);
+  check(`${label}: replies and reveal retained in Hide mode`,!children(a,old).classList.contains('rgc-part-hidden')&&!hit(reply)&&!a.classList.contains('rgc-hidden')&&!!a.querySelector('[data-label="SAVED PHRASE"]'));
+  check(`${label}: rule explanation`,a.querySelector('[data-label="SAVED PHRASE"]').title.includes('whole comment'));
+  button('Undo').click();await wait();check(`${label}: undo removes only saved rule`,local.personalRules.length===0&&!hit(a));
+  dialog().querySelector('textarea').value='flaming teapot';dialog().querySelector('select').value='contains';button('Save phrase').click();await wait();
+  check(`${label}: phrase mode filters variations`,hit(a)&&hit(b)&&!hit(friend));
+  button('Close').click();a.querySelector('[data-label="SAVED PHRASE"]').click();__rgc.scan();check(`${label}: reveal survives scan`,!a.classList.contains('rgc-collapsed'));
+  b.querySelector('.rgc-feedback-button').click();dialog().querySelector('textarea').value='FLAMING TEAPOT!';dialog().querySelector('select').value='contains';button('Save phrase').click();await wait();
+  check(`${label}: duplicate save cannot undo existing rule`,local.personalRules.length===1&&button('Undo').hidden&&dialog().textContent.includes('already saved'));button('Close').click();
+  const removal=await chrome.runtime.sendMessage({type:'rgc:personal-rule',action:'remove',id:local.personalRules[0].id});await wait();check(`${label}: other-tab removal updates page`,!hit(a)&&!hit(b));
+  b.querySelector('.rgc-feedback-button').click();failLocal=true;button('Save phrase').click();await wait();check(`${label}: failed write stays retryable`,dialog().textContent.includes('Storage failed')&&!button('Save phrase').disabled&&local.personalRules.length===0);failLocal=false;
+  button('Save phrase').click();await wait();check(`${label}: retry succeeds`,local.personalRules.length===1&&hit(b));button('Close').click();
+  listeners.forEach(fn=>fn({enabled:{newValue:false}},'sync'));await wait();check(`${label}: disabling removes actions and restores comments`,!comments.querySelector('.rgc-feedback-button')&&!hit(b));
+ }
+ const frame=document.getElementById('popup');const html=await(await fetch('../popup/popup.html')).text();
+ const ready=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=html.replace('<head>',`<head><base href="${new URL('../popup/',location.href)}"><script>window.chrome=parent.chrome;<\/script>`);await ready;await wait();
+ const doc=frame.contentDocument;check('popup: saved rules load from device storage',doc.querySelectorAll('.personal-rule').length===1);
+ failLocal=true;doc.querySelector('.personal-rule button').click();await wait();check('popup: failed removal preserves rule',local.personalRules.length===1&&doc.getElementById('personalStatus').textContent.includes('Storage failed'));failLocal=false;
+ doc.querySelector('.personal-rule button').click();await wait();check('popup: remove persists',local.personalRules.length===0&&!doc.getElementById('undoPersonalRemove').hidden);
+ doc.getElementById('undoPersonalRemove').click();await wait();check('popup: undo removal restores',local.personalRules.length===1&&doc.querySelectorAll('.personal-rule').length===1);
+ }catch(e){results.push(`FAIL ${e.stack}`);failLocal=false;}
+ document.getElementById('results').textContent=results.join('\n');run.disabled=false;
+};
+document.getElementById('demo').onclick=()=>{__rgc.settings={};const el=add('Your meme sir, I will be taking that.',false);__rgc.scan();el.querySelector('.rgc-feedback-button').click();};
+</script></html>

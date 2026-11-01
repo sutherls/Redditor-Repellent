@@ -72,5 +72,27 @@
     return tests.find((p) => p.test(raw, norm)) || null;
   }
 
-  globalThis.RedditorRepellentPatterns = { MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch };
+  function personalRule(text, mode) {
+    if (typeof text !== 'string' || !['exact', 'contains'].includes(mode)) return null;
+    const clean = text.trim().replace(/\s+/g, ' ');
+    const normalized = normalizeText(clean);
+    if (!normalized || clean.length > 300) return null;
+    return { text: clean, mode, normalized };
+  }
+
+  function personalRules(value) {
+    if (!Array.isArray(value)) return [];
+    return value.slice(0, 100).flatMap(item => {
+      const rule = item && personalRule(item.text, item.mode);
+      return rule && typeof item.id === 'string' ? [{ ...rule, id: item.id }] : [];
+    });
+  }
+
+  function personalMatch(rules, text) {
+    const normalized = normalizeText(String(text || ''));
+    return rules.find(rule => rule.mode === 'exact' ? normalized === rule.normalized
+      : ` ${normalized} `.includes(` ${rule.normalized} `)) || null;
+  }
+
+  globalThis.RedditorRepellentPatterns = { MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch, personalRule, personalRules, personalMatch };
 })();

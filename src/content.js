@@ -37,6 +37,9 @@
 
   // From src/patterns.js, which the manifest loads first.
   const { normalizeText, compilePatterns, firstMatch } = globalThis.RedditorRepellentPatterns;
+  const { personalRules, personalMatch } = globalThis.RedditorRepellentPatterns;
+  let savedPersonalRules = [];
+  const personalReasons = new WeakMap();
   const { isStockPhrase, isCopypasta, chainPattern } = globalThis.RedditorRepellentTextRules;
   const { pileonSignature, pileonDuplicates } = globalThis.RedditorRepellentTextRules;
   const pileonCache = new WeakMap();
@@ -74,6 +77,7 @@
 
   // Human labels for the banner/popup, and the short badge shown on the comment.
   const LABELS = {
+    personal: 'saved phrase',
     imageChain: 'image-chain reply',
     pileon: 'repetitive pile-on',
     gif: 'GIF', image: 'image', emote: 'emoji', phrase: '"this"', link: 'link-only',
@@ -81,6 +85,7 @@
     muted: 'muted', custom: 'custom pattern', chain: 'reply chain', politics: 'political pivot', moment: 'Reddit Moment', politicalNoise: 'political noise',
   };
   const BADGES = {
+    personal: 'SAVED PHRASE',
     imageChain: 'IMAGE CHAIN',
     pileon: 'PILE-ON',
     gif: 'GIF', image: 'IMG', emote: 'EMOJI', phrase: 'LOW EFFORT', link: 'LINK', bot: 'BOT',
@@ -358,6 +363,7 @@
 
   // A chain is mostly its replies, so "keep replies visible" doesn't apply to it.
   function keepsReplies(el) {
+    if (el.getAttribute(KIND_ATTR) === 'personal') return true;
     if (el.getAttribute(KIND_ATTR) === 'politicalNoise') return false;
     return ['politics', 'moment', 'pileon', 'imageChain'].includes(el.getAttribute(KIND_ATTR)) || (settings.keepReplies && el.getAttribute(KIND_ATTR) !== 'chain');
   }
@@ -384,6 +390,7 @@
     badge.textContent = badge.dataset.label;
     badge.title = kind === 'imageChain' ? IMAGE_CHAIN_REASON : kind === 'pileon' ? PILEON_REASON : ['moment', 'politicalNoise'].includes(kind) ? momentReasons.get(el) : kind === 'politics' ? POLITICAL_REASON : `Collapsed: ${LABELS[kind] || kind} comment`;
     meta.appendChild(badge);
+    if (kind === 'personal') badge.title = personalReasons.get(el);
     return badge;
   }
 
@@ -414,13 +421,17 @@
     const hidden = el.classList.contains(OWN_CLASS);
     badge.textContent = hidden ? `${label} · show` : `${label} · hide`;
     const kind = el.getAttribute(KIND_ATTR);
+    if (kind === 'personal') {
+      badge.title = `${personalReasons.get(el)} ${hidden ? 'Show this comment' : 'Hide this comment again'}`;
+      return;
+    }
     badge.title = (kind === 'imageChain' ? `${IMAGE_CHAIN_REASON} ` : kind === 'pileon' ? `${PILEON_REASON} ` : ['moment', 'politicalNoise'].includes(kind) ? `${momentReasons.get(el)} ` : kind === 'politics' ? `${POLITICAL_REASON} ` : '') + (hidden ? 'Show this comment' : 'Hide this comment again');
   }
 
   function apply(el, kind) {
     el.setAttribute(KIND_ATTR, kind);
 
-    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain'].includes(kind)) {
+    if (settings.mode === 'hide' && !['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain', 'personal'].includes(kind)) {
       el.classList.add(HIDDEN_CLASS);
       el.setAttribute(ATTR, 'hidden');
       tally(el);
@@ -505,6 +516,11 @@
 
     if (author && settings.mutedUsers.includes(author.toLowerCase())) return 'muted';
     if (isAllowed(el)) return null;
+    const personal = savedPersonalRules.length > 0 && typeof personalMatch === 'function' && personalMatch(savedPersonalRules, body.textContent);
+    if (personal && metaContainer(el)) {
+      personalReasons.set(el, `Your saved phrase (${personal.mode === 'exact' ? 'whole comment' : 'phrase anywhere'}): “${personal.text}”. Case and punctuation are ignored. Replies remain visible.`);
+      return 'personal';
+    }
     if (rules.politicalNoise && metaContainer(el)) {
       const term = momentRules.matchPoliticalNoise?.(body.textContent);
       if (term) {
@@ -620,7 +636,7 @@
 
   function isChainLink(el) {
     if (settings.rules.imageChain && isReactionImage(el)) return false;
-    if (['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
+    if (['politics', 'moment', 'politicalNoise', 'pileon', 'imageChain', 'personal'].includes(el.getAttribute(KIND_ATTR))) return false; // retain category explanation
     const body = bodyOf(el);
     if (!body || body.childNodes.length === 0 || isAllowed(el)) return false;
     const { kind, words } = classified(el, body);
@@ -750,7 +766,8 @@
   }
 
   function scan() {
-    if (!settings.enabled || revealed) return;
+    if (!settings.enabled) { document.querySelectorAll('.rgc-feedback-button, .rgc-personal-dialog').forEach(el => el.remove()); return; }
+    if (revealed) return;
     // Context can arrive after comments. Only explicit candidates need rechecking.
     for (const el of politicalCandidates) {
       if (!el.isConnected || !settings.rules.politics) { politicalCandidates.delete(el); continue; }
@@ -764,6 +781,7 @@
     document.querySelectorAll(`.commentarea .thing.comment:not([${ATTR}])`).forEach(consider);
     scanImageChains();
     scanPileons();
+    addPersonalActions();
     updateCounter();
   }
 
@@ -947,7 +965,7 @@
       text.textContent = `Showing ${describe(count, revealedByKind)}`;
       btn.textContent = 'Hide again';
     } else {
-      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise || s.byKind.pileon || s.byKind.imageChain ? 'hidden or collapsed' : 'hidden') : 'collapsed';
+      const verb = settings.mode === 'hide' ? (s.byKind.politics || s.byKind.moment || s.byKind.politicalNoise || s.byKind.pileon || s.byKind.imageChain || s.byKind.personal ? 'hidden or collapsed' : 'hidden') : 'collapsed';
       const prior = s.alreadyCollapsed ? `; ${s.alreadyCollapsed} already collapsed` : '';
       text.textContent = `${describe(count, s.byKind)} ${verb}${prior}`;
       btn.textContent = 'Show them';
@@ -1001,7 +1019,78 @@
     return Promise.resolve(storage.get(null)).then((s) => s || {}).catch(() => ({}));
   }
 
+  function applyPersonalRules(value) {
+    savedPersonalRules = typeof personalRules === 'function' ? personalRules(value) : [];
+    revealed = false;
+    restoreAll();
+    scan();
+  }
+
+  function addPersonalActions() {
+    if (typeof personalMatch !== 'function' || !api?.runtime?.sendMessage) return;
+    document.querySelectorAll('shreddit-comment, .commentarea .thing.comment').forEach(el => {
+      const meta = metaContainer(el), body = bodyOf(el);
+      if (!meta || !body?.textContent.trim() || meta.querySelector('.rgc-feedback-button')) return;
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'rgc-feedback-button'; button.textContent = 'Hide more like this';
+      button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openPersonalDialog(el, button); });
+      meta.append(button);
+    });
+  }
+
+  function openPersonalDialog(el, trigger) {
+    document.querySelector('.rgc-personal-dialog')?.remove();
+    const dialog = document.createElement('dialog'); dialog.className = 'rgc-personal-dialog';
+    const title = document.createElement('h2'); title.textContent = 'Hide more like this'; title.id = 'rgc-personal-title';
+    dialog.setAttribute('aria-labelledby', title.id);
+    const help = document.createElement('p'); help.textContent = 'Save a text rule on this device. This matches wording, not meaning. Case and punctuation are ignored. Rules apply across subreddits; replies stay visible. Manage saved phrases in the extension popup.';
+    const label = document.createElement('label'); label.textContent = 'Phrase to hide';
+    const input = document.createElement('textarea'); input.maxLength = 300; input.rows = 3; label.append(input);
+    const body = bodyOf(el), selection = window.getSelection();
+    const selected = selection && body?.contains(selection.anchorNode) && body?.contains(selection.focusNode) ? selection.toString().trim() : '';
+    const initial = selected || body?.textContent.trim() || '';
+    input.value = initial.length <= 300 ? initial : '';
+    input.placeholder = initial.length > 300 ? 'Choose a shorter phrase from this comment (up to 300 characters).' : 'Enter a phrase';
+    const modeLabel = document.createElement('label'); modeLabel.textContent = 'Match type';
+    const mode = document.createElement('select');
+    for (const [value, text] of [['exact','Whole comment'],['contains','Phrase anywhere in a comment']]) {
+      const option = document.createElement('option'); option.value = value; option.textContent = text; mode.append(option);
+    }
+    modeLabel.append(mode);
+    const status = document.createElement('p'); status.setAttribute('role', 'status');
+    const save = document.createElement('button'); save.type = 'button'; save.textContent = 'Save phrase';
+    const undo = document.createElement('button'); undo.type = 'button'; undo.textContent = 'Undo'; undo.hidden = true;
+    const close = document.createElement('button'); close.type = 'button'; close.textContent = 'Close';
+    close.onclick = () => dialog.close();
+    dialog.addEventListener('close', () => { dialog.remove(); if (trigger.isConnected) trigger.focus(); });
+    let savedId = null;
+    save.onclick = async () => {
+      save.disabled = true; status.textContent = 'Saving…';
+      try {
+        const response = await api.runtime.sendMessage({ type:'rgc:personal-rule', action:'add', text:input.value, mode:mode.value });
+        if (!response || response.error || !response.rule) throw new Error(response?.error || 'Could not save. Reload the extension and refresh this page.');
+        // storage.onChanged applies the authoritative list to every open tab.
+        input.disabled = mode.disabled = true;
+        savedId = response.added ? response.rule.id : null; undo.hidden = !savedId;
+        status.textContent = response.added ? 'Saved on this device. Matching comments now collapse. Other enabled filters still apply after undo.' : 'That phrase rule is already saved. Manage it in the extension popup.';
+      } catch(error) { status.textContent = error.message; save.disabled = false; }
+    };
+    undo.onclick = async () => {
+      undo.disabled = true;
+      try {
+        const response = await api.runtime.sendMessage({ type:'rgc:personal-rule', action:'remove', id:savedId });
+        if (!response || response.error) throw new Error(response?.error || 'Could not undo. Please retry.');
+        undo.hidden = true; save.disabled = false;
+        input.disabled = mode.disabled = false; status.textContent = 'Phrase removed. Other enabled filters still apply.';
+      } catch(error) { status.textContent = error.message; }
+      undo.disabled = false;
+    };
+    dialog.append(title, help, label, modeLabel, save, undo, close, status);
+    document.body.append(dialog); dialog.showModal(); input.focus();
+  }
+
   api?.storage?.onChanged?.addListener((changes, area) => {
+    if (area === 'local' && 'personalRules' in changes) applyPersonalRules(changes.personalRules.newValue);
     if (area === 'local' && 'lifetime' in changes) {
       lifetime = Number(changes.lifetime.newValue) || 0;
       updateCounter();
@@ -1045,7 +1134,8 @@
     },
   };
 
-  Promise.all([loadSettings(), loadLifetime()]).then(([raw]) => {
+  Promise.all([loadSettings(), loadLifetime(), Promise.resolve(api?.storage?.local?.get({ personalRules: [] })).catch(() => ({}))]).then(([raw, , local]) => {
+    savedPersonalRules = typeof personalRules === 'function' ? personalRules(local?.personalRules) : [];
     rawSettings = raw;
     settings = normalizeSettings(raw);
     scan();

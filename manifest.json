@@ -39,6 +39,7 @@
   "background": {
     "service_worker": "src/background.js",
     "scripts": [
+      "src/patterns.js",
       "src/background.js"
     ]
   },

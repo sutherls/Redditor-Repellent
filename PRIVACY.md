@@ -1,6 +1,6 @@
 # Privacy Policy — Redditor Repellent
 
-Last updated: 2026-10-28
+Last updated: 2026-11-01
 
 I develop Redditor Repellent as a solo developer. The extension does not send me browsing content, telemetry, or settings, and I do not operate a data-collection service for it.
 
@@ -16,9 +16,11 @@ Filter switches, sensitivity and display settings, muted/allowed usernames, and 
 
 The all-time filtering counter is a single number in local extension storage. It can be reset from the popup. Preferences can be changed or cleared using the popup's controls.
 
+**Hide more like this** stores only the phrase you confirm, its match type, a normalized copy used for matching, and an identifier in local extension storage. These saved phrases are not put in browser sync or sent to the developer. They persist on this device until removed (or extension data is cleared). Remove them under **Saved phrases — this device** in the popup. The extension does not save the source comment's author, thread URL, or surrounding discussion as part of the rule. Saving a whole-comment phrase does retain that confirmed text locally.
+
 ## Future features and support
 
-Reaction-image chains use only the existing page's image URLs and reply structure; no images are downloaded for analysis. A Hide more like this action, per-subreddit settings, and optional OpenAI integration are not implemented. Any future data-sharing behavior will be documented before introduction.
+Reaction-image chains use only the existing page's image URLs and reply structure; no images are downloaded for analysis. Per-subreddit settings and optional OpenAI integration are not implemented. Any future data-sharing behavior will be documented before introduction.
 
 If you voluntarily submit an issue, GitHub processes the information you include. Avoid posting private information in public issues.
 

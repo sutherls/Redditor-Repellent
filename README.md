@@ -28,6 +28,9 @@ These switches are independent and start off. Enable **Political noise — aggre
 
 ### Available filters
 
+- **Hide more like this:** use the action beside a comment containing text, edit the phrase, and choose **Whole comment** (default) or **Phrase anywhere in a comment** before saving. Case and punctuation are ignored; words must match at word boundaries. This is a text preference, not AI learning or semantic classification. Saved phrases apply across subreddits on this device only, with a limit of 100 rules and 300 characters per phrase.
+  - Matches use a **SAVED PHRASE** explanation and reveal control, preserving replies even in Hide mode. Always-show users are exempt unless also muted. Undo a new save in the editor, or remove a rule under **Saved phrases — this device** in the popup; the latest popup removal can be undone while the popup stays open. Duplicate saves do not create another rule. Other enabled filters still apply after removal. Rules survive browser restarts and are separate from the existing synced wildcard/regex patterns.
+
 - **Reaction-image chains (opt-in):** enable **Reply-chain filtering → Collapse reaction-image chains**. Three or more consecutive image-only comments can form a chain even when every image is different. The first stays open; later images collapse individually with **IMAGE CHAIN** explanations and reveal controls. Text replies remain visible, including in Hide mode. Always-show users and captions break the run. Other enabled filters still apply, but this option takes priority over the older reply-chain rule for image-only comments.
   - Detects structure, not image meaning. Uses supported image URLs in rendered images, image-only links, or literal Markdown. Small emotes, quoted/code images, missing URLs, and video players do not qualify. It cannot read “your meme” or “bath bombs” text inside images; useful image sequences can also match. Late content, edits, and removals are rechecked. No OCR, image downloads, AI, or new permissions.
 
@@ -56,7 +59,7 @@ The current rules are deterministic heuristics. They can make mistakes, and shor
 
 ## What I plan to build next
 
-Repetitive pile-ons and structural reaction-image chains are implemented. Next, one feature at a time: a **Hide more like this** action with undo, then per-subreddit settings. These two features are not implemented yet. Image filtering does not read captions or understand an image's meaning.
+Repetitive pile-ons, structural reaction-image chains, and **Hide more like this** with undo are implemented. Next: per-subreddit settings, which are not implemented yet. Image filtering does not read captions or understand an image's meaning.
 
 - **Political derailment:** catch unrelated political or ideological commentary regardless of affiliation, without simply blocking political keywords.
 - **Repetition and joke chains:** improve detection of recycled jokes, song lyric chains, and low-effort pile-ons.
@@ -74,7 +77,7 @@ See the [grouped roadmap](docs/ROADMAP.md) and [comprehensive filtering targets]
 
 Filtering currently runs in your browser using deterministic rules. There is no AI integration, tracking, analytics, or extension-initiated network traffic.
 
-Preferences use the browser's extension sync storage and may sync through your browser account. The all-time counter stays in local extension storage. Permissions are limited to storage and Reddit pages. See [PRIVACY.md](PRIVACY.md) for the current privacy policy.
+General preferences and the existing custom wildcard/regex patterns use extension sync storage and may sync through your browser account. **Hide more like this** phrases and the all-time counter stay in local extension storage. Permissions are limited to storage and Reddit pages. See [PRIVACY.md](PRIVACY.md) for the current privacy policy.
 
 Future OpenAI API integration may be offered as an optional feature for more advanced classification. There is no requirement for local AI models. Any future data-sharing behavior will be documented before that feature is introduced.
 
@@ -115,7 +118,7 @@ Plain JavaScript, HTML, and CSS. No dependency installation or build step is nee
 | `src/moment-rules.js` | Reddit Moment combinations and aggressive political wording matching |
 | `src/media-rules.js` | Repeated-image URL identity without image downloads |
 | `src/patterns.js` | Normalization and custom pattern matching |
-| `src/background.js` | Toolbar badge and lifetime tally |
+| `src/background.js` | Toolbar badge, lifetime tally, and serialized device-only phrase writes |
 | `popup/` | Filter controls and settings |
 | `test/` | Text-rule regression tests and browser fixtures |
 
@@ -127,6 +130,7 @@ node --test test/media-rules.test.cjs
 node --test test/politics-rules.test.cjs
 node --test test/moment-rules.test.cjs
 node --test test/pileon-rules.test.cjs
+node --test test/personal-rules.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765 --bind 127.0.0.1`, then open `http://127.0.0.1:8765/test/fixture.html` and click **Run all scenarios**.
@@ -146,6 +150,8 @@ The same server also provides `test/lifecycle.html` for comment replacement, edi
 The pile-on milestone passed 41 Node rule tests and 94 browser-fixture checks (26 pile-on, 22 popup, and 46 existing chain checks). These are regression results, not an accuracy estimate across Reddit. The manifest remains at development version **1.2.1**.
 
 `test/image-chains.html` checks different-image chains, first-image preservation, text replies, captions, exclusions, reveal, late sources, edits/removals, live settings, and interaction with the older chain rule on both layouts.
+
+`test/personal.html` exercises the actual saved-phrase background writer, comment editor, collapse/reveal, undo, duplicate prevention, failure/retry, live changes, and popup removal on old and modern markup. Node tests cover literal matching, concurrent saves, validation, and storage limits.
 
 Build a distributable ZIP on Windows:
 

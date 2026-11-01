@@ -31,6 +31,8 @@ Pile-ons, reaction-image chains, Reddit Moment, political derailment, and aggres
 
 ### Make it yours
 
+Use **Hide more like this** beside a text comment to edit and save a phrase. Choose whole-comment matching or a phrase anywhere; case and punctuation are ignored. Saved phrases stay on this device and apply across subreddits. Undo a new save, or remove phrases with undo from the popup. Matching comments retain replies and a SAVED PHRASE reveal control even in Hide mode. This matches wording, not meaning, and does not train an AI model.
+
 Add wildcard or regex patterns, mute usernames, or maintain an always-show list. A muted user takes precedence if also placed on the always-show list. An allowed user's reply may still sit inside a collapsed ancestor branch.
 
 Choose collapse or hide for ordinary filters. Pile-ons, reaction-image chains, Reddit Moment, and political pivots always retain replies and use reversible collapse, even in Hide mode. Aggressive political noise always collapses the entire branch. Hover a label for its explanation and use its reveal control to inspect the comment.
@@ -43,7 +45,7 @@ Works with modern and old Reddit comment layouts. Existing Reddit/user/RES colla
 
 All classification is deterministic and runs in your browser. No AI service, analytics, tracking, or extension-initiated network requests. Preferences, including custom patterns and user lists, use browser extension sync storage and may sync through your browser account. The lifetime counter stays in local extension storage. See [the privacy policy](PRIVACY.md).
 
-Rules can miss unwanted comments and collapse useful ones. Pile-ons detect similar wording, not equivalent meaning. Image-chain detection uses URLs and reply structure; it does not read captions or understand images. Feed/post filtering, a Hide more like this action, and per-subreddit settings are not implemented yet.
+Rules can miss unwanted comments and collapse useful ones. Pile-ons detect similar wording, not equivalent meaning. Image-chain detection uses URLs and reply structure; it does not read captions or understand images. Feed/post filtering and per-subreddit settings are not implemented yet. Device-only saved phrases are separate from the existing synced custom patterns; no comments are uploaded for classification.
 
 Open source under the MIT license. Original Not This. copyright and attribution are preserved. Not affiliated with or endorsed by Reddit, Inc.
 
@@ -51,7 +53,7 @@ Open source under the MIT license. Original Not This. copyright and attribution 
 
 ## Permission explanations
 
-- **storage:** saves filter preferences, user lists, custom patterns, and a lifetime counter. Preferences may use browser sync; the counter is local.
+- **storage:** saves filter preferences, user lists, custom patterns, saved phrases, and a lifetime counter. General preferences and custom patterns may use browser sync; Hide more like this phrases and the counter are local.
 - **Reddit host access:** reads visible comments and relevant page context to filter comments and modify their display. Content scripts are restricted to the Reddit hosts listed in the manifest.
 - **Developer data collection:** none. Comment classification and comparison happen on the device; the extension does not upload browsing content.
 

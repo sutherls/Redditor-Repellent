@@ -5,6 +5,35 @@
 
 const api = globalThis.browser ?? globalThis.chrome;
 
+// Service workers load the shared literal matcher here; Firefox loads it via the manifest.
+if (!globalThis.RedditorRepellentPatterns && typeof importScripts === 'function') importScripts('patterns.js');
+let personalQueue = Promise.resolve();
+function changePersonalRule(msg) {
+  const run = personalQueue.then(async () => {
+    const { personalRule, personalRules } = globalThis.RedditorRepellentPatterns;
+    const stored = await api.storage.local.get({ personalRules: [] });
+    let rules = personalRules(stored.personalRules);
+    if (msg.action === 'add') {
+      const rule = personalRule(msg.text, msg.mode);
+      if (!rule) throw new Error('Enter a phrase of 1–300 characters and choose a match type.');
+      const existing = rules.find(r => r.mode === rule.mode && r.normalized === rule.normalized);
+      if (existing) return { rules, rule: existing, added: false };
+      if (rules.length >= 100) throw new Error('The 100-rule limit is reached. Remove a saved phrase first.');
+      const saved = { ...rule, id: crypto.randomUUID() };
+      rules.push(saved);
+      await api.storage.local.set({ personalRules: rules });
+      return { rules, rule: saved, added: true };
+    }
+    if (msg.action !== 'remove' || typeof msg.id !== 'string') throw new Error('Invalid phrase-rule action.');
+    const removed = rules.find(r => r.id === msg.id);
+    rules = rules.filter(r => r.id !== msg.id);
+    await api.storage.local.set({ personalRules: rules });
+    return { rules, removed };
+  });
+  personalQueue = run.catch(() => {});
+  return run;
+}
+
 let tallyQueue = Promise.resolve();
 function addToLifetime(delta) {
   const run = tallyQueue.then(async () => {
@@ -32,6 +61,11 @@ function setBadge(tabId, count) {
 
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg) return;
+
+  if (msg.type === 'rgc:personal-rule') {
+    changePersonalRule(msg).then(sendResponse, error => sendResponse({ error: error.message || 'Could not save phrase.' }));
+    return true;
+  }
 
   if (msg.type === 'rgc:count') {
     const tabId = sender.tab && sender.tab.id;

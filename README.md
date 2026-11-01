@@ -61,6 +61,7 @@ These switches are independent and start off. Enable **Political noise — aggre
 - See why a comment was collapsed and reveal it when you want. Complete hiding is also optional.
 - Choose whether to keep replies visible when collapsing a comment, with reply chains folded as a group.
 - See per-page and all-time filtering counts.
+- The popup reports activity even when nothing matches: **Active · 85 comments checked · No matches.** The count covers currently loaded comment elements examined by the extension, not all comments in the thread or a lifetime total. Empty/unloaded bodies are excluded and repeated scans do not inflate it. Waiting for comments, paused filtering, missing modules, and a disconnected tab have distinct messages. No-match threads still do not need a page banner.
 
 The current rules are deterministic heuristics. They can make mistakes, and short reply chains are detected by structure and length, not by understanding the conversation.
 

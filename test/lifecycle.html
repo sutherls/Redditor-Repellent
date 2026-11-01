@@ -54,6 +54,16 @@ shreddit-comment[collapsed] [slot="comment"] { display: none; }
     comments.replaceChildren();
     const output = [];
     const check = (name, ok) => output.push(`${ok ? 'PASS' : 'FAIL'} ${name}`);
+    const unloaded = addComment('');
+    await wait();
+    check('Empty body is not counted as checked', __rgc.stats().commentsChecked === 0);
+    unloaded.body.textContent = 'A useful contribution with several explanatory details.';
+    await wait();
+    check('Useful non-matching comment counts as checked', __rgc.stats().commentsChecked === 1 && __rgc.stats().total === 0);
+    __rgc.scan(); __rgc.scan();
+    check('Repeated scans do not inflate checked count', __rgc.stats().commentsChecked === 1);
+    unloaded.el.remove(); await wait();
+    check('Removed comments leave the checked count', __rgc.stats().commentsChecked === 0);
     for (const old of [false, true]) {
       const label = old ? 'old Reddit' : 'new Reddit';
       const item = addComment('Loading discussion content', old);

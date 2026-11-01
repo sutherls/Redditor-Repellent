@@ -287,12 +287,18 @@ async function refreshStats() {
       $status.textContent = `${s.unavailableRules.join(', ')} did not load. Other filters remain active. Reload Redditor Repellent from chrome://extensions or edge://extensions, then refresh this Reddit tab.`;
       return;
     }
+    const checked = Number.isInteger(s.commentsChecked) && s.commentsChecked >= 0 ? s.commentsChecked : null;
+    const activity = checked === null ? 'Active' : `Active · ${checked} comment${checked === 1 ? '' : 's'} checked`;
     if (s.revealed) {
-      $status.textContent = `Showing ${s.revealedCount} low-effort comment${s.revealedCount === 1 ? '' : 's'} on this page (you clicked "Show them").`;
+      $status.textContent = `${activity} · Showing ${s.revealedCount} low-effort comment${s.revealedCount === 1 ? '' : 's'} on this page (you clicked "Show them").`;
       return;
     }
     if (!s.total) {
-      $status.textContent = 'No low-effort comments found on this page yet.';
+      $status.textContent = checked === null
+        ? 'Active · No matches reported. Refresh this Reddit tab to enable comment counts.'
+        : checked > 0 ? `${activity} · No matches.`
+        : s.isCommentThread === false ? 'Active · Open a Reddit comment thread to check comments.'
+        : 'Active · Waiting for comments to load.';
       return;
     }
     const hasCollapseOnly = ['personal', 'pileon', 'imageChain', 'moment', 'politics', 'politicalNoise', 'tragedy'].some(kind => s.byKind?.[kind]);
@@ -303,10 +309,10 @@ async function refreshStats() {
       .join(', ');
     const strong = document.createElement('strong');
     strong.textContent = String(s.total);
-    $status.append(strong, ` low-effort comment${s.total === 1 ? '' : 's'} ${verb} on this page`, parts ? ` (${parts}).` : '.');
+    $status.append(`${activity} · `, strong, ` low-effort comment${s.total === 1 ? '' : 's'} ${verb} on this page`, parts ? ` (${parts}).` : '.');
     if (s.alreadyCollapsed) $status.append(` ${s.alreadyCollapsed} were already collapsed by Reddit, RES, or you.`);
   } catch {
-    $status.textContent = 'Open a Reddit comment thread to see stats.';
+    $status.textContent = 'Not connected to this tab. Open a Reddit comment thread, or refresh the Reddit tab after reloading the extension.';
   }
 }
 

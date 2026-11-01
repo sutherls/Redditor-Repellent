@@ -43,6 +43,8 @@ Choose collapse or hide for ordinary filters. Pile-ons, reaction-image chains, R
 
 A summary appears when comments match, with Show them/Hide again controls. The toolbar shows a count, and a local lifetime counter tracks automatic filtering. Settings apply live. After updating extension files, reload the extension and refresh Reddit.
 
+The popup also shows how many currently loaded comments were checked, even when there are no matches. Waiting for comments, paused filtering, missing modules, and a disconnected tab have distinct messages. This activity count stays in page memory and is not a record of browsing history.
+
 Works with modern and old Reddit comment layouts. Existing Reddit/user/RES collapse state is preserved during ordinary filtering; matched prior collapses can receive labels and appear in the summary. The explicit Show them action can open those matched prior collapses.
 
 ### Privacy and limitations

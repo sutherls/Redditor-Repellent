@@ -22,6 +22,7 @@ Development milestones for Redditor Repellent. The manifest remains at the inher
 
 ### Reliability and interface
 
+- Added explicit popup activity status and a count of currently loaded comments checked, including zero-match pages. Empty/unloaded bodies and removed comments are excluded; rescans do not inflate the count. Distinguishes waiting, paused, disconnected, and missing-module states without changing filtering behavior or storing additional data.
 - Missing optional modules no longer stop existing filters; the popup reports recovery instructions. (`7667a1c`)
 - Old Reddit collapse/reveal prevents JavaScript URL navigation without weakening CSP; native-state fallback and RES behavior have regression coverage. (`55d09bf`)
 - Live settings updates, late/replaced body rechecks, prior-collapse labels, and summary restoration. (`cc53cfb`, `dfd8607`)

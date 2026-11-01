@@ -116,6 +116,28 @@
       win.chrome.tabs.sendMessage = async () => ({ enabled: true, total: 0, unavailableRules: ['Reddit Moment'] });
       await win.refreshStats();
       check('Missing module warning explains recovery', doc.getElementById('status').textContent.includes('Reddit Moment did not load') && doc.getElementById('status').textContent.includes('chrome://extensions'));
+      const status = () => doc.getElementById('status').textContent;
+      const showStats = async patch => {
+        win.chrome.tabs.sendMessage = async () => ({ enabled:true, total:0, commentsChecked:85, isCommentThread:true, ...patch });
+        await win.refreshStats();
+      };
+      await showStats({});
+      check('Active with checked comments and no matches is explicit', status() === 'Active · 85 comments checked · No matches.');
+      await showStats({commentsChecked:0});
+      check('No loaded comments is waiting, not no matches', status().includes('Waiting for comments'));
+      await showStats({commentsChecked:0,isCommentThread:false});
+      check('Feed requests a comment thread', status().includes('Open a Reddit comment thread'));
+      await showStats({commentsChecked:1,total:1,byKind:{gif:1},mode:'collapse'});
+      check('Matches retain counts and category details', status().includes('1 comment checked') && status().includes('1 low-effort comment collapsed') && status().includes('1 GIF'));
+      await showStats({revealed:true,revealedCount:2});
+      check('Explicit reveal retains activity and reveal status', status().includes('85 comments checked') && status().includes('Showing 2'));
+      await showStats({enabled:false});
+      check('Paused does not claim active', status() === 'Paused on this page.');
+      await showStats({commentsChecked:undefined});
+      check('Older scripts do not invent a checked count', status().includes('Refresh this Reddit tab') && !status().includes('85'));
+      win.chrome.tabs.sendMessage = async () => { throw new Error('No receiver'); };
+      await win.refreshStats();
+      check('Disconnected tab does not claim active or no matches', status().startsWith('Not connected') && status().includes('refresh'));
     } catch (error) {
       output.push(`FAIL ${error.message}`);
     }

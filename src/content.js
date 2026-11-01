@@ -602,6 +602,7 @@
     else tragedyCandidates.delete(el);
 
     const kind = decide(el, body);
+    checkedComments.add(el);
     if (kind) {
       apply(el, kind);
     } else {
@@ -621,6 +622,7 @@
 
   let classCache = new WeakMap();
   const processedBodies = new WeakMap();
+  const checkedComments = new WeakSet();
 
   function classified(el, body) {
     let c = classCache.get(el);
@@ -849,6 +851,9 @@
       byKind[k] = (byKind[k] || 0) + 1;
     });
     return {
+      commentsChecked: [...document.querySelectorAll('shreddit-comment, .commentarea .thing.comment')]
+        .filter(el => checkedComments.has(el) && bodyOf(el)?.childNodes.length > 0).length,
+      isCommentThread: /\/comments\//.test(location.pathname),
       total: acted.length,
       alreadyCollapsed: document.querySelectorAll(`[${NATIVE_ATTR}]`).length,
       byKind,

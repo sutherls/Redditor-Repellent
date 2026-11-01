@@ -28,6 +28,8 @@ These switches are independent and start off. Enable **Political noise — aggre
 
 ### Available filters
 
+- **Always show this comment:** correct a false positive using the action beside a comment. Saves its Reddit comment ID on this device and exempts that comment from every filter, including muted-user and custom rules. It survives refreshes and comment edits without exempting other comments by the author. Click **Always shown · Undo**, or use **Always-shown comments — this device** in the popup, to remove it. In Hide mode, click the summary's **Show them** first; a collapsed parent must also be opened to reach its replies. Requires a stable Reddit comment ID, with a limit of 1,000 exceptions. No comment text is stored, no report is sent, and filters are not retrained. Feedback reasons/export remain future work.
+
 - **Tragedy-thread clichés (opt-in):** enable **Collapse recurring tragedy jokes and stock defenses**. Requires recognized death/disaster wording in the visible post title or ancestor comments. **Standard** catches supported recurring jokes (such as “To shreds, you say?”, “can't land here,” and cameraman/bike-blame templates), generic humor-as-coping defenses, and selected dismissive replies. **Conservative — jokes only** excludes the defenses. Matches show a **TRAGEDY CLICHÉ** explanation and reveal control; replies stay visible even in Hide mode.
   - Skips recognized personal grief accounts, sources, quoted passages, and selected fictional contexts. Always-show users remain exempt. Late context and edits are rechecked. These are limited English wording patterns, not judgments about anyone's grief or intent; they can miss variations or hide useful comments. Other enabled filters still apply. No AI, downloads, or new permissions.
 
@@ -136,6 +138,7 @@ node --test test/moment-rules.test.cjs
 node --test test/pileon-rules.test.cjs
 node --test test/personal-rules.test.cjs
 node --test test/tragedy-rules.test.cjs
+node --test test/exceptions.test.cjs
 ```
 
 To check the browser fixture, serve the repository locally, for example with `python -m http.server 8765 --bind 127.0.0.1`, then open `http://127.0.0.1:8765/test/fixture.html` and click **Run all scenarios**.
@@ -159,6 +162,8 @@ The pile-on milestone passed 41 Node rule tests and 94 browser-fixture checks (2
 `test/personal.html` exercises the actual saved-phrase background writer, comment editor, collapse/reveal, undo, duplicate prevention, failure/retry, live changes, and popup removal on old and modern markup. Node tests cover literal matching, concurrent saves, validation, and storage limits.
 
 `test/tragedy.html` checks title/ancestor context, late updates, personal grief and source protections, sensitivity, reveal, preserved replies, and live disabling on both layouts. The tragedy milestone passed 49 Node tests and 30 tragedy browser checks, plus 27 popup checks. Local fixtures do not replace testing the installed extension on Reddit.
+
+`test/exceptions.html` checks false-positive correction and undo on both layouts, stable-ID persistence and fresh startup, failed writes and retry, Hide mode, reply/image chains, pile-ons, and popup removal. Exceptions store only comment IDs; feedback reasons and export are not implemented.
 
 Build a distributable ZIP on Windows:
 

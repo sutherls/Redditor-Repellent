@@ -514,7 +514,13 @@
   // Deciding
   // ---------------------------------------------------------------------------
 
+  let savedExceptions = new Set();
+  function exceptionKey(el) {
+    return globalThis.RedditorRepellentPatterns.exceptionId(commentId(el));
+  }
+  function isException(el) { return savedExceptions.has(exceptionKey(el)); }
   function isAllowed(el) {
+    if (isException(el)) return true;
     const author = authorOf(el).toLowerCase();
     return !!author && settings.allowedUsers.includes(author);
   }
@@ -528,6 +534,7 @@
     const rules = settings.rules;
     const author = authorOf(el);
 
+    if (isException(el)) return null;
     if (author && settings.mutedUsers.includes(author.toLowerCase())) return 'muted';
     if (isAllowed(el)) return null;
     const personal = savedPersonalRules.length > 0 && typeof personalMatch === 'function' && personalMatch(savedPersonalRules, body.textContent);
@@ -576,6 +583,7 @@
   }
 
   function consider(el) {
+    if (isException(el) && isNativelyCollapsed(el)) setNativeCollapsed(el, false);
     const body = bodyOf(el);
     processedBodies.set(el, body);
     if (!body) {
@@ -801,7 +809,7 @@
   }
 
   function scan() {
-    if (!settings.enabled) { document.querySelectorAll('.rgc-feedback-button, .rgc-personal-dialog').forEach(el => el.remove()); return; }
+    if (!settings.enabled) { document.querySelectorAll('.rgc-feedback-button, .rgc-exception-button, .rgc-personal-dialog').forEach(el => el.remove()); return; }
     if (revealed) return;
     for (const el of tragedyCandidates) {
       if (!el.isConnected || !settings.rules.tragedy) { tragedyCandidates.delete(el); continue; }
@@ -825,6 +833,7 @@
     scanImageChains();
     scanPileons();
     addPersonalActions();
+    addExceptionActions();
     updateCounter();
   }
 
@@ -1070,6 +1079,43 @@
     scan();
   }
 
+  function applyExceptions(value) {
+    savedExceptions = new Set(globalThis.RedditorRepellentPatterns.commentExceptions(value));
+    document.querySelectorAll('shreddit-comment, .commentarea .thing.comment').forEach(el => {
+      if (settings.enabled && isException(el) && isNativelyCollapsed(el)) setNativeCollapsed(el, false);
+    });
+    revealed = false;
+    restoreAll();
+    scan();
+  }
+
+  function addExceptionActions() {
+    if (!api?.runtime?.sendMessage) return;
+    document.querySelectorAll('shreddit-comment, .commentarea .thing.comment').forEach(el => {
+      const meta = metaContainer(el), id = exceptionKey(el);
+      if (!meta || !id) return;
+      let button = meta.querySelector(':scope > .rgc-exception-button');
+      if (!button) {
+        if (!el.hasAttribute(KIND_ATTR) && !isException(el)) return;
+        button = document.createElement('button'); button.type = 'button'; button.className = 'rgc-exception-button';
+        button.title = 'Device-only exception across all filters. Does not exempt the author or replies. Manage exceptions in the popup.';
+        button.onclick = async event => {
+          event.preventDefault(); event.stopPropagation(); button.disabled = true;
+          delete button.dataset.error;
+          try {
+            const response = await api.runtime.sendMessage({type:'rgc:comment-exception', action:isException(el)?'remove':'add', id});
+            if (!response || response.error) throw new Error(response?.error || 'Could not save. Reload the extension and refresh this page.');
+            button.textContent = isException(el) ? 'Always shown · Undo' : 'Always show this comment';
+          } catch (error) { button.dataset.error = 'true'; button.textContent = `${error.message} Click to retry.`; }
+          button.disabled = false;
+        };
+        meta.append(button);
+      }
+      const label = isException(el) ? 'Always shown · Undo' : 'Always show this comment';
+      if (!button.disabled && !button.dataset.error && button.textContent !== label) button.textContent = label;
+    });
+  }
+
   function addPersonalActions() {
     if (typeof personalMatch !== 'function' || !api?.runtime?.sendMessage) return;
     document.querySelectorAll('shreddit-comment, .commentarea .thing.comment').forEach(el => {
@@ -1134,6 +1180,7 @@
   }
 
   api?.storage?.onChanged?.addListener((changes, area) => {
+    if (area === 'local' && 'commentExceptions' in changes) applyExceptions(changes.commentExceptions.newValue);
     if (area === 'local' && 'personalRules' in changes) applyPersonalRules(changes.personalRules.newValue);
     if (area === 'local' && 'lifetime' in changes) {
       lifetime = Number(changes.lifetime.newValue) || 0;
@@ -1178,11 +1225,11 @@
     },
   };
 
-  Promise.all([loadSettings(), loadLifetime(), Promise.resolve(api?.storage?.local?.get({ personalRules: [] })).catch(() => ({}))]).then(([raw, , local]) => {
+  Promise.all([loadSettings(), loadLifetime(), Promise.resolve(api?.storage?.local?.get({ personalRules: [], commentExceptions: [] })).catch(() => ({}))]).then(([raw, , local]) => {
     savedPersonalRules = typeof personalRules === 'function' ? personalRules(local?.personalRules) : [];
     rawSettings = raw;
     settings = normalizeSettings(raw);
-    scan();
+    applyExceptions(local?.commentExceptions);
     new MutationObserver(onMutations).observe(document.documentElement, {
       childList: true,
       characterData: true,

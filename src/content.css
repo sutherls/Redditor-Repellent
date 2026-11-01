@@ -105,8 +105,8 @@
   margin-right: 10px;
 }
 
-.rgc-feedback-button { margin-left: 8px; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; opacity: .7; }
-.rgc-feedback-button:hover, .rgc-feedback-button:focus-visible { opacity: 1; }
+.rgc-feedback-button, .rgc-exception-button { margin-left: 8px; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; opacity: .7; }
+.rgc-feedback-button:hover, .rgc-feedback-button:focus-visible, .rgc-exception-button:hover, .rgc-exception-button:focus-visible { opacity: 1; }
 .rgc-personal-dialog { color-scheme: light dark; width: min(440px, 85vw); max-height: 85vh; overflow: auto; border: 1px solid #888; border-radius: 12px; padding: 20px; font: 14px/1.5 system-ui, sans-serif; }
 .rgc-personal-dialog::backdrop { background: #0008; }
 .rgc-personal-dialog h2 { margin-top: 0; font-size: 20px; }

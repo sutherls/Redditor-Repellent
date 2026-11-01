@@ -59,6 +59,8 @@ Recent Reddit Moment additions cover consumer contempt combined with shaming or 
 
 Device-only saved phrases provide explicit user feedback today. Learned preferences, semantic similarity, and feed/post filtering remain planned.
 
+False-positive correction now includes **Always show this comment**: device-only comment-ID exceptions across every filter, with inline undo and popup removal. Reasons and feedback export remain planned; nothing is automatically submitted or learned.
+
 Combines section 10, post-level parts of 5, and feedback requirements in 11.
 
 Extend the comment-only architecture to posts with reversible collapse and explanations. Evaluate duplicate detection and title patterns without claiming to fact-check articles or screenshots that have not been examined. Add false-positive/missed-content feedback and eventually user-defined preferences for similar content.

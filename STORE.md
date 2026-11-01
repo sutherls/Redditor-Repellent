@@ -32,6 +32,8 @@ Tragedy-thread clichés, pile-ons, reaction-image chains, Reddit Moment, politic
 
 ### Make it yours
 
+Correct false positives with **Always show this comment**. Device-local exceptions override all filters for the selected comment ID, including later edits, and can be undone beside the comment or in the popup. Other comments by the same author remain subject to filtering. Stores up to 1,000 IDs with no comment text or automatic reporting. In Hide mode, use Show them to access the action; collapsed parents can still conceal exempt replies.
+
 Use **Hide more like this** beside a text comment to edit and save a phrase. Choose whole-comment matching or a phrase anywhere; case and punctuation are ignored. Saved phrases stay on this device and apply across subreddits. Undo a new save, or remove phrases with undo from the popup. Matching comments retain replies and a SAVED PHRASE reveal control even in Hide mode. This matches wording, not meaning, and does not train an AI model.
 
 Add wildcard or regex patterns, mute usernames, or maintain an always-show list. A muted user takes precedence if also placed on the always-show list. An allowed user's reply may still sit inside a collapsed ancestor branch.

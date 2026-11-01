@@ -94,5 +94,12 @@
       : ` ${normalized} `.includes(` ${rule.normalized} `)) || null;
   }
 
-  globalThis.RedditorRepellentPatterns = { MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch, personalRule, personalRules, personalMatch };
+  function exceptionId(value) {
+    const id = String(value || '').toLowerCase().replace(/^thing_/, '');
+    return /^t1_[a-z0-9]+$/.test(id) ? id : null;
+  }
+  function commentExceptions(value) {
+    return Array.isArray(value) ? [...new Set(value.map(exceptionId).filter(Boolean))].slice(0, 1000) : [];
+  }
+  globalThis.RedditorRepellentPatterns = { exceptionId, commentExceptions, MAX_PATTERN_CHARS, normalizeText, compilePatterns, firstMatch, personalRule, personalRules, personalMatch };
 })();

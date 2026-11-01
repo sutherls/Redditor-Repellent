@@ -18,6 +18,8 @@ The all-time filtering counter is a single number in local extension storage. It
 
 **Hide more like this** stores only the phrase you confirm, its match type, a normalized copy used for matching, and an identifier in local extension storage. These saved phrases are not put in browser sync or sent to the developer. They persist on this device until removed (or extension data is cleared). Remove them under **Saved phrases — this device** in the popup. The extension does not save the source comment's author, thread URL, or surrounding discussion as part of the rule. Saving a whole-comment phrase does retain that confirmed text locally.
 
+**Always show this comment** stores only the selected Reddit comment ID in local extension storage, up to 1,000 IDs. IDs can identify the comments you chose to exempt, but no comment text, author, surrounding thread, or feedback reason is saved by this feature. They are not synced or sent to me. Exceptions persist until undone beside the comment, removed in the popup, or extension data is cleared. This is a display preference, not a submitted false-positive report or training data.
+
 ## Future features and support
 
 Reaction-image chains use only the existing page's image URLs and reply structure; no images are downloaded for analysis. Per-subreddit settings and optional OpenAI integration are not implemented. Any future data-sharing behavior will be documented before introduction.

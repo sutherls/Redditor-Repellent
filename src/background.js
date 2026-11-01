@@ -34,6 +34,26 @@ function changePersonalRule(msg) {
   return run;
 }
 
+let exceptionQueue = Promise.resolve();
+function changeException(msg) {
+  const run = exceptionQueue.then(async () => {
+    const { exceptionId, commentExceptions } = globalThis.RedditorRepellentPatterns;
+    const id = exceptionId(msg.id);
+    if (!id || !['add', 'remove'].includes(msg.action)) throw new Error('Invalid comment exception.');
+    const stored = await api.storage.local.get({ commentExceptions: [] });
+    let ids = commentExceptions(stored.commentExceptions);
+    if (msg.action === 'add') {
+      if (ids.includes(id)) return { ids, added: false };
+      if (ids.length >= 1000) throw new Error('The 1,000-comment limit is reached. Remove an exception in the popup first.');
+      ids.push(id);
+    } else ids = ids.filter(value => value !== id);
+    await api.storage.local.set({ commentExceptions: ids });
+    return { ids, added: msg.action === 'add' };
+  });
+  exceptionQueue = run.catch(() => {});
+  return run;
+}
+
 let tallyQueue = Promise.resolve();
 function addToLifetime(delta) {
   const run = tallyQueue.then(async () => {
@@ -61,6 +81,11 @@ function setBadge(tabId, count) {
 
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg) return;
+
+  if (msg.type === 'rgc:comment-exception') {
+    changeException(msg).then(sendResponse, error => sendResponse({ error: error.message || 'Could not save exception.' }));
+    return true;
+  }
 
   if (msg.type === 'rgc:personal-rule') {
     changePersonalRule(msg).then(sendResponse, error => sendResponse({ error: error.message || 'Could not save phrase.' }));

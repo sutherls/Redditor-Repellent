@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Comment exception checks</title>
+<link rel="stylesheet" href="../src/content.css"><style>body{font:14px/1.5 system-ui;padding:24px} .thing.comment{margin:16px 0;padding:12px;border:1px solid #aaa}.thing.collapsed>.entry .usertext-body{display:none}pre{white-space:pre-wrap}button{cursor:pointer}</style><h1>Comment exception checks</h1>
+<button id="run">Run exception tests</button><button id="demo">Show correction example</button><pre id="results">Ready</pre><div class="commentarea" id="comments"></div><iframe id="popup" title="Phrase manager"></iframe>
+<script>
+const listeners=[],messages=[];const local={personalRules:[],commentExceptions:[],lifetime:0};let failLocal=false;
+window.chrome={action:{setBadgeText(){},setBadgeBackgroundColor(){}},tabs:{query:async()=>[]},storage:{
+ local:{get:async()=>structuredClone(local),set:async patch=>{if(failLocal)throw new Error('Storage failed');const changes={};for(const key in patch){changes[key]={oldValue:local[key],newValue:patch[key]};local[key]=structuredClone(patch[key]);}listeners.forEach(fn=>fn(changes,'local'));}},
+ sync:{get:async()=>({}),set:async()=>{}},onChanged:{addListener:fn=>listeners.push(fn)}},runtime:{onMessage:{addListener:fn=>messages.push(fn)},sendMessage:msg=>new Promise(resolve=>{let pending=false,answered=false;for(const fn of messages){const result=fn(msg,{},value=>{answered=true;resolve(value);});if(result===true)pending=true;}if(!pending&&!answered)resolve({});})}};
+</script>
+<script src="../src/patterns.js"></script><script src="../src/background.js"></script><script src="../src/text-rules.js"></script><script src="../src/media-rules.js"></script><script src="../src/politics-rules.js"></script><script src="../src/moment-rules.js"></script><script src="../src/tragedy-rules.js"></script><script src="../src/content.js"></script>
+<script>
+const comments=document.getElementById('comments'),wait=()=>new Promise(r=>setTimeout(r,350));let id=0;
+function add(text,old,parent=comments,author='reader'){
+ const el=document.createElement(old?'div':'shreddit-comment');el.id=`t1_${++id}`;el.dataset.author=author;el.setAttribute('author',author);
+ el.innerHTML=old?'<div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md"></div></div></div><div class="child"></div>':'<div slot="commentMeta">reader</div><div slot="comment"></div><div id="comment-children"></div>';
+ if(old)el.className='thing comment noncollapsed';el.querySelector(old?'.md':'[slot="comment"]').textContent=text;parent.append(el);return el;
+}
+const hit=el=>!!el.getAttribute('data-rgc-kind');
+const action=el=>el.querySelector('.rgc-exception-button');
+document.getElementById('run').onclick=async()=>{
+ const run=document.getElementById('run');run.disabled=true;const results=[];const check=(name,ok)=>{results.push(`${ok?'PASS':'FAIL'} ${name}`);document.getElementById('results').textContent=results.join('\n');};
+ try { for(const old of [false,true]) {
+ const label=old?'old':'modern';__rgc.restoreAll();comments.replaceChildren();await chrome.storage.local.set({commentExceptions:[],personalRules:[]});
+ __rgc.settings={mutedUsers:['reader']};
+ const a=add('This.',old),b=add('This.',old);await wait();
+ check(`${label}: correction action on muted match`,hit(a)&&!!action(a));
+ action(a).click();await wait();
+ check(`${label}: exception overrides mute without exempting author`,!hit(a)&&hit(b)&&local.commentExceptions.includes(a.id)&&action(a).textContent.includes('Undo'));
+ const savedId=a.id;a.remove();const replacement=add('Changed comment text.',old);replacement.id=savedId;await wait();
+ check(`${label}: replacement and edits retain ID exception`,!hit(replacement));
+ action(replacement).click();await wait();check(`${label}: undo reapplies mute`,hit(replacement)&&!local.commentExceptions.length);
+ failLocal=true;action(replacement).click();await wait();check(`${label}: failed write preserves filtering and offers retry`,hit(replacement)&&!local.commentExceptions.length&&action(replacement).textContent.includes('retry'));failLocal=false;
+ action(replacement).click();await wait();check(`${label}: retry saves exception`,!hit(replacement)&&local.commentExceptions.length===1);
+ __rgc.settings={mode:'hide',customPatterns:'Changed comment text.'};__rgc.restoreAll();__rgc.scan();await wait();check(`${label}: exception overrides custom Hide mode`,!hit(replacement)&&hit(b));
+ await chrome.runtime.sendMessage({type:'rgc:comment-exception',action:'remove',id:savedId});await wait();check(`${label}: remote removal reapplies Hide mode`,replacement.classList.contains('rgc-hidden'));
+ document.querySelector('.rgc-banner__btn').click();await wait();check(`${label}: Show them exposes correction in Hide mode`,!replacement.classList.contains('rgc-hidden')&&!!action(replacement));
+ action(replacement).click();await wait();check(`${label}: save from Show them persists`,!hit(replacement)&&hit(b));
+ __rgc.restoreAll();comments.replaceChildren();__rgc.settings={rules:{chain:true,imageChain:true,pileon:true,phrase:false,gif:false,image:false},chainLength:3};
+ const root=add('A detailed opening discussion with enough words to stay outside short reply chains while providing useful information about the subject.',old),childHost=el=>el.querySelector(old?'.child':'#comment-children');
+ const chain1=add('Short reply',old,childHost(root)),chain2=add('Short reply',old,childHost(chain1)),chain3=add('Short reply',old,childHost(chain2));await wait();
+ check(label+': reply chain initially matches',hit(chain2));action(chain2).click();await wait();check(label+': exception breaks reply chain',!hit(chain2));
+ __rgc.settings={rules:{pileon:true}};__rgc.restoreAll();comments.replaceChildren();
+ const parent=add('A detailed opening discussion with enough words to stay outside short reply chains while providing useful information about the subject.',old);const repeats=[1,2,3].map(()=>add('This company keeps selling the same broken product',old,childHost(parent)));await wait();
+ check(label+': pile-on initially matches',repeats.some(hit));const repeated=repeats.find(hit);action(repeated).click();await wait();check(label+': exception excluded from pile-on',!hit(repeated));
+ __rgc.settings={rules:{imageChain:true,image:false,gif:false,phrase:false}};__rgc.restoreAll();comments.replaceChildren();
+ const imgRoot=add('Image discussion',old);let host=childHost(imgRoot);const images=[];for(let i=0;i<3;i++){const el=add('',old,host);el.querySelector(old?'.md':'[slot="comment"]').innerHTML='<img src="https://i.redd.it/test'+i+'.png" width="300" height="200">';images.push(el);host=childHost(el);}await wait();
+ check(label+': image chain initially matches',hit(images[1]));action(images[1]).click();await wait();check(label+': image exception stays open',!hit(images[1]));
+ await chrome.storage.local.set({commentExceptions:[images[1].id]});
+ const noId=add('This.',old);noId.id='temporary-dom-id';await wait();check(`${label}: unknown ID cannot create persistent exception`,!action(noId));
+ }
+ const reloadFrame=document.getElementById('popup');
+ const reloadReady=new Promise(resolve=>reloadFrame.onload=resolve);
+ reloadFrame.srcdoc='<base href="'+new URL('../',location.href)+'"><div class="commentarea"><div class="thing comment noncollapsed" data-fullname="'+local.commentExceptions[0]+'"><div class="entry"><p class="tagline">reader</p><div class="usertext-body"><div class="md">This.</div></div></div><div class="child"></div></div></div><script>window.chrome=parent.chrome;<\/script>'+['patterns','text-rules','media-rules','politics-rules','moment-rules','tragedy-rules','content'].map(f=>'<script src="src/'+f+'.js"><\/script>').join('');
+ await reloadReady;await wait();check('fresh content-script startup loads saved exception',!reloadFrame.contentDocument.querySelector('[data-rgc-kind]')&&reloadFrame.contentDocument.querySelector('.rgc-exception-button')?.textContent.includes('Undo'));
+ const frame=document.getElementById('popup'),html=await(await fetch('../popup/popup.html')).text();const ready=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=html.replace('<head>',`<head><base href="${new URL('../popup/',location.href)}"><script>window.chrome=parent.chrome;<\/script>`);await ready;await wait();
+ const doc=frame.contentDocument;check('popup: saved exception visible',doc.getElementById('commentExceptions').textContent.includes(local.commentExceptions[0]));
+ doc.querySelector('#commentExceptions button').click();await wait();check('popup: undo persists and updates page',local.commentExceptions.length===0&&doc.getElementById('commentExceptions').textContent.includes('No comment'));
+ }catch(error){check(error.stack,false);failLocal=false;}
+ run.disabled=false;
+};
+document.getElementById('demo').onclick=async()=>{
+ __rgc.restoreAll();comments.replaceChildren();__rgc.settings={};
+ document.getElementById('results').textContent='Saved locally: this comment stays visible after refresh. Other comments remain filtered.';
+ document.getElementById('popup').hidden=true;
+ const sample=add('This.',true);await chrome.runtime.sendMessage({type:'rgc:comment-exception',action:'add',id:sample.id});add('This.',true);await wait();
+};
+</script></html>

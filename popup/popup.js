@@ -402,3 +402,29 @@ api.storage.local.get({ personalRules: [] }).then(data => renderPersonalRules(da
 api.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && 'personalRules' in changes) renderPersonalRules(changes.personalRules.newValue);
 });
+
+// Device-only comment exceptions; the background serializes writes across tabs.
+function renderExceptions(value) {
+  const host = $('commentExceptions'); host.replaceChildren();
+  const ids = globalThis.RedditorRepellentPatterns.commentExceptions(value);
+  if (!ids.length) { host.textContent = 'No comment exceptions.'; return; }
+  for (const id of ids) {
+    const row = document.createElement('div'); row.className = 'personal-rule';
+    const label = document.createElement('span'); label.textContent = id;
+    const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Undo exception';
+    remove.setAttribute('aria-label', `Undo exception ${id}`);
+    remove.onclick = async () => {
+      remove.disabled = true;
+      try {
+        const response = await api.runtime.sendMessage({type:'rgc:comment-exception', action:'remove', id});
+        if (!response || response.error) throw new Error(response?.error || 'Could not remove exception. Please retry.');
+        $('exceptionStatus').textContent = 'Exception removed. Filters apply again.'; statsSoon();
+      } catch (error) { $('exceptionStatus').textContent = error.message; remove.disabled = false; }
+    };
+    row.append(label, remove); host.append(row);
+  }
+}
+api.storage.local.get({commentExceptions:[]}).then(data => renderExceptions(data.commentExceptions)).catch(() => { $('exceptionStatus').textContent = 'Could not load exceptions. Reopen the popup to retry.'; });
+api.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && 'commentExceptions' in changes) renderExceptions(changes.commentExceptions.newValue);
+});
